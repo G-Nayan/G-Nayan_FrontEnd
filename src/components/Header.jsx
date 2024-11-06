@@ -31,7 +31,7 @@ const Header = () => {
   };
 
   const handleButtonClick = () => {
-    window.location.href = 'http://localhost:3000';
+    window.location.href = 'https://retinopathy-dashboard.vercel.app/';
   };
   return (
     <div
