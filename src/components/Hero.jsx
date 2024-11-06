@@ -13,7 +13,7 @@ const Hero = () => {
         <div className="relative z-1 max-w-[62rem] mx-auto text-center mb-[3.875rem] md:mb-20 lg:mb-[6.25rem]">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-blue-900">
             <span className="inline-block relative">
-              G-Nayana{" "}
+              G-NAYANA{" "}
               <svg
                 viewBox="0 0 624 28"
                 fill="none"
