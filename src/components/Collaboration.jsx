@@ -37,7 +37,7 @@ const Collaboration = () => {
             ))}
           </ul>
           
-          <Button href="/pricing">Learn More</Button>
+          <Button href="/">Learn More</Button>
         </div>
         
         <div className="flex items-center justify-center lg:flex-1">

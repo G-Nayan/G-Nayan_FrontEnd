@@ -13,7 +13,7 @@ const Hero = () => {
         <div className="relative z-1 max-w-[62rem] mx-auto text-center mb-[3.875rem] md:mb-20 lg:mb-[6.25rem]">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-blue-900">
             <span className="inline-block relative">
-              AI-RA{" "}
+              G-Nayana{" "}
               <svg
                 viewBox="0 0 624 28"
                 fill="none"
@@ -41,7 +41,7 @@ const Hero = () => {
           <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8" style={{ color: "#1e40af" }}>
             Fast and Accurate
           </p>
-          <Button href="/pricing">Get started</Button>
+          <Button href="https://retinopathy-dashboard.vercel.app/">Get started</Button>
         </div>
 
        
