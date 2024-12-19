@@ -31,7 +31,7 @@ const Header = () => {
   };
 
   const handleButtonClick = () => {
-    window.location.href = 'https://retinopathy-dashboard.vercel.app/';
+    window.location.href = 'https://gnayana-frontend.azurewebsites.net/';
   };
   return (
     <div
