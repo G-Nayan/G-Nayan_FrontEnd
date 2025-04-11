@@ -1,0 +1,10 @@
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.3;
+  }
+  80%, 100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
