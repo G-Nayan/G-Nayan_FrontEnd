@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "./Button";
+import GNayanaBot from "@/components/GNayana/GNayanaBot";
 
 const Hero = () => {
   return (
@@ -46,6 +47,7 @@ const Hero = () => {
 
        
       </div>
+      <GNayanaBot />
     </section>
   );
 };
