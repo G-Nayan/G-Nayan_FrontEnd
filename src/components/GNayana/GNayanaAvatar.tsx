@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -38,32 +37,42 @@ const EyeIcon = ({ size }: { size: string }) => {
 
   return (
     <div className="relative flex items-center justify-center">
-      {/* Outer eye shape */}
+      {/* Robot head outline */}
       <div 
-        className="absolute rounded-full border-2 border-white/80 bg-white/20 animate-pulse"
+        className="absolute rounded-lg border-2 border-white/80 bg-white/20"
         style={{ 
           width: sizeMap[size].width * 1.8, 
-          height: sizeMap[size].height, 
+          height: sizeMap[size].height * 1.4,
           animationDuration: '3s'
         }}
-      ></div>
-      
-      {/* Iris */}
-      <div 
-        className="rounded-full bg-white/90" 
-        style={{ 
-          width: sizeMap[size].width * 0.7, 
-          height: sizeMap[size].height * 0.7 
-        }}
       >
-        {/* Pupil */}
+        {/* Antenna */}
         <div 
-          className="rounded-full bg-indigo-900 mx-auto" 
+          className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-1 bg-white/80"
           style={{ 
-            width: sizeMap[size].width * 0.3, 
             height: sizeMap[size].height * 0.3 
           }}
-        ></div>
+        />
+      </div>
+      
+      {/* Robot eyes */}
+      <div className="flex space-x-1">
+        <div 
+          className="rounded-full bg-cyan-400" 
+          style={{ 
+            width: sizeMap[size].width * 0.4, 
+            height: sizeMap[size].height * 0.4,
+            boxShadow: '0 0 10px rgba(34, 211, 238, 0.6)'
+          }}
+        />
+        <div 
+          className="rounded-full bg-cyan-400" 
+          style={{ 
+            width: sizeMap[size].width * 0.4, 
+            height: sizeMap[size].height * 0.4,
+            boxShadow: '0 0 10px rgba(34, 211, 238, 0.6)'
+          }}
+        />
       </div>
     </div>
   );

@@ -83,6 +83,8 @@ import instagram from "./socials/instagram.svg";
 import telegram from "./socials/telegram.svg";
 import twitter from "./socials/twitter.svg";
 
+import bot from "./GNayana/bot.png";
+
 export {
   brainwave,
   check,
@@ -154,10 +156,11 @@ export {
   twitter,
   python,
   Airflow,
-kafka,
-kubernetes,
-mlflow,
-scikitlearn,
-mongo,
-spark,
+  kafka,
+  kubernetes,
+  mlflow,
+  scikitlearn,
+  mongo,
+  spark,
+  bot,
 };
