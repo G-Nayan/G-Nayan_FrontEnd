@@ -1,3 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 @keyframes pulseRing {
   0% {
     transform: scale(0.7);
@@ -17,3 +22,94 @@
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out;
 }
+
+
+
+/* In your global CSS file */
+
+@keyframes bot-fade-slide-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) translateX(-50%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%);
+  }
+}
+
+@keyframes bot-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px); /* Adjust float height */
+  }
+}
+
+@keyframes eye-pulse {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05); /* Adjust pulse scale */
+  }
+}
+
+/* You might need Tailwind base/components/utilities imports here too */
+
+
+/* Add this to your global CSS file (e.g., index.css or app.css) */
+
+
+
+/* Keyframes for the animated bot greeting */
+@keyframes bot-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) translateX(-50%); /* Start lower and centered */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%); /* End at final position */
+  }
+}
+
+@keyframes bot-float {
+  0%, 100% {
+    transform: translateY(0px); /* Neutral position */
+  }
+  50% {
+    transform: translateY(-5px); /* Highest point of float */
+  }
+}
+
+@keyframes eye-pulse {
+  0%, 100% {
+    opacity: 0.8; /* Dimmer state */
+  }
+  50% {
+    opacity: 1;   /* Brighter state */
+  }
+}
+
+/* Class to apply the appearance animation */
+.animate-bot-appear {
+  transform: translateX(-50%); /* Ensures it starts centered horizontally */
+  animation: bot-appear 0.5s ease-out forwards;
+}
+
+/* Class to apply the floating animation to the main bot group */
+.bot-float-group {
+  animation: bot-float 3.5s ease-in-out infinite;
+}
+
+/* Class to apply the eye pulse animation */
+.bot-eye-pulse {
+  animation: eye-pulse 2s ease-in-out infinite;
+}
+
+/* Optional: If you have base body styles, ensure overflow-x: hidden is NOT
+   aggressively set on body/html if it clips absolutely positioned elements */
