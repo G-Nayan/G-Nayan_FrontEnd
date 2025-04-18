@@ -151,7 +151,7 @@ const FriendlyBotGreeting: React.FC<FriendlyBotGreetingProps> = ({
           className="text-base whitespace-nowrap bg-clip-text text-transparent"
            style={{ backgroundImage: `linear-gradient(to right, ${colors.bubbleTextStart}, ${colors.bubbleTextEnd})`}}
         >
-            Hello! Need help?
+            Hello! I am G-Nayana
         </span>
 
          {/* Bubble Tail */}
