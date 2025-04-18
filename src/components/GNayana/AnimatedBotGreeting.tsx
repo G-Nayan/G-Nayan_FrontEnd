@@ -156,7 +156,7 @@ const FriendlyBotGreeting: React.FC<FriendlyBotGreetingProps> = ({
 
          {/* Bubble Tail */}
         <div
-          className="absolute bottom-[-6px] left-1/2 transform -translate-x-1/2 w-4 h-4 rotate-45"
+          className="absolute bottom-[-9px] left-1/2 transform -translate-x-1/2 w-4 h-4 rotate-45"
            style={{ background: `linear-gradient(135deg, ${colors.bubbleGradStart}, ${colors.bubbleGradEnd})` }} // Match gradient direction
         />
       </div>
