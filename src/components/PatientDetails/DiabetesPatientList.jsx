@@ -1,85 +1,163 @@
 // import { useState, useEffect } from 'react';
 
+// // NOTE: Store in .env in real use
+// const API_URL = 'http://localhost:8000/patients';
+// const COMBINED_BASE = 'http://localhost:8000/combined-report';
+
 // const DiabetesPatientList = () => {
 //   const [patients, setPatients] = useState([]);
 //   const [isLoading, setIsLoading] = useState(true);
+//   const [error, setError] = useState(null);
 
 //   useEffect(() => {
-//     // We use a different key in localStorage to keep data separate
-//     const storedPatients = JSON.parse(localStorage.getItem('diabetesPatients')) || [];
-//     setPatients(storedPatients.sort((a, b) => b.id - a.id)); // Show newest first
-//     setIsLoading(false);
+//     const fetchPatients = async () => {
+//       try {
+//         const res = await fetch(API_URL);
+//         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+//         const data = await res.json();
+//         const sorted = data.sort((a, b) =>
+//           new Date(b.Date_of_registration) - new Date(a.Date_of_registration)
+//         );
+//         setPatients(sorted);
+//         setError(null);
+//       } catch (e) {
+//         console.error(e);
+//         setError('Could not fetch patient data.');
+//         setPatients([]);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
+//     fetchPatients();
 //   }, []);
 
-//   if (isLoading) {
-//     return <p className="text-center text-gray-500 mt-10">Loading patient data...</p>;
-//   }
-
-//   if (patients.length === 0) {
-//     return (
-//         <div className="text-center text-gray-500 mt-10 p-8 bg-white rounded-lg shadow-md">
-//             <h2 className="text-2xl font-semibold">No Diabetes Patient Data Found</h2>
-//             <p className="mt-2">Use the "Diabetes Register" page to add new patient records.</p>
-//         </div>
-//     );
-//   }
+//   if (isLoading) return <p className="text-center mt-10">Loading patient data...</p>;
+//   if (error) return <div className="text-center text-red-600 mt-10">{error}</div>;
+//   if (!patients.length) return <div className="text-center mt-10">No patient records found.</div>;
 
 //   return (
-//     <div>
-//       <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Diabetes Patient Records</h1>
-//       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+//     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+//       <h1 className="text-3xl font-bold text-center mb-8">Diabetes Patient Records</h1>
+//       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
 //         {patients.map((p) => (
-//           <div key={p.id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-shadow duration-300">
-//             {/* Card Header */}
-//             <div className="p-5 bg-indigo-600 text-white">
-//               <h2 className="text-2xl font-bold truncate">{p.name}</h2>
-//               <p className="text-sm opacity-90">{p.age} years old, {p.gender}</p>
-//               <p className="text-sm opacity-90 mt-1">📞 {p.mobileNumber}</p>
-//             </div>
-
-//             {/* Card Body with Clinical Data */}
-//             <div className="p-5 grid grid-cols-2 gap-x-4 gap-y-3 flex-grow">
-//               <DataPoint label="HbA1c" value={p.hba1cLevel} unit="%" />
-//               <DataPoint label="Fasting Glucose" value={p.fastingBloodGlucose} unit="mg/dL" />
-//               <DataPoint label="Blood Pressure" value={p.bloodPressure} unit="mmHg" />
-//               <DataPoint label="Cholesterol" value={p.cholesterol} unit="mg/dL" />
-//               <DataPoint label="BMI" value={p.bmi} unit="kg/m²" />
-//               <DataPoint label="Albuminuria" value={p.albuminuria} unit="mg/g" />
-//               <DataPoint label="Diabetes Duration" value={p.durationOfDiabetes} unit="Yrs" />
-//               <DataPoint label="Visual Acuity" value={p.visualAcuity} />
-//             </div>
-
-//             {/* Card Footer */}
-//             <div className="p-5 bg-gray-50 border-t text-sm text-gray-600">
-//                 <p><strong>Hospital:</strong> {p.hospitalName}</p>
-//                 <p><strong>Registered On:</strong> {p.dateOfRegistration}</p>
-//                 <p><strong>Total Visits:</strong> {p.numVisits || 'N/A'}</p>
-//             </div>
-//           </div>
+//           <PatientCard key={p.visit_id || p.id} patient={p} />
 //         ))}
 //       </div>
 //     </div>
 //   );
 // };
 
-// // Helper component for consistent data display
+// const PatientCard = ({ patient }) => {
+//   const [retinoData, setRetinoData] = useState(null);
+//   const [loadingRetino, setLoadingRetino] = useState(false);
+//   const [retinoError, setRetinoError] = useState(null);
+
+//   const handleRetino = async () => {
+//     setLoadingRetino(true);
+//     try {
+//       const res = await fetch(`${COMBINED_BASE}/${patient.patient_id}`);
+//       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+//       const data = await res.json();
+
+//       const left = data.find((entry) => entry.eye_scan_id?.endsWith("left"));
+//       const right = data.find((entry) => entry.eye_scan_id?.endsWith("right"));
+
+//       setRetinoData({ left_eye: left, right_eye: right, email_id: data[0]?.email_id });
+//       setRetinoError(null);
+//     } catch (e) {
+//       console.error(e);
+//       setRetinoError("Failed to load retinopathy data.");
+//     } finally {
+//       setLoadingRetino(false);
+//     }
+//   };
+
+//   return (
+//     <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
+//       {/* Header */}
+//       <div className="p-5 bg-indigo-600 text-white">
+//         <h2 className="text-2xl font-bold truncate">{patient.name}</h2>
+//         <p className="text-sm mt-1">{patient.Age} yrs, {patient.gender}</p>
+//         <p className="text-sm mt-1">📞 {patient.mobile_number}</p>
+//       </div>
+
+//       {/* Clinical Data */}
+//       <div className="p-5 grid grid-cols-2 gap-4 flex-grow">
+//         <DataPoint label="HbA1c" value={patient.HbA1c_Level} unit="%" />
+//         <DataPoint label="Fasting Glucose" value={patient.Fasting_Blood_Glucose} unit="mg/dL" />
+//         <DataPoint label="Blood Pressure" value={patient.Blood_Pressure} unit="mmHg" />
+//         <DataPoint label="Cholesterol" value={patient.Cholesterol} unit="mg/dL" />
+//         <DataPoint label="BMI" value={patient.BMI} unit="kg/m²" />
+//         <DataPoint label="Albuminuria" value={patient.Albuminuria} unit="mg/g" />
+//         <DataPoint label="Diabetes Duration" value={patient.Duration_of_Diabetes} unit="Yrs" />
+//         <DataPoint label="Visual Acuity" value={patient.Visual_Acuity} />
+//       </div>
+
+//       {/* Footer */}
+//       <div className="p-5 bg-gray-50 border-t text-sm text-gray-600">
+//         <p><strong>Visit ID:</strong> {patient.visit_id}</p>
+//         <p><strong>Patient ID:</strong> {patient.patient_id}</p>
+//         <p><strong>Hospital:</strong> {patient.Hospital_name}</p>
+//         <p><strong>Registered On:</strong> {new Date(patient.Date_of_registration).toLocaleDateString()}</p>
+//       </div>
+
+//       {/* Retinopathy Button */}
+//       <div className="p-5 bg-white border-t">
+//         <button
+//           onClick={handleRetino}
+//           disabled={loadingRetino}
+//           className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+//         >
+//           {loadingRetino ? 'Loading...' : 'Retinopathy'}
+//         </button>
+//         {retinoError && <p className="text-red-500 mt-2">{retinoError}</p>}
+//       </div>
+
+//       {/* Retinopathy Data */}
+//       {retinoData && (
+//         <div className="p-5 bg-white border-t space-y-4">
+//           {/* <p><strong>Email ID:</strong> {retinoData.email_id}</p> */}
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//             {retinoData.left_eye && <EyeSection title="Left Eye" data={retinoData.left_eye} />}
+//             {retinoData.right_eye && <EyeSection title="Right Eye" data={retinoData.right_eye} />}
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// const EyeSection = ({ title, data }) => {
+//   if (!data) return null;
+//   return (
+//     <div className="border p-4 rounded shadow-sm">
+//       <h3 className="font-semibold text-lg mb-2">{title}</h3>
+//       <p><strong>Stage:</strong> {data.Stage}</p>
+//       <p><strong>Confidence:</strong> {data.Confidence}%</p>
+//       <p><strong>Risk Factor:</strong> {data.Risk_Factor}%</p>
+//       <p><strong>Doctor's Diagnosis:</strong> {data.Doctors_Diagnosis || 'N/A'}</p>
+//       <p><strong>Feedback:</strong> {data.Feedback}</p>
+//       <p><strong>Review:</strong> {data.Review}</p>
+//       <p><strong>Explanation:</strong> {data.Explanation}</p>
+//       <p className="text-sm mt-2 italic text-gray-600">{data.Note}</p>
+//     </div>
+//   );
+// };
+
 // const DataPoint = ({ label, value, unit }) => (
 //   <div>
-//     <p className="text-xs text-gray-500 font-medium uppercase">{label}</p>
+//     <p className="text-xs text-gray-500 uppercase">{label}</p>
 //     <p className="text-lg font-semibold text-gray-800">
-//       {value || 'N/A'}
-//       {value && unit && <span className="text-sm font-normal text-gray-600 ml-1">{unit}</span>}
+//       {value ?? 'N/A'}{unit && ` ${unit}`}
 //     </p>
 //   </div>
 // );
 
-
 // export default DiabetesPatientList;
-
 import { useState, useEffect } from 'react';
 
-// NOTE: For a real application, you'd store this in an environment variable.
-const API_URL = 'http://localhost:8000/patient';
+const API_URL = 'http://localhost:8000/patients';
+const COMBINED_BASE = 'http://localhost:8000/combined-report';
 
 const DiabetesPatientList = () => {
   const [patients, setPatients] = useState([]);
@@ -87,110 +165,142 @@ const DiabetesPatientList = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Define an async function to fetch data from the API
     const fetchPatients = async () => {
       try {
-        // Fetch data from your backend
-        const response = await fetch(API_URL);
-
-        // Check if the request was successful
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        // Sort patients by registration date to show the newest first
-        const sortedData = data.sort((a, b) => new Date(b.dateOfRegistration) - new Date(a.dateOfRegistration));
-        
-        setPatients(sortedData);
-        setError(null); // Clear any previous errors on success
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const sorted = data.sort(
+          (a, b) => new Date(b.Date_of_registration) - new Date(a.Date_of_registration)
+        );
+        setPatients(sorted);
       } catch (err) {
-        console.error("Failed to fetch patient data:", err);
-        setError("Could not fetch patient data. Please ensure the backend server is running and accessible.");
-        setPatients([]); // Clear any stale data
+        setError('Could not fetch patient data.');
       } finally {
-        // This will run whether the fetch succeeded or failed
         setIsLoading(false);
       }
     };
-
-    // Call the function to fetch data when the component mounts
     fetchPatients();
+  }, []);
 
-  }, []); // The empty dependency array means this effect runs only once
-
-  if (isLoading) {
-    return <p className="text-center text-gray-500 mt-10">Loading patient data from server...</p>;
-  }
-
-  if (error) {
-    return (
-        <div className="text-center text-red-600 mt-10 p-8 bg-red-50 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold">An Error Occurred</h2>
-            <p className="mt-2">{error}</p>
-        </div>
-    );
-  }
-
-  if (patients.length === 0) {
-    return (
-        <div className="text-center text-gray-500 mt-10 p-8 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold">No Patient Records Found</h2>
-            <p className="mt-2">Use the "Register Patient" page to add new patient records.</p>
-        </div>
-    );
-  }
+  if (isLoading) return <p className="text-center mt-10">Loading patient data...</p>;
+  if (error) return <p className="text-center text-red-600 mt-10">{error}</p>;
+  if (!patients.length) return <p className="text-center mt-10">No patient records found.</p>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Diabetes Patient Records</h1>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-center mb-8">Diabetes Patient Records</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {patients.map((p) => (
-          // Using visit_id as the unique key, falling back to id if it exists
-          <div key={p.visit_id || p.id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-shadow duration-300">
-            {/* Card Header */}
-            <div className="p-5 bg-indigo-600 text-white">
-              <h2 className="text-2xl font-bold truncate">{p.name}</h2>
-              <p className="text-sm opacity-90">{p.age} years old, {p.gender}</p>
-              <p className="text-sm opacity-90 mt-1">📞 {p.mobileNumber}</p>
-            </div>
-
-            {/* Card Body with Clinical Data */}
-            <div className="p-5 grid grid-cols-2 gap-x-4 gap-y-3 flex-grow">
-              <DataPoint label="HbA1c" value={p.hba1cLevel} unit="%" />
-              <DataPoint label="Fasting Glucose" value={p.fastingBloodGlucose} unit="mg/dL" />
-              <DataPoint label="Blood Pressure" value={p.bloodPressure} unit="mmHg" />
-              <DataPoint label="Cholesterol" value={p.cholesterol} unit="mg/dL" />
-              <DataPoint label="BMI" value={p.bmi} unit="kg/m²" />
-              <DataPoint label="Albuminuria" value={p.albuminuria} unit="mg/g" />
-              <DataPoint label="Diabetes Duration" value={p.durationOfDiabetes} unit="Yrs" />
-              <DataPoint label="Visual Acuity" value={p.visualAcuity} />
-            </div>
-
-            {/* Card Footer */}
-            <div className="p-5 bg-gray-50 border-t text-sm text-gray-600">
-                <p><strong>Visit ID:</strong> {p.visit_id}</p>
-                <p><strong>Hospital:</strong> {p.hospitalName}</p>
-                <p><strong>Registered On:</strong> {new Date(p.dateOfRegistration).toLocaleDateString()}</p>
-            </div>
-          </div>
+          <PatientCard key={p.visit_id || p.id} patient={p} />
         ))}
       </div>
     </div>
   );
 };
 
-// Helper component for consistent data display
-const DataPoint = ({ label, value, unit }) => (
-  <div>
-    <p className="text-xs text-gray-500 font-medium uppercase">{label}</p>
-    <p className="text-lg font-semibold text-gray-800">
-      {value || 'N/A'}
-      {value && unit && <span className="text-sm font-normal text-gray-600 ml-1">{unit}</span>}
-    </p>
+const PatientCard = ({ patient }) => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [retinoData, setRetinoData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchRetinoData = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${COMBINED_BASE}/${patient.patient_id}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      const left = data.find((entry) => entry.eye_scan_id?.endsWith("left"));
+      const right = data.find((entry) => entry.eye_scan_id?.endsWith("right"));
+      setRetinoData({ left_eye: left, right_eye: right, email_id: data[0]?.email_id });
+      setModalOpen(true);
+    } catch (err) {
+      console.error("Error fetching retinopathy data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="bg-white rounded-lg shadow flex flex-col">
+        <div className="p-5 bg-indigo-600 text-white">
+          <h2 className="text-xl font-bold">{patient.name}</h2>
+          <p className="text-sm">{patient.Age} yrs, {patient.gender}</p>
+          <p className="text-sm">📞 {patient.mobile_number}</p>
+        </div>
+
+        <div className="p-5 grid grid-cols-2 gap-4">
+          <DataPoint label="HbA1c" value={patient.HbA1c_Level} unit="%" />
+          <DataPoint label="Glucose" value={patient.Fasting_Blood_Glucose} unit="mg/dL" />
+          <DataPoint label="BP" value={patient.Blood_Pressure} unit="mmHg" />
+          <DataPoint label="Cholesterol" value={patient.Cholesterol} unit="mg/dL" />
+          <DataPoint label="BMI" value={patient.BMI} unit="kg/m²" />
+          <DataPoint label="Albuminuria" value={patient.Albuminuria} unit="mg/g" />
+          <DataPoint label="Diabetes Duration" value={patient.Duration_of_Diabetes} unit="Yrs" />
+          <DataPoint label="Visual Acuity" value={patient.Visual_Acuity} />
+        </div>
+
+        <div className="p-5 bg-gray-50 border-t text-sm">
+          <p><strong>Visit ID:</strong> {patient.visit_id}</p>
+          <p><strong>Patient ID:</strong> {patient.patient_id}</p>
+          <p><strong>Hospital:</strong> {patient.Hospital_name}</p>
+          <p><strong>Date:</strong> {new Date(patient.Date_of_registration).toLocaleDateString()}</p>
+        </div>
+
+        <div className="p-5 border-t">
+          <button
+            onClick={fetchRetinoData}
+            disabled={loading}
+            className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+          >
+            {loading ? 'Loading...' : 'Retinopathy'}
+          </button>
+        </div>
+      </div>
+
+      {modalOpen && retinoData && (
+        <RetinoModal data={retinoData} onClose={() => setModalOpen(false)} />
+      )}
+    </>
+  );
+};
+
+const RetinoModal = ({ data, onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg w-full max-w-3xl shadow-lg p-6 relative overflow-y-auto max-h-[90vh]">
+        <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-black text-xl">&times;</button>
+        <h2 className="text-xl font-semibold mb-4">Retinopathy Report</h2>
+        <p className="mb-4"><strong>Email ID:</strong> {data.email_id || 'N/A'}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {data.left_eye && <EyeSection title="Left Eye" data={data.left_eye} />}
+          {data.right_eye && <EyeSection title="Right Eye" data={data.right_eye} />}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const EyeSection = ({ title, data }) => (
+  <div className="bg-gray-100 p-4 rounded shadow-sm">
+    <h3 className="font-semibold text-lg mb-2">{title}</h3>
+    {Object.entries(data).map(([key, val]) => (
+      <p key={key}>
+        <strong>{key.replace(/_/g, ' ')}:</strong> {val?.toString()}
+      </p>
+    ))}
   </div>
 );
 
+const DataPoint = ({ label, value, unit }) => (
+  <div>
+    <p className="text-xs text-gray-500 uppercase">{label}</p>
+    <p className="text-lg font-semibold text-gray-800">
+      {value ?? 'N/A'}{unit && ` ${unit}`}
+    </p>
+  </div>
+);
 
 export default DiabetesPatientList;

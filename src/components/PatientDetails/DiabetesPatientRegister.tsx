@@ -829,7 +829,6 @@
 
 // export default DiabetesPatientRegister;
 
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -846,10 +845,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { 
-  User, 
-  Activity, 
-  Building2, 
+import {
+  User,
+  Activity,
+  Building2,
   Calendar,
   ChevronDown,
   Check,
@@ -857,7 +856,7 @@ import {
   Heart,
   Eye,
   Phone,
-  UserCheck
+  UserCheck,
 } from "lucide-react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
@@ -881,6 +880,7 @@ interface FormErrors {
 const DiabetesPatientRegister = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationComplete, setRegistrationComplete] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
 
@@ -953,7 +953,8 @@ const DiabetesPatientRegister = () => {
       Albuminuria: parseFloat(formData.Albuminuria),
       Duration_of_Diabetes: parseInt(formData.Duration_of_Diabetes),
       num_visits: parseInt(formData.num_visits || "0"),
-      Date_of_registration: formData.Date_of_registration.toISOString().split("T")[0],
+      Date_of_registration:
+        formData.Date_of_registration.toISOString().split("T")[0],
     };
 
     const API_URL = `http://localhost:8000/?patient_id=${formData.patient_id}`;
@@ -973,9 +974,12 @@ const DiabetesPatientRegister = () => {
       }
 
       toast.success("Patient registered successfully!");
+       setRegistrationComplete(true);
     } catch (error) {
       console.error("Registration failed:", error);
-      toast.error(`Registration failed: ${error instanceof Error ? error.message : error}`);
+      toast.error(
+        `Registration failed: ${error instanceof Error ? error.message : error}`
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -984,33 +988,33 @@ const DiabetesPatientRegister = () => {
   const progressPercentage = (currentStep / totalSteps) * 100;
 
   const steps = [
-    { 
-      id: 1, 
-      title: "Patient Information", 
-      icon: UserCheck, 
+    {
+      id: 1,
+      title: "Patient Information",
+      icon: UserCheck,
       description: "Basic patient details",
-      color: "bg-blue-600"
+      color: "bg-blue-600",
     },
-    { 
-      id: 2, 
-      title: "Clinical Measurements", 
-      icon: Activity, 
+    {
+      id: 2,
+      title: "Clinical Measurements",
+      icon: Activity,
       description: "Medical test results",
-      color: "bg-green-600"
+      color: "bg-green-600",
     },
-    { 
-      id: 3, 
-      title: "Administrative Details", 
-      icon: Building2, 
+    {
+      id: 3,
+      title: "Administrative Details",
+      icon: Building2,
       description: "Hospital and registration info",
-      color: "bg-purple-600"
+      color: "bg-purple-600",
     },
-    { 
-      id: 4, 
-      title: "Review & Submit", 
-      icon: Check, 
+    {
+      id: 4,
+      title: "Review & Submit",
+      icon: Check,
       description: "Verify and save patient data",
-      color: "bg-orange-600"
+      color: "bg-orange-600",
     },
   ];
 
@@ -1021,8 +1025,13 @@ const DiabetesPatientRegister = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label htmlFor="patient_id" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">*</Badge>
+                <label
+                  htmlFor="patient_id"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    *
+                  </Badge>
                   Patient ID
                 </label>
                 <Input
@@ -1031,7 +1040,10 @@ const DiabetesPatientRegister = () => {
                   name="patient_id"
                   value={formData.patient_id}
                   onChange={handleChange}
-                  className={cn("transition-all duration-200", errors.patient_id && "border-red-500 focus:border-red-500")}
+                  className={cn(
+                    "transition-all duration-200",
+                    errors.patient_id && "border-red-500 focus:border-red-500"
+                  )}
                   placeholder="Enter unique patient ID"
                 />
                 {errors.patient_id && (
@@ -1043,8 +1055,13 @@ const DiabetesPatientRegister = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">*</Badge>
+                <label
+                  htmlFor="name"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    *
+                  </Badge>
                   Full Name
                 </label>
                 <Input
@@ -1052,7 +1069,10 @@ const DiabetesPatientRegister = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={cn("transition-all duration-200", errors.name && "border-red-500 focus:border-red-500")}
+                  className={cn(
+                    "transition-all duration-200",
+                    errors.name && "border-red-500 focus:border-red-500"
+                  )}
                   placeholder="Enter patient's full name"
                 />
                 {errors.name && (
@@ -1064,8 +1084,13 @@ const DiabetesPatientRegister = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="age" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">*</Badge>
+                <label
+                  htmlFor="age"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    *
+                  </Badge>
                   Age
                 </label>
                 <Input
@@ -1074,7 +1099,10 @@ const DiabetesPatientRegister = () => {
                   name="age"
                   value={formData.age}
                   onChange={handleChange}
-                  className={cn("transition-all duration-200", errors.age && "border-red-500 focus:border-red-500")}
+                  className={cn(
+                    "transition-all duration-200",
+                    errors.age && "border-red-500 focus:border-red-500"
+                  )}
                   placeholder="Enter age in years"
                 />
                 {errors.age && (
@@ -1086,8 +1114,13 @@ const DiabetesPatientRegister = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="gender" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">*</Badge>
+                <label
+                  htmlFor="gender"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    *
+                  </Badge>
                   Gender
                 </label>
                 <DropdownMenu>
@@ -1127,8 +1160,13 @@ const DiabetesPatientRegister = () => {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <label htmlFor="mobile_number" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">*</Badge>
+                <label
+                  htmlFor="mobile_number"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    *
+                  </Badge>
                   <Phone className="h-4 w-4" />
                   Mobile Number
                 </label>
@@ -1138,7 +1176,11 @@ const DiabetesPatientRegister = () => {
                   name="mobile_number"
                   value={formData.mobile_number}
                   onChange={handleChange}
-                  className={cn("transition-all duration-200", errors.mobile_number && "border-red-500 focus:border-red-500")}
+                  className={cn(
+                    "transition-all duration-200",
+                    errors.mobile_number &&
+                      "border-red-500 focus:border-red-500"
+                  )}
                   placeholder="Enter mobile number"
                 />
                 {errors.mobile_number && (
@@ -1157,15 +1199,43 @@ const DiabetesPatientRegister = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
-                { id: "HbA1c_Level", label: "HbA1c Level", unit: "%", icon: Heart },
-                { id: "Fasting_Blood_Glucose", label: "Fasting Glucose", unit: "mg/dL", icon: Activity },
-                { id: "Blood_Pressure", label: "Blood Pressure", unit: "mmHg", icon: Heart },
-                { id: "Cholesterol", label: "Cholesterol", unit: "mg/dL", icon: Activity },
+                {
+                  id: "HbA1c_Level",
+                  label: "HbA1c Level",
+                  unit: "%",
+                  icon: Heart,
+                },
+                {
+                  id: "Fasting_Blood_Glucose",
+                  label: "Fasting Glucose",
+                  unit: "mg/dL",
+                  icon: Activity,
+                },
+                {
+                  id: "Blood_Pressure",
+                  label: "Blood Pressure",
+                  unit: "mmHg",
+                  icon: Heart,
+                },
+                {
+                  id: "Cholesterol",
+                  label: "Cholesterol",
+                  unit: "mg/dL",
+                  icon: Activity,
+                },
                 { id: "BMI", label: "BMI", unit: "kg/m²", icon: User },
-                { id: "Albuminuria", label: "Albuminuria", unit: "mg/g", icon: Activity },
+                {
+                  id: "Albuminuria",
+                  label: "Albuminuria",
+                  unit: "mg/g",
+                  icon: Activity,
+                },
               ].map(({ id, label, unit, icon: Icon }) => (
                 <div key={id} className="space-y-2">
-                  <label htmlFor={id} className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <label
+                    htmlFor={id}
+                    className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                  >
                     <Icon className="h-4 w-4 text-green-600" />
                     {label} ({unit})
                   </label>
@@ -1187,7 +1257,10 @@ const DiabetesPatientRegister = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label htmlFor="Duration_of_Diabetes" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label
+                  htmlFor="Duration_of_Diabetes"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
                   <Calendar className="h-4 w-4 text-green-600" />
                   Diabetes Duration (Years)
                 </label>
@@ -1203,7 +1276,10 @@ const DiabetesPatientRegister = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="Visual_Acuity" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label
+                  htmlFor="Visual_Acuity"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
                   <Eye className="h-4 w-4 text-green-600" />
                   Visual Acuity
                 </label>
@@ -1218,17 +1294,22 @@ const DiabetesPatientRegister = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-full bg-white shadow-lg border">
-                    {["Normal", "Mild", "Moderate", "Severe", "Blind"].map((option) => (
-                      <DropdownMenuItem
-                        key={option}
-                        onSelect={() =>
-                          setFormData((prev) => ({ ...prev, Visual_Acuity: option }))
-                        }
-                        className="cursor-pointer hover:bg-gray-50"
-                      >
-                        {option}
-                      </DropdownMenuItem>
-                    ))}
+                    {["Normal", "Mild", "Moderate", "Severe", "Blind"].map(
+                      (option) => (
+                        <DropdownMenuItem
+                          key={option}
+                          onSelect={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              Visual_Acuity: option,
+                            }))
+                          }
+                          className="cursor-pointer hover:bg-gray-50"
+                        >
+                          {option}
+                        </DropdownMenuItem>
+                      )
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -1241,8 +1322,13 @@ const DiabetesPatientRegister = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label htmlFor="Hospital_name" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">*</Badge>
+                <label
+                  htmlFor="Hospital_name"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    *
+                  </Badge>
                   <Building2 className="h-4 w-4 text-purple-600" />
                   Hospital Name
                 </label>
@@ -1252,7 +1338,11 @@ const DiabetesPatientRegister = () => {
                   name="Hospital_name"
                   value={formData.Hospital_name}
                   onChange={handleChange}
-                  className={cn("transition-all duration-200", errors.Hospital_name && "border-red-500 focus:border-red-500")}
+                  className={cn(
+                    "transition-all duration-200",
+                    errors.Hospital_name &&
+                      "border-red-500 focus:border-red-500"
+                  )}
                   placeholder="Enter hospital name"
                 />
                 {errors.Hospital_name && (
@@ -1264,8 +1354,13 @@ const DiabetesPatientRegister = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="Date_of_registration" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">*</Badge>
+                <label
+                  htmlFor="Date_of_registration"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    *
+                  </Badge>
                   <Calendar className="h-4 w-4 text-purple-600" />
                   Date of Registration
                 </label>
@@ -1275,7 +1370,8 @@ const DiabetesPatientRegister = () => {
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal transition-all duration-200",
-                        !formData.Date_of_registration && "text-muted-foreground",
+                        !formData.Date_of_registration &&
+                          "text-muted-foreground",
                         errors.Date_of_registration && "border-red-500"
                       )}
                     >
@@ -1291,7 +1387,12 @@ const DiabetesPatientRegister = () => {
                     <CalendarComponent
                       mode="single"
                       selected={formData.Date_of_registration}
-                      onSelect={(date) => setFormData((prev) => ({ ...prev, Date_of_registration: date || new Date() }))}
+                      onSelect={(date) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          Date_of_registration: date || new Date(),
+                        }))
+                      }
                       initialFocus
                       className="p-3 pointer-events-auto bg-white"
                     />
@@ -1306,7 +1407,10 @@ const DiabetesPatientRegister = () => {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <label htmlFor="num_visits" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label
+                  htmlFor="num_visits"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
                   <User className="h-4 w-4 text-purple-600" />
                   Number of Previous Visits
                 </label>
@@ -1328,27 +1432,57 @@ const DiabetesPatientRegister = () => {
         return (
           <div className="space-y-2">
             <div className="bg-blue-50 p-2 rounded-lg border border-blue-200">
-              <h3 className="font-semibold text-blue-900 mb-2">Patient Summary</h3>
+              <h3 className="font-semibold text-blue-900 mb-2">
+                Patient Summary
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div><strong>Name:</strong> {formData.name || "Not provided"}</div>
-                <div><strong>Age:</strong> {formData.age || "Not provided"}</div>
-                <div><strong>Gender:</strong> {formData.gender || "Not provided"}</div>
-                <div><strong>Hospital:</strong> {formData.Hospital_name || "Not provided"}</div>
+                <div>
+                  <strong>Name:</strong> {formData.name || "Not provided"}
+                </div>
+                <div>
+                  <strong>Age:</strong> {formData.age || "Not provided"}
+                </div>
+                <div>
+                  <strong>Gender:</strong> {formData.gender || "Not provided"}
+                </div>
+                <div>
+                  <strong>Hospital:</strong>{" "}
+                  {formData.Hospital_name || "Not provided"}
+                </div>
               </div>
             </div>
-            
+
             <div className="bg-green-50 p-2 rounded-lg border border-green-200">
-              <h3 className="font-semibold text-green-900 mb-2">Clinical Data</h3>
+              <h3 className="font-semibold text-green-900 mb-2">
+                Clinical Data
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                {formData.HbA1c_Level && <div><strong>HbA1c:</strong> {formData.HbA1c_Level}%</div>}
-                {formData.BMI && <div><strong>BMI:</strong> {formData.BMI} kg/m²</div>}
-                {formData.Visual_Acuity && <div><strong>Visual Acuity:</strong> {formData.Visual_Acuity}</div>}
-                {formData.Duration_of_Diabetes && <div><strong>Diabetes Duration:</strong> {formData.Duration_of_Diabetes} years</div>}
+                {formData.HbA1c_Level && (
+                  <div>
+                    <strong>HbA1c:</strong> {formData.HbA1c_Level}%
+                  </div>
+                )}
+                {formData.BMI && (
+                  <div>
+                    <strong>BMI:</strong> {formData.BMI} kg/m²
+                  </div>
+                )}
+                {formData.Visual_Acuity && (
+                  <div>
+                    <strong>Visual Acuity:</strong> {formData.Visual_Acuity}
+                  </div>
+                )}
+                {formData.Duration_of_Diabetes && (
+                  <div>
+                    <strong>Diabetes Duration:</strong>{" "}
+                    {formData.Duration_of_Diabetes} years
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
-              <Button
+              {/* <Button
                 type="submit"
                 disabled={isSubmitting}
                 className="px-12 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg transform transition-all duration-200 hover:scale-105 disabled:transform-none disabled:opacity-50"
@@ -1365,11 +1499,39 @@ const DiabetesPatientRegister = () => {
                     Register Patient
                   </>
                 )}
-              </Button>
+              </Button> */}
+                 {/* <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg"> */}
+              {!registrationComplete ? (
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-12 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg transform transition-all duration-200 hover:scale-105 disabled:transform-none disabled:opacity-50"
+                  onClick={handleSubmit}
+                >
+                  {isSubmitting ? (
+                    <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>Saving...</>
+                  ) : (
+                    <><Check className="h-4 w-4 mr-2" />Register Patient</>
+                  )}
+                </Button>
+              ) : (
+                // <Button
+                //   onClick={() => window.location.href = 'https://retinopathy-dashboard.vercel.app/'}
+                //   className="px-12 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-lg"
+                // >
+                //   Upload Retinopathy Eye Images
+                // </Button>
+                 <Button
+                  onClick={() => window.open('http://localhost:3000/', '_blank', 'noopener,noreferrer')}
+                  className="px-12 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-lg"
+                >
+                  Upload Retinopathy Eye Images
+                </Button>
+              )}
+            {/* </div> */}
             </div>
           </div>
         );
-
       default:
         return null;
     }
@@ -1384,14 +1546,18 @@ const DiabetesPatientRegister = () => {
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Patient Registration
             </h1>
-            <p className="text-gray-600 text-sm mt-2">Complete all steps to register</p>
+            <p className="text-gray-600 text-sm mt-2">
+              Complete all steps to register
+            </p>
           </div>
 
           {/* Progress Bar */}
           <div className="p-6 border-b border-gray-100">
             <div className="flex justify-between items-center mb-3">
               <span className="text-sm font-small text-gray-700">Progress</span>
-              <span className="text-sm font-small text-gray-700">{Math.round(progressPercentage)}%</span>
+              <span className="text-sm font-small text-gray-700">
+                {Math.round(progressPercentage)}%
+              </span>
             </div>
             <Progress value={progressPercentage} className="h-2" />
           </div>
@@ -1402,7 +1568,7 @@ const DiabetesPatientRegister = () => {
               const Icon = step.icon;
               const isActive = currentStep === step.id;
               const isCompleted = currentStep > step.id;
-              
+
               return (
                 <div
                   key={step.id}
@@ -1413,12 +1579,14 @@ const DiabetesPatientRegister = () => {
                     isCompleted && "bg-green-50"
                   )}
                 >
-                  <div className={cn(
-                    "flex items-center justify-center w-10 h-10 rounded-full mr-4 transition-all duration-200",
-                    isActive && "bg-blue-600 text-white shadow-lg",
-                    isCompleted && "bg-green-600 text-white",
-                    !isActive && !isCompleted && "bg-gray-200 text-gray-600"
-                  )}>
+                  <div
+                    className={cn(
+                      "flex items-center justify-center w-10 h-10 rounded-full mr-4 transition-all duration-200",
+                      isActive && "bg-blue-600 text-white shadow-lg",
+                      isCompleted && "bg-green-600 text-white",
+                      !isActive && !isCompleted && "bg-gray-200 text-gray-600"
+                    )}
+                  >
                     {isCompleted ? (
                       <Check className="h-5 w-5" />
                     ) : (
@@ -1426,15 +1594,19 @@ const DiabetesPatientRegister = () => {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className={cn(
-                      "text-sm font-medium transition-colors duration-200",
-                      isActive && "text-blue-900",
-                      isCompleted && "text-green-900",
-                      !isActive && !isCompleted && "text-gray-700"
-                    )}>
+                    <h3
+                      className={cn(
+                        "text-sm font-medium transition-colors duration-200",
+                        isActive && "text-blue-900",
+                        isCompleted && "text-green-900",
+                        !isActive && !isCompleted && "text-gray-700"
+                      )}
+                    >
                       {step.title}
                     </h3>
-                    <p className="text-xs text-gray-500 mt-1">{step.description}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {step.description}
+                    </p>
                   </div>
                 </div>
               );
@@ -1447,18 +1619,20 @@ const DiabetesPatientRegister = () => {
           <div className="max-w-4xl mx-auto">
             <form onSubmit={handleSubmit} className="space-y-6">
               <Card className="animate-fade-in shadow-lg">
-                <CardHeader className={cn(
-                  "text-white rounded-t-lg",
-                  steps[currentStep - 1]?.color || "bg-blue-600"
-                )}>
+                <CardHeader
+                  className={cn(
+                    "text-white rounded-t-lg",
+                    steps[currentStep - 1]?.color || "bg-blue-600"
+                  )}
+                >
                   <CardTitle className="flex items-center gap-2">
-                    {React.createElement(steps[currentStep - 1]?.icon || User, { className: "h-5 w-5" })}
+                    {React.createElement(steps[currentStep - 1]?.icon || User, {
+                      className: "h-5 w-5",
+                    })}
                     {steps[currentStep - 1]?.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4">
-                  {renderFormStep()}
-                </CardContent>
+                <CardContent className="p-4">{renderFormStep()}</CardContent>
               </Card>
 
               {/* Navigation Buttons */}
@@ -1472,11 +1646,13 @@ const DiabetesPatientRegister = () => {
                 >
                   Previous
                 </Button>
-                
+
                 {currentStep < totalSteps && (
                   <Button
                     type="button"
-                    onClick={() => setCurrentStep(Math.min(totalSteps, currentStep + 1))}
+                    onClick={() =>
+                      setCurrentStep(Math.min(totalSteps, currentStep + 1))
+                    }
                     className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200"
                   >
                     Next Step
