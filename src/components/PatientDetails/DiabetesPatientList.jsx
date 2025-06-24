@@ -7,6 +7,8 @@ const DiabetesPatientList = () => {
   const [patients, setPatients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const patientsPerPage = 9;
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -27,6 +29,11 @@ const DiabetesPatientList = () => {
     fetchPatients();
   }, []);
 
+  const indexOfLast = currentPage * patientsPerPage;
+  const indexOfFirst = indexOfLast - patientsPerPage;
+  const currentPatients = patients.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(patients.length / patientsPerPage);
+
   if (isLoading) return <p className="text-center mt-10">Loading patient data...</p>;
   if (error) return <p className="text-center text-red-600 mt-10">{error}</p>;
   if (!patients.length) return <p className="text-center mt-10">No patient records found.</p>;
@@ -34,9 +41,27 @@ const DiabetesPatientList = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-center mb-8">Diabetes Patient Records</h1>
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {patients.map((p) => (
+        {currentPatients.map((p) => (
           <PatientCard key={p.visit_id || p.id} patient={p} />
+        ))}
+      </div>
+
+      <div className="flex justify-center mt-8 space-x-2">
+        {Array.from({ length: totalPages }, (_, idx) => (
+          <button
+            key={idx}
+            onClick={() => {
+              setCurrentPage(idx + 1);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`px-4 py-2 rounded ${
+              currentPage === idx + 1 ? 'bg-indigo-600 text-white' : 'bg-gray-200'
+            }`}
+          >
+            {idx + 1}
+          </button>
         ))}
       </div>
     </div>
@@ -54,7 +79,6 @@ const PatientCard = ({ patient }) => {
       const res = await fetch(`${COMBINED_BASE}/${patient.patient_id}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-
       const left = data.find((entry) => entry.eye_scan_id?.endsWith("left"));
       const right = data.find((entry) => entry.eye_scan_id?.endsWith("right"));
       setRetinoData({ left_eye: left, right_eye: right, email_id: data[0]?.email_id });
@@ -111,29 +135,25 @@ const PatientCard = ({ patient }) => {
   );
 };
 
-const RetinoModal = ({ data, onClose }) => {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg w-full max-w-3xl shadow-lg p-6 relative overflow-y-auto max-h-[90vh]">
-        <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-black text-xl">&times;</button>
-        <h2 className="text-xl font-semibold mb-4">Retinopathy Report</h2>
-        <p className="mb-4"><strong>Email ID:</strong> {data.email_id || 'N/A'}</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {data.left_eye && <EyeSection title="Left Eye" data={data.left_eye} />}
-          {data.right_eye && <EyeSection title="Right Eye" data={data.right_eye} />}
-        </div>
+const RetinoModal = ({ data, onClose }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-lg w-full max-w-3xl shadow-lg p-6 relative overflow-y-auto max-h-[90vh]">
+      <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-black text-xl">&times;</button>
+      <h2 className="text-xl font-semibold mb-4">Retinopathy Report</h2>
+      <p className="mb-4"><strong>Email ID:</strong> {data.email_id || 'N/A'}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {data.left_eye && <EyeSection title="Left Eye" data={data.left_eye} />}
+        {data.right_eye && <EyeSection title="Right Eye" data={data.right_eye} />}
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 const EyeSection = ({ title, data }) => (
   <div className="bg-gray-100 p-4 rounded shadow-sm">
     <h3 className="font-semibold text-lg mb-2">{title}</h3>
     {Object.entries(data).map(([key, val]) => (
-      <p key={key}>
-        <strong>{key.replace(/_/g, ' ')}:</strong> {val?.toString()}
-      </p>
+      <p key={key}><strong>{key.replace(/_/g, ' ')}:</strong> {val?.toString()}</p>
     ))}
   </div>
 );

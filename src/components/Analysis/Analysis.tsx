@@ -1,10 +1,8 @@
 "use client";
 import React, { useState } from "react";
-// import Head from 'next/head';
-// import Image from 'next/image';
-// import { useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
 import { ArrowRight, Eye, Info } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +10,7 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
+  CardDescription, // Added for EyeAnalysisCard if needed, or can be removed
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
@@ -27,17 +25,17 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
 import ErrorModal from "@/components/Analysis/ErrorModal";
-import ModelRender from "@/components/Analysis/model-render";
-import Benefits from "@/components/Analysis/Benefits";
-import { FeedbackModal } from "@/components/Analysis/FeedbackModal";
-import { ReportModal } from "@/components/Analysis/ReportModal";
+import ModelRender from "@/components/Analysis/model-render"; // Assuming this is correct path
+import Benefits from "@/components/Analysis/Benefits"; // Assuming this is correct path
+import { FeedbackModal } from "@/components/Analysis/FeedbackModal"; // Assuming this is correct path
+import { ReportModal } from "@/components/Analysis/ReportModal"; // Assuming this is correct path
 
 interface EyeResult {
   predicted_class: number;
@@ -67,29 +65,19 @@ interface ChartDataItem {
 interface FeedbackData {
   patient_id: string;
   email_id: string;
-  left_eye: {
-    predicted_class: number;
-    Stage: string;
-    confidence: number;
-    explanation: string;
-    Note: string;
-    Risk_Factor: number;
+  left_eye: EyeResult & {
     feedback: string;
     doctors_diagnosis: string;
     review: string;
   };
-  right_eye: {
-    predicted_class: number;
-    Stage: string;
-    confidence: number;
-    explanation: string;
-    Note: string;
-    Risk_Factor: number;
+  right_eye: EyeResult & {
     feedback: string;
     doctors_diagnosis: string;
     review: string;
   };
 }
+
+// --- Components from Code A (Styling Focused) ---
 
 const getTooltipContent = (itemName: string): string => {
   switch (itemName) {
@@ -97,7 +85,7 @@ const getTooltipContent = (itemName: string): string => {
       return "The model evaluates and indicates the Stage of diabetic retinopathy it has identified in your case.";
     case "Confidence":
       return "This shows how sure the model is about its prediction, with a higher number meaning more certainty.";
-    case "Risk_Factor":
+    case "Risk_Factor": // In Code A this was "Risk"
       return "This indicates the chance that your condition might get worse over time.";
     default:
       return "";
@@ -214,7 +202,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
       displayValue: Stage,
       markers: [
         { position: 25, label: "No DR" },
-        { position: 50, label: "Moderate" },
+        { position: 50, label: "Mild" },
         { position: 75, label: "Severe" },
         { position: 100, label: "Proliferative" },
       ],
@@ -232,7 +220,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
       isConfidence: true,
     },
     {
-      name: "Risk",
+      name: "Risk_Factor",
       value: Risk_Factor,
       displayValue: `${Risk_Factor.toFixed(2)}%`,
       markers: [
@@ -241,7 +229,7 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
         { position: 75, label: "High" },
         { position: 100, label: "Very High" },
       ],
-    },
+    }, // Changed name to "Risk_Factor" to match tooltip
   ];
 
   return (
@@ -251,7 +239,9 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
           <Eye className="mr-2" /> {eye} Eye Analysis
         </CardTitle>
         <Separator className="my-3 bg-white/20" />
+        {/* CardDescription in Code A was used for Stage, here Stage is in chartData */}
         <CardDescription className="text-lg mt-3 font-medium text-white/90">
+          {/* Displaying Stage here as it was in Code A's CardDescription */}
           {Stage.split("\n").map((line, index) => (
             <React.Fragment key={index}>
               {line}
@@ -289,13 +279,10 @@ const MovingImage = ({
   isMoving: boolean;
   isAnalyzing: boolean;
 }) => {
-  const handleAnimationComplete = () => {
-    // You can add any logic here that should run when the animation completes
-  };
-
+  const handleAnimationComplete = () => {};
   return (
     <motion.div
-      className="relative w-[300px] h-[300px] overflow-hidden"
+      className="relative w-full max-w-[300px] h-[300px] mx-auto overflow-hidden" // Made responsive
       animate={isMoving ? { x: [0, 10, -10, 0] } : { x: 0 }}
       transition={{
         repeat: isMoving ? Infinity : 0,
@@ -306,8 +293,9 @@ const MovingImage = ({
       <img
         src={src}
         alt={alt}
-        className="absolute inset-0 w-full h-full object-cover z-0"
-      />
+        className="absolute inset-0 w-full h-full object-cover z-0 rounded-md"
+      />{" "}
+      {/* Added rounded-md */}
       <div className="absolute inset-0 z-10">
         <ModelRender
           isAnalyzing={isAnalyzing}
@@ -318,39 +306,43 @@ const MovingImage = ({
   );
 };
 
+// --- Main Analysis Component (Merged) ---
 export function Analysis() {
-  // const router = useRouter();
   const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
   const [rightEyeImage, setRightEyeImage] = useState<File | null>(null);
   const [leftEyePreview, setLeftEyePreview] = useState<string | null>(null);
   const [rightEyePreview, setRightEyePreview] = useState<string | null>(null);
   const [apiData, setApiData] = useState<ApiResponse | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showInputCard, setShowInputCard] = useState<boolean>(true);
-  const [isMoving, setIsMoving] = useState<boolean>(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [modalPatientId, setModalPatientId] = useState<string>("");
-  const [showBenefits, setShowBenefits] = useState<boolean>(true);
-  const [showFeedbackModal, setShowFeedbackModal] = useState<boolean>(false);
-  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
+  const [showInputCard, setShowInputCard] = useState(true);
+  const [isMoving, setIsMoving] = useState(false); // For MovingImage animation
+  const [isAnalyzing, setIsAnalyzing] = useState(false); // For ModelRender animation
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalPatientId, setModalPatientId] = useState("");
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showBenefitsInitially, setShowBenefitsInitially] = useState(true);
 
   const handleImageUpload = (file: File | null, eye: "left" | "right") => {
-    if (file) {
-      if (eye === "left") {
-        setLeftEyeImage(file);
-        setLeftEyePreview(URL.createObjectURL(file));
-      } else {
-        setRightEyeImage(file);
-        setRightEyePreview(URL.createObjectURL(file));
-      }
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    if (eye === "left") {
+      setLeftEyeImage(file);
+      setLeftEyePreview(url);
+    } else {
+      setRightEyeImage(file);
+      setRightEyePreview(url);
     }
+    setError(null); // Clear error on new upload
   };
 
   const handleSubmit = () => {
     if (!leftEyeImage || !rightEyeImage) {
       setError("Please upload both eye images.");
+      toast.error("Please upload both eye images.");
       return;
     }
     setIsModalOpen(true);
@@ -359,173 +351,129 @@ export function Analysis() {
   const handleModalSubmit = async () => {
     if (!modalPatientId) {
       setError("Please enter a Patient ID.");
+      toast.error("Please enter a Patient ID.");
       return;
     }
-
     setIsModalOpen(false);
     setIsLoading(true);
     setError(null);
-    setIsMoving(true);
-    setIsAnalyzing(true);
-    setShowBenefits(false);
+    setIsMoving(true); // Start moving image animation
+    setIsAnalyzing(true); // Start model render animation
+    setShowBenefitsInitially(false); // Hide benefits section
 
     const formData = new FormData();
     formData.append("left_image", leftEyeImage!);
     formData.append("right_image", rightEyeImage!);
 
     try {
-      const response = await fetch(
+      const resp = await fetch(
         `http://localhost:8000/infer_for_diabetic_retinopathy/upload%20images?patient_id=${encodeURIComponent(
           modalPatientId
         )}`,
-        {
-          method: "POST",
-          body: formData,
-        }
+        { method: "POST", body: formData }
       );
-
-      if (!response.ok) {
+      if (!resp.ok) {
+        const errorData = await resp
+          .json()
+          .catch(() => ({ detail: `HTTP error! status: ${resp.status}` }));
         throw new Error(
-          `Network response was not ok: ${response.status} ${response.statusText}`
+          errorData.detail || `HTTP error! status: ${resp.status}`
         );
       }
-
-      const data: ApiResponse = await response.json();
-
-      if (data.message) {
-        setError(data.message);
-        return;
-      }
-
-      if (data.error) {
-        setError(data.error);
-        return;
-      }
-
-      if (data.left_eye && data.right_eye) {
-        setApiData(data);
-        setShowInputCard(false);
-      } else {
-        setError("Unexpected response format. Please try again.");
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        setError(
-          `An error occurred while processing your request: ${error.message}`
+      const data: ApiResponse = await resp.json();
+      if (data.message || data.error) {
+        setError(data.message || data.error);
+        toast.error(
+          data.message || data.error || "An error occurred during analysis."
         );
-      } else {
-        setError("An unknown error occurred");
+        setShowInputCard(true); // Keep input card if error
+        setShowBenefitsInitially(true); // Show benefits again
+        return;
       }
-      console.error("Error:", error);
+      setApiData(data);
+      setShowInputCard(false);
+      setShowFeedbackModal(true); // Show feedback modal immediately after successful analysis
+      toast.success("Analysis complete! Please provide feedback.");
+    } catch (e) {
+      const errorMessage =
+        (e as Error).message || "An unknown error occurred during analysis.";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      setShowInputCard(true); // Keep input card on error
+      setShowBenefitsInitially(true); // Show benefits again
     } finally {
       setIsLoading(false);
-      setIsMoving(false);
-      setIsAnalyzing(false);
+      setIsMoving(false); // Stop moving image animation
+      setIsAnalyzing(false); // Stop model render animation
     }
   };
 
-  const handleFeedbackSubmit = async (feedbackData: FeedbackData) => {
-    console.log("Preparing to submit feedback...");
-
+  const handleFeedbackSubmit = async (fb: FeedbackData) => {
     const payload = {
       patient_id: modalPatientId,
-      email_id: "iscs-client_hospital@gmail.com",
-      left_eye: {
-        ...apiData?.left_eye,
-        feedback: feedbackData.left_eye.feedback,
-        doctors_diagnosis: feedbackData.left_eye.doctors_diagnosis,
-        review: feedbackData.left_eye.review,
-      },
-      right_eye: {
-        ...apiData?.right_eye,
-        feedback: feedbackData.right_eye.feedback,
-        doctors_diagnosis: feedbackData.right_eye.doctors_diagnosis,
-        review: feedbackData.right_eye.review,
-      },
+      email_id: "iscs-client_hospital@gmail.com", // Hardcoded as in Code A
+      left_eye: { ...apiData?.left_eye, ...fb.left_eye },
+      right_eye: { ...apiData?.right_eye, ...fb.right_eye },
     };
-
-    console.log("Feedback payload:", JSON.stringify(payload, null, 2));
-
     try {
-      console.log("Initiating API call to submit_feedback endpoint...");
-      console.log(
-        "API URL:",
-        "http://localhost:8000/submit_feedback_from_frontend/from_json_to_db/"
-      );
-      console.log("HTTP Method:", "POST");
-      console.log(
-        "Request Headers:",
-        JSON.stringify(
-          {
-            "Content-Type": "application/json",
-          },
-          null,
-          2
-        )
-      );
-
-      const response = await fetch(
+      const resp = await fetch(
         "http://localhost:8000/submit_feedback_from_frontend/from_json_to_db/",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         }
       );
-
-      console.log("API call completed.");
-      console.log("Response status:", response.status);
-      console.log("Response status text:", response.statusText);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!resp.ok) {
+        const errorData = await resp
+          .json()
+          .catch(() => ({ detail: `HTTP error! status: ${resp.status}` }));
+        throw new Error(
+          errorData.detail || `HTTP error! status: ${resp.status}`
+        );
       }
-
-      const responseData = await response.json();
-      console.log("API Response data:", JSON.stringify(responseData, null, 2));
-
-      console.log("Feedback submitted successfully");
-      setShowFeedbackModal(false);
+      await resp.json();
       setFeedbackSubmitted(true);
-    } catch (error) {
-      console.error("Error submitting feedback:", error);
-      if (error instanceof Error) {
-        console.error("Error message:", error.message);
-      }
-      setError("Failed to submit feedback. Please try again.");
+      setShowFeedbackModal(false);
+      toast.success("Feedback submitted! Opening report...");
+      setShowReportModal(true);
+    } catch (e) {
+      toast.error(`Failed to submit feedback: ${(e as Error).message}`);
     }
+  };
+
+  const handleGetReport = () => {
+    // Modified to match Code B logic (report after feedback)
+    if (!feedbackSubmitted) {
+      toast.error("Please submit feedback first to view the report.");
+      setShowFeedbackModal(true); // Re-open feedback if not submitted
+      return;
+    }
+    setShowReportModal(true);
   };
 
   const handleGoBack = () => {
     setShowInputCard(true);
-    setShowBenefits(true);
+    setShowBenefitsInitially(true); // Show benefits again
     setApiData(null);
     setLeftEyeImage(null);
     setRightEyeImage(null);
     setLeftEyePreview(null);
     setRightEyePreview(null);
-    setModalPatientId("");
+    // setModalPatientId(""); // Keep patient ID if they want to re-analyze with same ID but new images
     setFeedbackSubmitted(false);
-  };
-  const [showReportModal, setShowReportModal] = useState(false);
-
-  // ... (previous functions)
-
-  const handleGetReport = () => {
-    setShowReportModal(true);
+    setShowReportModal(false);
+    setError(null);
   };
 
   return (
     <>
-      {/* <Head> */}
-      <meta
-        httpEquiv="Content-Security-Policy"
-        content="upgrade-insecure-requests"
-      />
-      {/* </Head> */}
+      {/* <Head> is for Next.js pages/app directory, not directly in client components like this */}
+      {/* <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests"/> */}
+      {/* <Toaster position="top-center" /> */}
+
       <div className="relative min-h-screen w-full bg-[#0A192F]">
+        {/* Hero Section from Code A */}
         <div className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[300px] h-[300px] opacity-20">
             <div className="w-full h-full border-2 border-white/20 rounded-full" />
@@ -538,7 +486,9 @@ export function Analysis() {
             <div className="absolute inset-8 border-2 border-white/20 rounded-full" />
           </div>
           <div className="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-red-400/20 to-transparent" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+            {" "}
+            {/* Adjusted padding */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-tight max-w-5xl text-center">
               <span className="inline-block relative">
                 G-NAYANA
@@ -575,12 +525,14 @@ export function Analysis() {
             </p>
           </div>
         </div>
+
+        {/* Content Area */}
         <div className="flex-1 p-6">
           <div className="max-w-6xl mx-auto">
-            {showInputCard ? (
+            {showInputCard && (
               <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-[#112240] text-white">
-                <CardHeader className="bg-gradient-to-r from-indigo-600/90 to-purple-600/90">
-                  <CardTitle className="text-xl font-semibold text-center">
+                <CardHeader className="bg-gradient-to-r from-indigo-600/90 to-purple-600/90 rounded-t-lg">
+                  <CardTitle className="text-xl font-semibold text-center text-white">
                     Diabetic Retinopathy Report Generation
                   </CardTitle>
                 </CardHeader>
@@ -624,134 +576,168 @@ export function Analysis() {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="bg-[#1A2C4E] p-4 flex flex-col items-center">
+                <CardFooter className="bg-[#1A2C4E] p-4 flex flex-col items-center rounded-b-lg">
                   <Button
                     onClick={handleSubmit}
-                    disabled={isLoading}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out flex items-center"
+                    disabled={isLoading || !leftEyeImage || !rightEyeImage} // Disable if no images
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out flex items-center text-base disabled:opacity-50" // Larger button
                   >
                     {isLoading ? "Analyzing..." : "Submit Analysis"}
-                    {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
+                    {!isLoading && <ArrowRight className="ml-2 h-5 w-5" />}
                   </Button>
                 </CardFooter>
               </Card>
-            ) : null}
-            {apiData && (
-              <motion.div
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <EyeAnalysisCard eye="Left" data={apiData.left_eye!} />
-                <EyeAnalysisCard eye="Right" data={apiData.right_eye!} />
-              </motion.div>
             )}
-            {showBenefits ? (
-              <Benefits />
-            ) : (
-              <div className="flex justify-center mt-8 space-x-4">
-                <Button
-                  onClick={handleGetReport}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
-                >
-                  Get Report
-                </Button>
-                {!feedbackSubmitted ? (
-                  <Button
-                    onClick={() => setShowFeedbackModal(true)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
+
+            {apiData &&
+              !showInputCard &&
+              !showReportModal && ( // Show analysis cards if data exists and not showing report yet
+                <>
+                  <motion.div
+                    className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
                   >
-                    Give Feedback
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleGoBack}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
-                  >
-                    Go Back
-                  </Button>
-                )}
-              </div>
-            )}
+                    <EyeAnalysisCard eye="Left" data={apiData.left_eye!} />
+                    <EyeAnalysisCard eye="Right" data={apiData.right_eye!} />
+                  </motion.div>
+                  {/* Buttons are shown after analysis, before report OR after feedback submitted */}
+                  <div className="flex justify-center mt-8 space-x-4">
+                    <Button
+                      onClick={handleGetReport}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out"
+                      disabled={!feedbackSubmitted} // Enabled only after feedback
+                    >
+                      Get Report
+                    </Button>
+                    {!feedbackSubmitted && (
+                      <Button
+                        onClick={() => setShowFeedbackModal(true)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out"
+                      >
+                        Give Feedback
+                      </Button>
+                    )}
+                    {(feedbackSubmitted ||
+                      (!showFeedbackModal && !apiData)) && ( // Show Go Back if feedback done OR if we are back at input stage
+                      <Button
+                        onClick={handleGoBack}
+                        className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out"
+                      >
+                        Analyze New Images
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
+
+            {showInputCard && showBenefitsInitially && <Benefits />}
           </div>
         </div>
-      </div>
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="bg-[#112240] text-white">
-          <DialogHeader>
-            <DialogTitle>Enter Patient ID</DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Please enter the Patient ID to proceed with the analysis.
-            </DialogDescription>
-          </DialogHeader>
-          <Input
-            type="text"
-            placeholder="Patient ID"
-            value={modalPatientId}
-            onChange={(e) => setModalPatientId(e.target.value)}
-            className="w-full border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500 bg-[#1A2C4E] text-white"
+
+        {/* Patient ID Modal */}
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="bg-[#112240] text-white border-indigo-500">
+            <DialogHeader>
+              <DialogTitle className="text-white">Enter Patient ID</DialogTitle>
+              <DialogDescription className="text-gray-400">
+                Please enter the Patient ID to proceed with the analysis.
+              </DialogDescription>
+            </DialogHeader>
+            <Input
+              type="text"
+              placeholder="Patient ID"
+              value={modalPatientId}
+              onChange={(e) => setModalPatientId(e.target.value)}
+              className="w-full border-indigo-400 focus:border-indigo-300 focus:ring-indigo-300 bg-[#1A2C4E] text-white placeholder-gray-500"
+            />
+            <DialogFooter>
+              <Button
+                onClick={() => setIsModalOpen(false)}
+                variant="outline"
+                className="text-gray-300 border-gray-500 hover:bg-gray-700 hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleModalSubmit}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                disabled={!modalPatientId.trim()}
+              >
+                Submit
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Feedback Modal (Uses Shadcn Dialog internally) */}
+        {apiData && ( // Only render FeedbackModal if apiData is available
+          <FeedbackModal
+            isOpen={showFeedbackModal}
+            onClose={() => {
+              // if (!feedbackSubmitted) toast.error("Feedback is required to view the report.");
+              setShowFeedbackModal(false); // Allow closing even if feedback not submitted yet
+            }}
+            leftEyePreview={leftEyePreview || ""}
+            rightEyePreview={rightEyePreview || ""}
+            onSubmitFeedback={handleFeedbackSubmit}
+            patientId={modalPatientId}
+            leftEyeData={
+              apiData.left_eye || {
+                predicted_class: 0,
+                Stage: "",
+                confidence: 0,
+                explanation: "",
+                Note: "",
+                Risk_Factor: 0,
+              }
+            }
+            rightEyeData={
+              apiData.right_eye || {
+                predicted_class: 0,
+                Stage: "",
+                confidence: 0,
+                explanation: "",
+                Note: "",
+                Risk_Factor: 0,
+              }
+            }
+            // Ensure FeedbackModal itself uses DialogContent with bg-[#112240] text-white if it's a separate Dialog
           />
-          <DialogFooter>
-            <Button
-              onClick={handleModalSubmit}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
-            >
-              Submit
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      <ReportModal
-        isOpen={showReportModal}
-        onClose={() => setShowReportModal(false)}
-        patientId={modalPatientId}
-        leftEyeImage={leftEyePreview}
-        rightEyeImage={rightEyePreview}
-        leftEyeData={apiData?.left_eye}
-        rightEyeData={apiData?.right_eye}
-      />
-      <FeedbackModal
-        isOpen={showFeedbackModal}
-        onClose={() => setShowFeedbackModal(false)}
-        leftEyePreview={leftEyePreview || ""}
-        rightEyePreview={rightEyePreview || ""}
-        onSubmitFeedback={handleFeedbackSubmit}
-        patientId={modalPatientId}
-        leftEyeData={
-          apiData?.left_eye || {
-            predicted_class: 0,
-            Stage: "",
-            confidence: 0,
-            explanation: "",
-            Note: "",
-            Risk_Factor: 0,
-          }
-        }
-        rightEyeData={
-          apiData?.right_eye || {
-            predicted_class: 0,
-            Stage: "",
-            confidence: 0,
-            explanation: "",
-            Note: "",
-            Risk_Factor: 0,
-          }
-        }
-      />
-      <ErrorModal
-        isOpen={!!error}
-        onClose={() => setError(null)}
-        errorMessage={error || ""}
-      />
+        )}
+
+        {/* Report Modal */}
+        {apiData && ( // Only render ReportModal if apiData is available
+          <ReportModal
+            isOpen={showReportModal}
+            onClose={() => {
+              setShowReportModal(false);
+              // Optionally, if closing report means starting over:
+              // handleGoBack();
+            }}
+            patientId={modalPatientId}
+            leftEyeImage={leftEyePreview}
+            rightEyeImage={rightEyePreview}
+            leftEyeData={apiData.left_eye}
+            rightEyeData={apiData.right_eye}
+            // Ensure ReportModal itself uses DialogContent with bg-[#112240] text-white
+          />
+        )}
+
+        <ErrorModal
+          isOpen={!!error}
+          onClose={() => setError(null)}
+          errorMessage={error || ""}
+        />
+      </div>
     </>
   );
 }
 
 export default function AnalysisPage() {
   return (
-    <div className="min-h-screen bg-[#0A192F]">
-      <Analysis />
-    </div>
+    // The main div for bg is now inside Analysis component
+    <Analysis />
   );
 }
