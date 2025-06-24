@@ -964,9 +964,9 @@ const DiabetesPatientRegister = () => {
               ) : (
                 <Button
                   type="button"
-                  onClick={() =>
-                    window.open("/Analysis", "noopener,noreferrer")
-                  }
+                  onClick={() => {
+                    window.location.href = "/Analysis";
+                  }}
                   className="px-12 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-lg"
                 >
                   Upload Retinopathy Eye Images
