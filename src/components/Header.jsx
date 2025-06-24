@@ -40,7 +40,7 @@ const Header = () => {
       }`}
     >
       <div className="flex items-center px-5 lg:px-7.5 xl:px-10 max-lg:py-4">
-        <a className="block w-[12rem] xl:mr-8" href="#hero">
+        <a className="block w-[12rem] xl:mr-0" href="#hero">
           <img src={brainwave} width={190} height={40} alt="AIRA" />
         </a>
 
@@ -57,11 +57,11 @@ const Header = () => {
                 onClick={handleClick}
                 className={`block relative font-code text-2xl uppercase text-n-8 transition-colors hover:text-color-1 ${
                   item.onlyMobile ? "lg:hidden" : ""
-                } px-6 py-6 md:py-8 lg:-mr-0.25 lg:text-xs lg:font-semibold ${
+                } px-2 py-2 md:py-8 lg:-mr-0.25 lg:text-xs lg:font-semibold ${
                   item.url === pathname.hash
                     ? "z-2 lg:text-n-8"
                     : "lg:text-n-8/50"
-                } lg:leading-5 lg:hover:text-n-8 xl:px-12`}
+                } lg:leading-5 lg:hover:text-n-8 xl:px-8`}
               >
                 {item.title}
               </a>

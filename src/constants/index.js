@@ -398,12 +398,12 @@ export const navigation = [
   // --- ADDED NEW LINKS HERE ---
   {
     id: "4",
-    title: "Register Patient",
+    title: "RegisterPatient",
     url: "/register-patient",
   },
   {
     id: "5",
-    title: "Patient List",
+    title: "PatientList",
     url: "/patient-list",
   },
   // --- END OF ADDED LINKS ---

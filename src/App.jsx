@@ -12,6 +12,8 @@ import Hero from "./components/Hero";
 import Roadmap from "./components/Roadmap";
 import DiabetesPatientRegister from "./components/PatientDetails/DiabetesPatientRegister";
 import DiabetesPatientList from "./components/PatientDetails/DiabetesPatientList";
+import AnalysisPage from "./components/Analysis/Analysis";
+
 
 // A helper component to render the main landing page content
 const LandingPage = () => (
@@ -38,6 +40,7 @@ const App = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/register-patient" element={<DiabetesPatientRegister />} />
           <Route path="/patient-list" element={<DiabetesPatientList />} />
+          <Route path="/Analysis" element={<AnalysisPage />} />
         </Routes>
 
         <Footer />
