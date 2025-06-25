@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "@/hooks/use-toast";
+// import { toast } from "@/hooks/use-toast";
+import { toast } from "react-hot-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -225,12 +226,7 @@ const DiabetesPatientRegister = () => {
 
     if (Object.keys(currentStepErrors).length > 0) {
       setErrors(currentStepErrors);
-      toast({
-        title: "Validation Error",
-        description:
-          "Please correct the errors on this page before proceeding.",
-        variant: "destructive",
-      });
+          toast.error("Please correct the errors on this page before proceeding.");
     } else {
       setErrors({});
       if (currentStep < totalSteps) {
@@ -240,57 +236,32 @@ const DiabetesPatientRegister = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formErrors = validateForm(formData);
 
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
-      toast({
-        title: "Validation Error",
-        description:
-          "Please fill in all required fields correctly across all steps.",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all required fields correctly across all steps.");
 
-      const step1Fields: (keyof FormErrors)[] = [
-        "patient_id",
-        "name",
-        "age",
-        "gender",
-        "mobile_number",
-      ];
-      const step2Fields: (keyof FormErrors)[] = [
-        "Duration_of_Diabetes",
-        "HbA1c_Level",
-        "Blood_Pressure",
-        "Fasting_Blood_Glucose",
-        "BMI",
-        "Cholesterol",
-        "Albuminuria",
-      ];
-      const step3Fields: (keyof FormErrors)[] = [
-        "Hospital_name",
-        "Date_of_registration",
-      ];
+      // Logic to switch to the step with the first error
+      const step1Fields: (keyof FormErrors)[] = ["patient_id", "name", "age", "gender", "mobile_number"];
+      const step2Fields: (keyof FormErrors)[] = ["Duration_of_Diabetes", "HbA1c_Level", "Blood_Pressure", "Fasting_Blood_Glucose", "BMI", "Cholesterol", "Albuminuria"];
+      const step3Fields: (keyof FormErrors)[] = ["Hospital_name", "Date_of_registration"];
 
-      if (step1Fields.some((key) => formErrors[key])) {
-        setCurrentStep(1);
-      } else if (step2Fields.some((key) => formErrors[key])) {
-        setCurrentStep(2);
-      } else if (step3Fields.some((key) => formErrors[key])) {
-        setCurrentStep(3);
-      }
+      if (step1Fields.some((key) => formErrors[key])) setCurrentStep(1);
+      else if (step2Fields.some((key) => formErrors[key])) setCurrentStep(2);
+      else if (step3Fields.some((key) => formErrors[key])) setCurrentStep(3);
       return;
     }
-    setErrors({});
 
+    setErrors({});
     setIsSubmitting(true);
 
     const payload = {
       ...formData,
       patient_id: parseInt(formData.patient_id),
-      Age: parseInt(formData.age),
+      Age: parseInt(formData.age), // Assuming API expects 'Age'
       HbA1c_Level: parseFloat(formData.HbA1c_Level),
       Fasting_Blood_Glucose: parseFloat(formData.Fasting_Blood_Glucose),
       Blood_Pressure: parseInt(formData.Blood_Pressure),
@@ -299,8 +270,7 @@ const DiabetesPatientRegister = () => {
       Albuminuria: parseFloat(formData.Albuminuria),
       Duration_of_Diabetes: parseInt(formData.Duration_of_Diabetes),
       num_visits: formData.num_visits ? parseInt(formData.num_visits) : 0,
-      Date_of_registration:
-        formData.Date_of_registration.toISOString().split("T")[0],
+      Date_of_registration: formData.Date_of_registration.toISOString().split("T")[0],
     };
 
     if (!formData.num_visits) {
@@ -317,41 +287,41 @@ const DiabetesPatientRegister = () => {
       });
 
       if (!response.ok) {
-        let errorData = { message: `HTTP error: ${response.status}` };
+        // Initialize a detailed error message
+        let apiErrorMessage = `Error ${response.status}: ${response.statusText || 'Unknown API Error'}`;
+
         try {
-          const jsonError = await response.json();
-          if (jsonError && jsonError.detail) {
-            if (Array.isArray(jsonError.detail) && jsonError.detail[0].msg) {
-              errorData.message = jsonError.detail[0].msg;
-            } else if (typeof jsonError.detail === "string") {
-              errorData.message = jsonError.detail;
-            } else if (jsonError.message) {
-              errorData.message = jsonError.message;
+          const errorJson = await response.json();
+          // Attempt to extract a more specific message from the API's JSON response
+          if (errorJson.detail) {
+            if (Array.isArray(errorJson.detail) && errorJson.detail[0]?.msg) {
+              apiErrorMessage = errorJson.detail[0].msg; // Common for FastAPI validation errors
+            } else if (typeof errorJson.detail === 'string' && errorJson.detail.trim() !== "") {
+              apiErrorMessage = errorJson.detail; // Common for FastAPI HTTPException
             }
-          } else if (jsonError && jsonError.message) {
-            errorData.message = jsonError.message;
+          } else if (errorJson.message && typeof errorJson.message === 'string' && errorJson.message.trim() !== "") {
+            apiErrorMessage = errorJson.message; // Generic message field
           }
-        } catch (e) {
-          errorData.message =
-            response.statusText || `HTTP error: ${response.status}`;
+        } catch (jsonParseError) {
+          // If parsing JSON fails, stick with the initial HTTP status error message.
+          // You could log jsonParseError for debugging if needed.
+          console.warn("Could not parse API error response as JSON:", jsonParseError);
         }
-        throw new Error(errorData.message);
+        // Throw an error with the derived API message. This will be caught by the catch block below.
+        throw new Error(apiErrorMessage);
       }
 
-      toast({
-        title: "Success!",
-        description: "Patient registered successfully!",
-      });
+      // If response.ok is true
+      toast.success("Patient registered successfully!");
       setRegistrationComplete(true);
+
     } catch (error) {
+      // This catch block handles:
+      // 1. Network errors from fetch() itself (e.g., server down).
+      // 2. Errors thrown manually from the `if (!response.ok)` block (i.e., API errors).
       console.error("Registration failed:", error);
-      toast({
-        title: "Registration Failed",
-        description: `Error: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-        variant: "destructive",
-      });
+      const message = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Registration failed: ${message}`);
     } finally {
       setIsSubmitting(false);
     }
