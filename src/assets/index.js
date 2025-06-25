@@ -1,4 +1,5 @@
 import brainwave from "./brainwave.svg";
+import AIRAlogo from "./AI-RAlogo.png";
 import check from "./check.svg";
 import brainwaveSymbol from "./brainwave-symbol.svg";
 import brainwaveWhiteSymbol from "./brainwave-symbol-white.svg";
@@ -87,6 +88,7 @@ import bot from "./GNayana/bot.png";
 
 export {
   brainwave,
+  AIRAlogo,
   check,
   check2,
   loading1,
