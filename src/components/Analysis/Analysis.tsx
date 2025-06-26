@@ -571,11 +571,6 @@ export function Analysis() {
                   {/* ... Image Upload JSX ... */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      {/* <p className="text-sm font-bold text-gray-300">Left Eye Image</p>
-                        <FileUpload onChange={(file) => handleImageUpload(file, "left")} />
-                        {leftEyePreview && (<div className="mt-2 flex items-center justify-center relative overflow-hidden">
-                            <MovingImage src={leftEyePreview} alt="Left Eye Preview" isMoving={isMoving} isAnalyzing={isAnalyzing} />
-                            </div>)} */}
                       <p className="text-sm font-bold text-gray-300">
                         Right Eye Image
                       </p>
@@ -643,8 +638,8 @@ export function Analysis() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <EyeAnalysisCard eye="Left" data={apiData.left_eye!} />
                   <EyeAnalysisCard eye="Right" data={apiData.right_eye!} />
+                  <EyeAnalysisCard eye="Left" data={apiData.left_eye!} />
                 </motion.div>
 
                 {/* Buttons after analysis results are shown */}

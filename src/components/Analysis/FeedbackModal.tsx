@@ -104,83 +104,7 @@ export function FeedbackModal({
           </DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-white border-b border-gray-600 pb-2">
-              Left Eye
-            </h3>
-            <div className="relative w-[150px] h-[150px] mx-auto mb-4">
-              {/* <img
-                src={leftEyePreview} 
-                alt="Left Eye" 
-                fill
-                className="rounded-lg object-cover"
-              /> */}
-              <img
-                src={leftEyePreview}
-                alt="Left Eye"
-                className="absolute inset-0 w-full h-full object-cover rounded-lg"
-              />
-            </div>
-            <div className="flex justify-center space-x-4 mb-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLeftEyeReview("positive")}
-                className={`
-                  ${
-                    leftEyeReview === "positive"
-                      ? "bg-green-500 text-white border-green-500 shadow-[0_0_10px_#4ade80]"
-                      : "bg-transparent text-[#4ade80] border-[#4ade80]"
-                  }
-                  transition-colors duration-200
-                `}
-              >
-                <ThumbsUp className="mr-2 h-4 w-4" />
-                Positive
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLeftEyeReview("negative")}
-                className={`
-                  ${
-                    leftEyeReview === "negative"
-                      ? "bg-red-500 text-white border-red-500 shadow-[0_0_10px_#f87171]"
-                      : "bg-transparent text-[#f87171] border-[#f87171]"
-                  }
-                  transition-colors duration-200
-                `}
-              >
-                <ThumbsDown className="mr-2 h-4 w-4" />
-                Negative
-              </Button>
-            </div>
-            <RadioGroup
-              value={leftEyeDiagnosis}
-              onValueChange={setLeftEyeDiagnosis}
-              className="flex justify-between mb-4 bg-[#1A2C4E] p-4 rounded-lg"
-            >
-              {diagnosisOptions.map((option) => (
-                <div key={option} className="flex items-center">
-                  <RadioGroupItem
-                    value={option}
-                    id={`left-${option}`}
-                    className="border-white data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
-                  />
-                  <Label htmlFor={`left-${option}`} className="ml-2 text-white">
-                    {option}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-            <Textarea
-              placeholder="Enter feedback for left eye"
-              value={leftEyeFeedback}
-              onChange={(e) => setLeftEyeFeedback(e.target.value)}
-              className="w-full bg-[#1A2C4E] text-white border-gray-600 focus:border-indigo-500 placeholder:text-gray-400"
-            />
-          </div>
-          <div>
+              <div>
             <h3 className="text-lg font-semibold mb-4 text-white border-b border-gray-600 pb-2">
               Right Eye
             </h3>
@@ -259,6 +183,83 @@ export function FeedbackModal({
               className="w-full bg-[#1A2C4E] text-white border-gray-600 focus:border-indigo-500 placeholder:text-gray-400"
             />
           </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-white border-b border-gray-600 pb-2">
+              Left Eye
+            </h3>
+            <div className="relative w-[150px] h-[150px] mx-auto mb-4">
+              {/* <img
+                src={leftEyePreview} 
+                alt="Left Eye" 
+                fill
+                className="rounded-lg object-cover"
+              /> */}
+              <img
+                src={leftEyePreview}
+                alt="Left Eye"
+                className="absolute inset-0 w-full h-full object-cover rounded-lg"
+              />
+            </div>
+            <div className="flex justify-center space-x-4 mb-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLeftEyeReview("positive")}
+                className={`
+                  ${
+                    leftEyeReview === "positive"
+                      ? "bg-green-500 text-white border-green-500 shadow-[0_0_10px_#4ade80]"
+                      : "bg-transparent text-[#4ade80] border-[#4ade80]"
+                  }
+                  transition-colors duration-200
+                `}
+              >
+                <ThumbsUp className="mr-2 h-4 w-4" />
+                Positive
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLeftEyeReview("negative")}
+                className={`
+                  ${
+                    leftEyeReview === "negative"
+                      ? "bg-red-500 text-white border-red-500 shadow-[0_0_10px_#f87171]"
+                      : "bg-transparent text-[#f87171] border-[#f87171]"
+                  }
+                  transition-colors duration-200
+                `}
+              >
+                <ThumbsDown className="mr-2 h-4 w-4" />
+                Negative
+              </Button>
+            </div>
+            <RadioGroup
+              value={leftEyeDiagnosis}
+              onValueChange={setLeftEyeDiagnosis}
+              className="flex justify-between mb-4 bg-[#1A2C4E] p-4 rounded-lg"
+            >
+              {diagnosisOptions.map((option) => (
+                <div key={option} className="flex items-center">
+                  <RadioGroupItem
+                    value={option}
+                    id={`left-${option}`}
+                    className="border-white data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                  />
+                  <Label htmlFor={`left-${option}`} className="ml-2 text-white">
+                    {option}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+            <Textarea
+              placeholder="Enter feedback for left eye"
+              value={leftEyeFeedback}
+              onChange={(e) => setLeftEyeFeedback(e.target.value)}
+              className="w-full bg-[#1A2C4E] text-white border-gray-600 focus:border-indigo-500 placeholder:text-gray-400"
+            />
+          </div>
+      
         </div>
         <DialogFooter>
           <Button
