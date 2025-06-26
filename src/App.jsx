@@ -15,27 +15,24 @@ import DiabetesPatientRegister from "./components/PatientDetails/DiabetesPatient
 import DiabetesPatientList from "./components/PatientDetails/DiabetesPatientList";
 import AnalysisPage from "./components/Analysis/Analysis";
 
-// ✅ Helper to scroll to hash fragment
+// ✅ Scroll to hash utility
 const ScrollToHashElement = () => {
   const location = useLocation();
-
   useEffect(() => {
     if (location.hash) {
       const id = location.hash.replace("#", "");
       const element = document.getElementById(id);
       if (element) {
-        // Delay ensures DOM is ready
         setTimeout(() => {
           element.scrollIntoView({ behavior: "smooth" });
         }, 0);
       }
     }
   }, [location]);
-
   return null;
 };
 
-// ✅ Landing page layout with scroll targets
+// ✅ Landing Page
 const LandingPage = () => (
   <>
     <div id="hero"><Hero /></div>
@@ -46,6 +43,12 @@ const LandingPage = () => (
 );
 
 const App = () => {
+  const location = useLocation();
+
+  // ❌ Hide footer on these routes
+  const hideFooterRoutes = ["/register-patient", "/patient-list", "/Analysis"];
+  const shouldShowFooter = !hideFooterRoutes.includes(location.pathname);
+
   return (
     <>
       <Toaster position="top-right" />
@@ -53,7 +56,6 @@ const App = () => {
       <div className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden">
         <Header />
 
-        {/* Scroll to hash when route changes */}
         <ScrollToHashElement />
 
         <Routes>
@@ -63,7 +65,7 @@ const App = () => {
           <Route path="/Analysis" element={<AnalysisPage />} />
         </Routes>
 
-        <Footer />
+        {shouldShowFooter && <Footer />}
       </div>
 
       <ButtonGradient />
