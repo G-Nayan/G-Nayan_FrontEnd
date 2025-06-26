@@ -465,8 +465,6 @@ const DiabetesPatientList = () => {
   if (isLoading)
     return <p className="text-center mt-10">Loading patient data...</p>;
   if (error) return <p className="text-center text-red-600 mt-10">{error}</p>;
-  if (!patients.length)
-    return <p className="text-center mt-10">No patient records found.</p>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -491,9 +489,15 @@ const DiabetesPatientList = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {patients.map((p) => (
-          <PatientCard key={p.visit_id} patient={p} />
-        ))}
+        {!isLoading && patients.length === 0 ? (
+          <p className="text-center col-span-full mt-10 text-gray-600">
+            {isSearching && searchTerm.trim()
+              ? `No match found with Patient: ${searchTerm}`
+              : "No patient records found."}
+          </p>
+        ) : (
+          patients.map((p) => <PatientCard key={p.visit_id} patient={p} />)
+        )}
       </div>
 
       {!isSearching && (
