@@ -37,10 +37,10 @@ export function Report({
               Attribute
             </th>
             <th className="border border-blue-300 px-4 py-2 text-blue-800">
-              Left Eye
+                Right Eye
             </th>
             <th className="border border-blue-300 px-4 py-2 text-blue-800">
-              Right Eye
+              {/* Right Eye */} Left Eye
             </th>
           </tr>
         </thead>
@@ -58,9 +58,16 @@ export function Report({
                   height={128} 
                   className="object-cover rounded-md"
                 /> */}
-                <img
+                {/* <img
                   src={leftEyeImage}
                   alt="Left Eye"
+                  width={128}
+                  height={128}
+                  className="object-cover rounded-md"
+                /> */}
+                 <img
+                  src={rightEyeImage}
+                  alt="Right Eye"
                   width={128}
                   height={128}
                   className="object-cover rounded-md"
@@ -69,9 +76,16 @@ export function Report({
             </td>
             <td className="border border-blue-300 px-4 py-2 text-center">
               <div className="w-32 h-32 mx-auto bg-black flex items-center justify-center rounded-md">
-                <img
+                {/* <img
                   src={rightEyeImage}
                   alt="Right Eye"
+                  width={128}
+                  height={128}
+                  className="object-cover rounded-md"
+                /> */}
+                <img
+                  src={leftEyeImage}
+                  alt="Left Eye"
                   width={128}
                   height={128}
                   className="object-cover rounded-md"
@@ -84,10 +98,12 @@ export function Report({
               Predicted Class
             </td>
             <td className="border border-blue-300 px-4 py-2">
-              {leftEyeData.predicted_class}
+              {/* {leftEyeData.predicted_class} */}
+               {rightEyeData.predicted_class}
             </td>
             <td className="border border-blue-300 px-4 py-2">
-              {rightEyeData.predicted_class}
+              {/* {rightEyeData.predicted_class} */}
+              {leftEyeData.predicted_class}
             </td>
           </tr>
           <tr>
@@ -95,10 +111,10 @@ export function Report({
               Stage
             </td>
             <td className="border border-blue-300 px-4 py-2">
-              {leftEyeData.Stage}
+              {/* {leftEyeData.Stage} */}  {rightEyeData.Stage}
             </td>
             <td className="border border-blue-300 px-4 py-2">
-              {rightEyeData.Stage}
+              {/* {rightEyeData.Stage} */}{leftEyeData.Stage}
             </td>
           </tr>
           <tr>
@@ -106,10 +122,12 @@ export function Report({
               Confidence
             </td>
             <td className="border border-blue-300 px-4 py-2">
-              {leftEyeData.confidence.toFixed(2)}%
+              {/* {leftEyeData.confidence.toFixed(2)}% */}
+                {rightEyeData.confidence.toFixed(2)}%
             </td>
             <td className="border border-blue-300 px-4 py-2">
-              {rightEyeData.confidence.toFixed(2)}%
+              {/* {rightEyeData.confidence.toFixed(2)}% */}
+              {leftEyeData.confidence.toFixed(2)}%
             </td>
           </tr>
           <tr>
@@ -117,10 +135,12 @@ export function Report({
               Risk Factor
             </td>
             <td className="border border-blue-300 px-4 py-2">
-              {leftEyeData.Risk_Factor}
+              {/* {leftEyeData.Risk_Factor} */}
+                {rightEyeData.Risk_Factor}
             </td>
             <td className="border border-blue-300 px-4 py-2">
-              {rightEyeData.Risk_Factor}
+              {/* {rightEyeData.Risk_Factor} */}
+              {leftEyeData.Risk_Factor}
             </td>
           </tr>
           <tr>
@@ -128,10 +148,12 @@ export function Report({
               Explanation
             </td>
             <td className="border border-blue-300 px-4 py-2">
-              {leftEyeData.explanation}
+              {/* {leftEyeData.explanation} */}
+               {rightEyeData.explanation}
             </td>
             <td className="border border-blue-300 px-4 py-2">
-              {rightEyeData.explanation}
+              {/* {rightEyeData.explanation} */}
+              {leftEyeData.explanation}
             </td>
           </tr>
           <tr>
@@ -139,10 +161,12 @@ export function Report({
               Note
             </td>
             <td className="border border-blue-300 px-4 py-2">
-              {leftEyeData.Note}
+              {/* {leftEyeData.Note} */}
+                   {rightEyeData.Note}
             </td>
             <td className="border border-blue-300 px-4 py-2">
-              {rightEyeData.Note}
+              {/* {rightEyeData.Note} */}
+              {leftEyeData.Note}
             </td>
           </tr>
         </tbody>
