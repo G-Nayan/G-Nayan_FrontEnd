@@ -343,7 +343,7 @@ const DiabetesPatientRegister = () => {
     },
     {
       id: 2,
-      title: "Clinical Measurements",
+      title: "Clinical Data",
       icon: Activity,
       description: "Medical test results",
       color: "bg-green-600",

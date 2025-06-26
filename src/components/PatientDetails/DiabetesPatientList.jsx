@@ -334,6 +334,11 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 
+import { Edit } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+import EditPatientModal from "../PatientDetails/PatientModel"; // Assuming you have this component for editing patient details
+
 const API_URL = "http://localhost:8000/patients";
 const COMBINED_BASE = "http://localhost:8000/combined-report";
 
@@ -345,6 +350,8 @@ const DiabetesPatientList = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+
+  const navigate = useNavigate();
 
   const patientsPerPage = 9;
 
@@ -467,10 +474,8 @@ const DiabetesPatientList = () => {
   if (error) return <p className="text-center text-red-600 mt-10">{error}</p>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-8">
-        Diabetes Patient Records
-      </h1>
+    <div className="max-w-7xl mx-auto px-32 py-8">
+      <h1 className="text-3xl font-bold text-center mb-8">Patient Records</h1>
 
       <div className="flex gap-2 mb-4">
         <input
@@ -488,9 +493,9 @@ const DiabetesPatientList = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {!isLoading && patients.length === 0 ? (
-          <p className="text-center col-span-full mt-10 text-gray-600">
+          <p className="text-center col-span-full mt-5 text-gray-600">
             {isSearching && searchTerm.trim()
               ? `No match found with Patient: ${searchTerm}`
               : "No patient records found."}
@@ -524,8 +529,130 @@ const DiabetesPatientList = () => {
   );
 };
 
+// const PatientCard = ({ patient }) => {
+//   const [modalOpen, setModalOpen] = useState(false);
+//   const [retinoData, setRetinoData] = useState(null);
+//   const [loading, setLoading] = useState(false);
+
+//   const fetchRetinoData = async () => {
+//     setLoading(true);
+//     try {
+//       const res = await fetch(`${COMBINED_BASE}/${patient.patient_id}`);
+//       if (!res.ok) {
+//         const errorData = await res.json().catch(() => null);
+//         const errorMessage =
+//           errorData?.detail || errorData?.message || `HTTP ${res.status}`;
+//         throw new Error(errorMessage);
+//       }
+
+//       const data = await res.json();
+//       const left = data.find((entry) => entry.eye_scan_id?.endsWith("left"));
+//       const right = data.find((entry) => entry.eye_scan_id?.endsWith("right"));
+
+//       setRetinoData({
+//         left_eye: left,
+//         right_eye: right,
+//         email_id: data[0]?.email_id,
+//       });
+//       setModalOpen(true);
+//     } catch (err) {
+//       console.error("Error fetching retinopathy data:", err);
+//       toast.error("Failed to fetch retinopathy data: " + err.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <>
+//       <div className="bg-white rounded-lg shadow flex flex-col">
+//         {/* <div className="p-5 bg-indigo-600 text-white">
+//           <h2 className="text-xl font-bold">{patient.name}</h2>
+//           <p className="text-sm">
+//             {patient.Age} yrs, {patient.gender}
+//           </p>
+//           <p className="text-sm">📞 {patient.mobile_number}</p>
+//         </div> */}
+
+//         <div className="relative p-5 bg-indigo-600 text-white rounded-t-lg">
+//           {/* Edit icon in the top-right corner */}
+//           <button
+
+//             onClick={() => setEditModalOpen(true)}
+//             className="absolute top-3 right-3 hover:text-gray-300"
+//             title="Edit Patient"
+//           >
+//             <Edit size={18} />
+//           </button>
+
+//           <h2 className="text-xl font-bold">{patient.name}</h2>
+//           <p className="text-sm">
+//             {patient.Age} yrs, {patient.gender}
+//           </p>
+//           <p className="text-sm">📞 {patient.mobile_number}</p>
+//         </div>
+//         <div className="p-5 grid grid-cols-2 gap-4">
+//           <DataPoint label="HbA1c" value={patient.HbA1c_Level} unit="%" />
+//           <DataPoint
+//             label="Glucose"
+//             value={patient.Fasting_Blood_Glucose}
+//             unit="mg/dL"
+//           />
+//           <DataPoint label="BP" value={patient.Blood_Pressure} unit="mmHg" />
+//           <DataPoint
+//             label="Cholesterol"
+//             value={patient.Cholesterol}
+//             unit="mg/dL"
+//           />
+//           <DataPoint label="BMI" value={patient.BMI} unit="kg/m²" />
+//           <DataPoint
+//             label="Albuminuria"
+//             value={patient.Albuminuria}
+//             unit="mg/g"
+//           />
+//           <DataPoint
+//             label="Diabetes Duration"
+//             value={patient.Duration_of_Diabetes}
+//             unit="Yrs"
+//           />
+//           <DataPoint label="Visual Acuity" value={patient.Visual_Acuity} />
+//         </div>
+//         <div className="p-5 bg-gray-50 border-t text-sm">
+//           <p>
+//             <strong>Visit ID:</strong> {patient.visit_id}
+//           </p>
+//           <p>
+//             <strong>Patient ID:</strong> {patient.patient_id}
+//           </p>
+//           <p>
+//             <strong>Hospital:</strong> {patient.Hospital_name}
+//           </p>
+//           <p>
+//             <strong>Date:</strong>{" "}
+//             {new Date(patient.Date_of_registration).toLocaleDateString()}
+//           </p>
+//         </div>
+//         <div className="p-5 border-t">
+//           <button
+//             onClick={fetchRetinoData}
+//             disabled={loading}
+//             className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+//           >
+//             {loading ? "Loading..." : "Retinopathy"}
+//           </button>
+//         </div>
+//       </div>
+
+//       {modalOpen && retinoData && (
+//         <RetinoModal data={retinoData} onClose={() => setModalOpen(false)} />
+//       )}
+//     </>
+//   );
+// };
+
 const PatientCard = ({ patient }) => {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false); // Retino modal
+  const [editModalOpen, setEditModalOpen] = useState(false); // Edit modal
   const [retinoData, setRetinoData] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -561,7 +688,15 @@ const PatientCard = ({ patient }) => {
   return (
     <>
       <div className="bg-white rounded-lg shadow flex flex-col">
-        <div className="p-5 bg-indigo-600 text-white">
+        <div className="relative p-3 bg-indigo-600 text-white rounded-t-lg">
+          <button
+            onClick={() => setEditModalOpen(true)}
+            className="absolute top-3 right-3 hover:text-gray-300"
+            title="Edit Patient"
+          >
+            <Edit size={18} />
+          </button>
+
           <h2 className="text-xl font-bold">{patient.name}</h2>
           <p className="text-sm">
             {patient.Age} yrs, {patient.gender}
@@ -569,7 +704,7 @@ const PatientCard = ({ patient }) => {
           <p className="text-sm">📞 {patient.mobile_number}</p>
         </div>
 
-        <div className="p-5 grid grid-cols-2 gap-4">
+        <div className="p-3 grid grid-cols-2 gap-">
           <DataPoint label="HbA1c" value={patient.HbA1c_Level} unit="%" />
           <DataPoint
             label="Glucose"
@@ -596,7 +731,7 @@ const PatientCard = ({ patient }) => {
           <DataPoint label="Visual Acuity" value={patient.Visual_Acuity} />
         </div>
 
-        <div className="p-5 bg-gray-50 border-t text-sm">
+        <div className="p-3 bg-gray-50 border-t text-sm">
           <p>
             <strong>Visit ID:</strong> {patient.visit_id}
           </p>
@@ -612,7 +747,7 @@ const PatientCard = ({ patient }) => {
           </p>
         </div>
 
-        <div className="p-5 border-t">
+        <div className="p-3 border-t">
           <button
             onClick={fetchRetinoData}
             disabled={loading}
@@ -623,8 +758,17 @@ const PatientCard = ({ patient }) => {
         </div>
       </div>
 
+      {/* Retinopathy Report Modal */}
       {modalOpen && retinoData && (
         <RetinoModal data={retinoData} onClose={() => setModalOpen(false)} />
+      )}
+
+      {/* Edit Modal */}
+      {editModalOpen && (
+        <EditPatientModal
+          patient={patient}
+          onClose={() => setEditModalOpen(false)}
+        />
       )}
     </>
   );
