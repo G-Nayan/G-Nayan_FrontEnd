@@ -181,9 +181,9 @@ const DiabetesPatientRegister = () => {
       newErrors.Albuminuria = "Albuminuria is required.";
     } else {
       const alb = parseFloat(Albuminuria);
-      if (isNaN(alb) || alb < 0.5 || alb > 3.0) {
+      if (isNaN(alb) || alb < 0 || alb > 1000) {
         newErrors.Albuminuria =
-          "Albuminuria must be between 0.5 and 3.0 mg/dL.";
+          "Albuminuria must be between 0 and 1000 mg/dL.";
       }
     }
 
