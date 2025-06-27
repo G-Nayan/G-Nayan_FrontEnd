@@ -198,7 +198,7 @@ const PatientCard = ({ patient }) => {
       setModalOpen(true);
     } catch (err) {
       console.error("Error fetching retinopathy data:", err);
-      toast.error("Failed to fetch retinopathy data: " + err.message);
+      toast.error("Failed to fetch data(give feedback and upload eye images): " + err.message);
     } finally {
       setLoading(false);
     }
@@ -216,11 +216,17 @@ const PatientCard = ({ patient }) => {
             <Edit size={18} />
           </button>
 
-          <h2 className="text-xl font-bold">{patient.name}</h2>
+          
+          <h2 className="text-xl font-bold  ">
+            {patient.name.charAt(0).toUpperCase() + patient.name.slice(1)}
+          </h2>
           <p className="text-sm">
-            {patient.Age} yrs, {patient.gender}
+            {patient.Age} yrs, &nbsp; {patient.gender}
           </p>
-          <p className="text-sm">📞 {patient.mobile_number}</p>
+          <p className="text-sm ">
+            Mobile number: &nbsp;
+            {patient.mobile_number}
+          </p>
         </div>
 
         <div className="p-3 grid grid-cols-2 gap-">
@@ -258,7 +264,10 @@ const PatientCard = ({ patient }) => {
             <strong>Patient ID:</strong> {patient.patient_id}
           </p>
           <p>
-            <strong>Hospital:</strong> {patient.Hospital_name}
+            <strong>Hospital:</strong>
+         
+            {patient.Hospital_name.charAt(0).toUpperCase() +
+              patient.Hospital_name.slice(1)}
           </p>
           <p>
             <strong>Date:</strong>{" "}
