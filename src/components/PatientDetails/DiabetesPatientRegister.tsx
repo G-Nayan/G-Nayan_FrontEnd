@@ -226,7 +226,7 @@ const DiabetesPatientRegister = () => {
 
     if (Object.keys(currentStepErrors).length > 0) {
       setErrors(currentStepErrors);
-          toast.error("Please correct the errors on this page before proceeding.");
+      toast.error("Please correct the errors on this page before proceeding.");
     } else {
       setErrors({});
       if (currentStep < totalSteps) {
@@ -236,18 +236,37 @@ const DiabetesPatientRegister = () => {
     }
   };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formErrors = validateForm(formData);
 
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
-      toast.error("Please fill in all required fields correctly across all steps.");
+      toast.error(
+        "Please fill in all required fields correctly across all steps."
+      );
 
       // Logic to switch to the step with the first error
-      const step1Fields: (keyof FormErrors)[] = ["patient_id", "name", "age", "gender", "mobile_number"];
-      const step2Fields: (keyof FormErrors)[] = ["Duration_of_Diabetes", "HbA1c_Level", "Blood_Pressure", "Fasting_Blood_Glucose", "BMI", "Cholesterol", "Albuminuria"];
-      const step3Fields: (keyof FormErrors)[] = ["Hospital_name", "Date_of_registration"];
+      const step1Fields: (keyof FormErrors)[] = [
+        "patient_id",
+        "name",
+        "age",
+        "gender",
+        "mobile_number",
+      ];
+      const step2Fields: (keyof FormErrors)[] = [
+        "Duration_of_Diabetes",
+        "HbA1c_Level",
+        "Blood_Pressure",
+        "Fasting_Blood_Glucose",
+        "BMI",
+        "Cholesterol",
+        "Albuminuria",
+      ];
+      const step3Fields: (keyof FormErrors)[] = [
+        "Hospital_name",
+        "Date_of_registration",
+      ];
 
       if (step1Fields.some((key) => formErrors[key])) setCurrentStep(1);
       else if (step2Fields.some((key) => formErrors[key])) setCurrentStep(2);
@@ -270,7 +289,8 @@ const DiabetesPatientRegister = () => {
       Albuminuria: parseFloat(formData.Albuminuria),
       Duration_of_Diabetes: parseInt(formData.Duration_of_Diabetes),
       num_visits: formData.num_visits ? parseInt(formData.num_visits) : 0,
-      Date_of_registration: formData.Date_of_registration.toISOString().split("T")[0],
+      Date_of_registration:
+        formData.Date_of_registration.toISOString().split("T")[0],
     };
 
     if (!formData.num_visits) {
@@ -288,7 +308,9 @@ const DiabetesPatientRegister = () => {
 
       if (!response.ok) {
         // Initialize a detailed error message
-        let apiErrorMessage = `Error ${response.status}: ${response.statusText || 'Unknown API Error'}`;
+        let apiErrorMessage = `Error ${response.status}: ${
+          response.statusText || "Unknown API Error"
+        }`;
 
         try {
           const errorJson = await response.json();
@@ -296,31 +318,41 @@ const DiabetesPatientRegister = () => {
           if (errorJson.detail) {
             if (Array.isArray(errorJson.detail) && errorJson.detail[0]?.msg) {
               apiErrorMessage = errorJson.detail[0].msg; // Common for FastAPI validation errors
-            } else if (typeof errorJson.detail === 'string' && errorJson.detail.trim() !== "") {
+            } else if (
+              typeof errorJson.detail === "string" &&
+              errorJson.detail.trim() !== ""
+            ) {
               apiErrorMessage = errorJson.detail; // Common for FastAPI HTTPException
             }
-          } else if (errorJson.message && typeof errorJson.message === 'string' && errorJson.message.trim() !== "") {
+          } else if (
+            errorJson.message &&
+            typeof errorJson.message === "string" &&
+            errorJson.message.trim() !== ""
+          ) {
             apiErrorMessage = errorJson.message; // Generic message field
           }
         } catch (jsonParseError) {
           // If parsing JSON fails, stick with the initial HTTP status error message.
           // You could log jsonParseError for debugging if needed.
-          console.warn("Could not parse API error response as JSON:", jsonParseError);
+          console.warn(
+            "Could not parse API error response as JSON:",
+            jsonParseError
+          );
         }
         // Throw an error with the derived API message. This will be caught by the catch block below.
         throw new Error(apiErrorMessage);
       }
 
       // If response.ok is true
-      toast.success("Patient registered successfully!");
+      // toast.success("Patient registered successfully!");
       setRegistrationComplete(true);
-
     } catch (error) {
       // This catch block handles:
       // 1. Network errors from fetch() itself (e.g., server down).
       // 2. Errors thrown manually from the `if (!response.ok)` block (i.e., API errors).
       console.error("Registration failed:", error);
-      const message = error instanceof Error ? error.message : "An unknown error occurred";
+      const message =
+        error instanceof Error ? error.message : "An unknown error occurred";
       toast.error(`Registration failed: ${message}`);
     } finally {
       setIsSubmitting(false);
@@ -658,6 +690,161 @@ const DiabetesPatientRegister = () => {
           </div>
         );
 
+      // case 2:
+      //   return (
+      //     <div className="space-y-6">
+      //       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      //         {[
+      //           {
+      //             id: "HbA1c_Level",
+      //             label: "HbA1c Level",
+      //             unit: "%",
+      //             icon: Heart,
+      //             step: "0.1",
+      //           },
+      //           {
+      //             id: "Fasting_Blood_Glucose",
+      //             label: "Fasting Glucose",
+      //             unit: "mg/dL",
+      //             icon: Activity,
+      //             step: "0.1",
+      //           },
+      //           {
+      //             id: "Blood_Pressure",
+      //             label: "Blood Pressure",
+      //             unit: "mmHg",
+      //             icon: Heart,
+      //             step: "1",
+      //           },
+      //           {
+      //             id: "Cholesterol",
+      //             label: "Cholesterol",
+      //             unit: "mg/dL",
+      //             icon: Activity,
+      //             step: "1",
+      //           },
+      //           {
+      //             id: "BMI",
+      //             label: "BMI",
+      //             unit: "kg/m²",
+      //             icon: User,
+      //             step: "0.1",
+      //           },
+      //           {
+      //             id: "Albuminuria",
+      //             label: "Albuminuria",
+      //             unit: "mg/dL",
+      //             icon: Activity,
+      //             step: "0.1",
+      //           },
+      //         ].map(({ id, label, unit, icon: Icon, step }) => (
+      //           <div key={id} className="space-y-2">
+      //             <label
+      //               htmlFor={id}
+      //               className="text-sm font-medium text-gray-700 flex items-center gap-2"
+      //             >
+      //               <Icon className="h-4 w-4 text-green-600" />
+      //               {label} ({unit})
+      //             </label>
+      //             <Input
+      //               type="number"
+      //               step={step}
+      //               id={id}
+      //               name={id}
+      //               value={formData[id as keyof typeof formData] as string}
+      //               onChange={handleChange}
+      //               className={cn(
+      //                 "transition-all duration-200 hover:border-green-300 focus:border-green-500",
+      //                 errors[id as keyof FormErrors] &&
+      //                   "border-red-500 focus:border-red-500"
+      //               )}
+      //               placeholder={`Enter ${label.toLowerCase()}`}
+      //             />
+      //             {errors[id as keyof FormErrors] && (
+      //               <p className="text-red-500 text-sm flex items-center gap-1">
+      //                 <AlertCircle className="h-4 w-4" />
+      //                 {errors[id as keyof FormErrors]}
+      //               </p>
+      //             )}
+      //           </div>
+      //         ))}
+      //       </div>
+
+      //       {/* <Separator /> */}
+
+      //       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      //         <div className="space-y-2">
+      //           <label
+      //             htmlFor="Duration_of_Diabetes"
+      //             className="text-sm font-medium text-gray-700 flex items-center gap-2"
+      //           >
+      //             <Calendar className="h-4 w-4 text-green-600" />
+      //             Diabetes Duration (Years)
+      //           </label>
+      //           <Input
+      //             type="number"
+      //             step="1"
+      //             id="Duration_of_Diabetes"
+      //             name="Duration_of_Diabetes"
+      //             value={formData.Duration_of_Diabetes}
+      //             onChange={handleChange}
+      //             className={cn(
+      //               "transition-all duration-200 hover:border-green-300 focus:border-green-500",
+      //               errors.Duration_of_Diabetes &&
+      //                 "border-red-500 focus:border-red-500"
+      //             )}
+      //             placeholder="Years with diabetes"
+      //           />
+      //           {errors.Duration_of_Diabetes && (
+      //             <p className="text-red-500 text-sm flex items-center gap-1">
+      //               <AlertCircle className="h-4 w-4" />
+      //               {errors.Duration_of_Diabetes}
+      //             </p>
+      //           )}
+      //         </div>
+
+      //         <div className="space-y-2">
+      //           <label
+      //             htmlFor="Visual_Acuity"
+      //             className="text-sm font-medium text-gray-700 flex items-center gap-2"
+      //           >
+      //             <Eye className="h-4 w-4 text-green-600" />
+      //             Visual Acuity
+      //           </label>
+      //           <DropdownMenu>
+      //             <DropdownMenuTrigger asChild>
+      //               <Button
+      //                 variant="outline"
+      //                 className="w-full justify-between text-left font-normal transition-all duration-200 hover:border-green-300"
+      //               >
+      //                 {formData.Visual_Acuity}
+      //                 <ChevronDown className="h-4 w-4 opacity-50" />
+      //               </Button>
+      //             </DropdownMenuTrigger>
+      //             <DropdownMenuContent className="w-full bg-white shadow-lg border">
+      //               {["Normal", "Mild", "Moderate", "Severe", "Blind"].map(
+      //                 (option) => (
+      //                   <DropdownMenuItem
+      //                     key={option}
+      //                     onSelect={() =>
+      //                       setFormData((prev) => ({
+      //                         ...prev,
+      //                         Visual_Acuity: option,
+      //                       }))
+      //                     }
+      //                     className="cursor-pointer hover:bg-gray-50"
+      //                   >
+      //                     {option}
+      //                   </DropdownMenuItem>
+      //                 )
+      //               )}
+      //             </DropdownMenuContent>
+      //           </DropdownMenu>
+      //         </div>
+      //       </div>
+      //     </div>
+      //   );
+
       case 2:
         return (
           <div className="space-y-6">
@@ -676,13 +863,6 @@ const DiabetesPatientRegister = () => {
                   unit: "mg/dL",
                   icon: Activity,
                   step: "0.1",
-                },
-                {
-                  id: "Blood_Pressure",
-                  label: "Blood Pressure",
-                  unit: "mmHg",
-                  icon: Heart,
-                  step: "1",
                 },
                 {
                   id: "Cholesterol",
@@ -736,9 +916,51 @@ const DiabetesPatientRegister = () => {
                   )}
                 </div>
               ))}
-            </div>
 
-            {/* <Separator /> */}
+              {/* Custom Blood Pressure Field */}
+              <div key="Blood_Pressure" className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Heart className="h-4 w-4 text-green-600" />
+                  Blood Pressure (mmHg)
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    step="1"
+                    name="Blood_Pressure"
+                    value={formData.Blood_Pressure}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        Blood_Pressure: e.target.value,
+                      }))
+                    }
+                    placeholder="Systolic"
+                    className={cn(
+                      "w-1/2 transition-all duration-200 hover:border-green-300 focus:border-green-500",
+                      errors.Blood_Pressure &&
+                        "border-red-500 focus:border-red-500"
+                    )}
+                  />
+                  <Input
+                    type="number"
+                    step="1"
+                    name="Diastolic_Blood_Pressure"
+                    placeholder="Diastolic"
+                    onChange={(e) => {
+                      console.log("Diastolic BP:", e.target.value);
+                    }}
+                    className="w-1/2 transition-all duration-200 hover:border-green-300 focus:border-green-500"
+                  />
+                </div>
+                {errors.Blood_Pressure && (
+                  <p className="text-red-500 text-sm flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.Blood_Pressure}
+                  </p>
+                )}
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
