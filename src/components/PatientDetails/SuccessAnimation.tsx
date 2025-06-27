@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import React, { useState, useEffect } from "react";
+import { Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface SuccessAnimationProps {
   onContinue: () => void;
+  mode?: "register" | "update"; // default is "register"
 }
 
-const SuccessAnimation: React.FC<SuccessAnimationProps> = ({ onContinue }) => {
+const SuccessAnimation: React.FC<SuccessAnimationProps> = ({ onContinue ,  mode = "register"}) => {
   const [animationStage, setAnimationStage] = useState(0);
 
-  useEffect(() => {
+  useEffect(() => { 
     const timeouts = [
       setTimeout(() => setAnimationStage(1), 100),
       setTimeout(() => setAnimationStage(2), 300),
@@ -27,18 +28,20 @@ const SuccessAnimation: React.FC<SuccessAnimationProps> = ({ onContinue }) => {
       {/* Card */}
       <div
         className={cn(
-          'relative p-12 rounded-3xl bg-white/80 backdrop-blur-lg border border-white/30 shadow-2xl transition-all duration-700 ease-out',
-          'before:absolute before:inset-0 before:rounded-3xl before:bg-gradient-to-br before:from-white/50 before:to-transparent before:pointer-events-none',
-          animationStage >= 1 ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          "relative p-12 rounded-3xl bg-white/80 backdrop-blur-lg border border-white/30 shadow-2xl transition-all duration-700 ease-out",
+          "before:absolute before:inset-0 before:rounded-3xl before:bg-gradient-to-br before:from-white/50 before:to-transparent before:pointer-events-none",
+          animationStage >= 1 ? "opacity-100 scale-100" : "opacity-0 scale-95"
         )}
       >
         <div className="relative flex flex-col items-center">
           {/* Animated green circle */}
           <div
             className={cn(
-              'relative w-24 h-24 rounded-full bg-gradient-to-br from-green-400/30 to-emerald-500/30 backdrop-blur-sm border border-green-300/40 shadow-lg flex items-center justify-center',
-              'before:absolute before:inset-[-2px] before:rounded-full before:bg-gradient-to-br before:from-green-300/20 before:to-transparent before:blur-sm',
-              animationStage >= 2 ? 'animate-bounce-in opacity-100' : 'opacity-0 scale-0'
+              "relative w-24 h-24 rounded-full bg-gradient-to-br from-green-400/30 to-emerald-500/30 backdrop-blur-sm border border-green-300/40 shadow-lg flex items-center justify-center",
+              "before:absolute before:inset-[-2px] before:rounded-full before:bg-gradient-to-br before:from-green-300/20 before:to-transparent before:blur-sm",
+              animationStage >= 2
+                ? "animate-bounce-in opacity-100"
+                : "opacity-0 scale-0"
             )}
           >
             {animationStage >= 3 && (
@@ -58,10 +61,12 @@ const SuccessAnimation: React.FC<SuccessAnimationProps> = ({ onContinue }) => {
                   className="absolute w-2 h-2 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full opacity-70 animate-confetti-burst"
                   style={
                     {
-                      left: '50%',
-                      top: '50%',
-                      transform: `translate(-50%, -50%) rotate(${i * 30}deg) translateY(-40px)`,
-                      '--rotation': `${i * 30}deg`,
+                      left: "50%",
+                      top: "50%",
+                      transform: `translate(-50%, -50%) rotate(${
+                        i * 30
+                      }deg) translateY(-40px)`,
+                      "--rotation": `${i * 30}deg`,
                     } as React.CSSProperties & Record<string, string>
                   }
                 />
@@ -72,15 +77,28 @@ const SuccessAnimation: React.FC<SuccessAnimationProps> = ({ onContinue }) => {
           {/* Message */}
           <div
             className={cn(
-              'mt-8 text-center transition-all duration-400 ease-in-out',
-              animationStage >= 5 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              "mt-8 text-center transition-all duration-400 ease-in-out",
+              animationStage >= 5
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4"
             )}
           >
-            <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+            {/* <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
               Patient Registered Successfully!
             </h2>
             <p className="text-gray-600 text-sm md:text-base">
               Ready to upload retinopathy images for analysis
+            </p> */}
+
+            <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+              {mode === "update"
+                ? "Patient Updated Successfully!"
+                : "Patient Registered Successfully!"}
+            </h2>
+            <p className="text-gray-600 text-sm md:text-base">
+              {mode === "update"
+                ? "The patient's record has been successfully updated."
+                : "Ready to upload retinopathy images for analysis"}
             </p>
           </div>
 
@@ -88,10 +106,12 @@ const SuccessAnimation: React.FC<SuccessAnimationProps> = ({ onContinue }) => {
           <Button
             onClick={onContinue}
             className={cn(
-              'mt-8 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-2xl shadow-lg',
-              'transition-all duration-200 transform hover:scale-105 active:scale-95',
-              'relative overflow-hidden',
-              animationStage >= 6 ? 'animate-pop-in opacity-100' : 'opacity-0 scale-90'
+              "mt-8 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-2xl shadow-lg",
+              "transition-all duration-200 transform hover:scale-105 active:scale-95",
+              "relative overflow-hidden",
+              animationStage >= 6
+                ? "animate-pop-in opacity-100"
+                : "opacity-0 scale-90"
             )}
           >
             <span className="relative z-10">Upload Retinopathy Images</span>

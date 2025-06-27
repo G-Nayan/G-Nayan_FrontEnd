@@ -1273,7 +1273,7 @@ const DiabetesPatientRegister = () => {
 
   // Show success animation if registration is complete
   if (registrationComplete) {
-    return <SuccessAnimation onContinue={handleContinueToUpload} />;
+    return <SuccessAnimation onContinue={handleContinueToUpload} mode="register" />;
   }
 
   return (

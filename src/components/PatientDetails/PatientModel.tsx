@@ -72,7 +72,7 @@ const EditPatientModal = ({ patient, onClose, onUpdated }) => {
   };
 
   if (registrationComplete) {
-    return <SuccessAnimation onContinue={handleContinueToUpload} />;
+    return <SuccessAnimation onContinue={handleContinueToUpload}  mode="update"/>;
   }
 
   return (

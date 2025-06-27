@@ -70,12 +70,12 @@ export const navigation = [
   // --- ADDED NEW LINKS HERE ---
   {
     id: "4",
-    title: "RegisterPatient",
+    title: "Register-Patient",
     url: "/register-patient",
   },
   {
     id: "5",
-    title: "PatientList",
+    title: "Patient-List",
     url: "/patient-list",
   },
   // --- END OF ADDED LINKS ---
