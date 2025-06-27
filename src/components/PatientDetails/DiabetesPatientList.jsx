@@ -114,7 +114,7 @@ const DiabetesPatientList = () => {
   if (error) return <p className="text-center text-red-600 mt-10">{error}</p>;
 
   return (
-    <div className="max-w-7xl mx-auto px-32 py-8">
+    <div className="max-w-7xl mx-auto px-4 xs:px-32 py-8">
       <h1 className="text-3xl font-bold text-center mb-8">Patient Records</h1>
 
       <div className="flex gap-2 mb-4">

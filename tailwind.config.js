@@ -74,6 +74,9 @@ export default {
       animation: {
         "spin-slow": "spin 20s linear infinite",
       },
+       screens: {
+        'xs': '560px', // custom screen
+      },
       keyframes: {
         "bounce-in": {
           "0%": { transform: "scale(0)" },
