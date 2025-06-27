@@ -1102,15 +1102,13 @@ const DiabetesPatientRegister = () => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
+                   
+                     <CalendarComponent
                       mode="single"
                       selected={formData.Date_of_registration}
-                      onSelect={(date) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          Date_of_registration: date || new Date(),
-                        }))
-                      }
+                      onSelect={(date) => setFormData((prev) => ({ ...prev, Date_of_registration: date || new Date() }))}
+                      // THIS IS THE CHANGE: Only today is selectable
+                      disabled={(date) => format(date, 'yyyy-MM-dd') !== format(new Date(), 'yyyy-MM-dd')}
                       initialFocus
                       className="p-3 pointer-events-auto bg-white"
                     />
