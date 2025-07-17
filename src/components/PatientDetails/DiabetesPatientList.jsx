@@ -6,9 +6,8 @@ import { useNavigate } from "react-router-dom";
 
 import EditPatientModal from "../PatientDetails/PatientModel"; // Assuming you have this component for editing patient details
 
-
-
 const API_URL = "https://c4bb55d851d5.ngrok-free.app/patients";
+
 const COMBINED_BASE = "https://c4bb55d851d5.ngrok-free.app/combined-report";
 
 const DiabetesPatientList = () => {
@@ -25,6 +24,41 @@ const DiabetesPatientList = () => {
   const patientsPerPage = 9;
 
   // Search globally across all pages when Search button is clicked
+  // const searchPatientsGlobally = async (id) => {
+  //   try {
+  //     setIsLoading(true);
+  //     setIsSearching(true);
+  //     let allPatients = [];
+  //     let page = 1;
+  //     let hasMore = true;
+
+  //     while (hasMore) {
+  //       const res = await fetch(
+  //         `${API_URL}?page=${page}&limit=${patientsPerPage}`
+  //       );
+  //       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  //       const data = await res.json();
+  //       allPatients = [...allPatients, ...data.patients];
+  //       page++;
+  //       hasMore = page <= data.total_pages;
+  //     }
+
+  //     const filtered = allPatients.filter((p) =>
+  //       p.patient_id.toString().includes(id.trim())
+  //     );
+
+  //     setPatients(filtered);
+  //     setTotalPages(1);
+  //     setCurrentPage(1);
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("Failed to search patient data.");
+  //     setError("Could not search patient data.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const searchPatientsGlobally = async (id) => {
     try {
       setIsLoading(true);
@@ -35,9 +69,27 @@ const DiabetesPatientList = () => {
 
       while (hasMore) {
         const res = await fetch(
-          `${API_URL}?page=${page}&limit=${patientsPerPage}`
+          `${API_URL}?page=${page}&limit=${patientsPerPage}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
         );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const contentType = res.headers.get("content-type");
+        if (
+          !res.ok ||
+          !contentType ||
+          !contentType.includes("application/json")
+        ) {
+          const text = await res.text();
+          console.error("Unexpected response:", text);
+          throw new Error("Invalid response format.");
+        }
+
         const data = await res.json();
         allPatients = [...allPatients, ...data.patients];
         page++;
@@ -60,32 +112,82 @@ const DiabetesPatientList = () => {
     }
   };
 
-
-
   // Main paginated fetch (runs only when NOT searching)
   useEffect(() => {
     if (isSearching) return;
 
+    // const fetchPatients = async () => {
+    //   try {
+    //     setIsLoading(true);
+    //     const res = await fetch(
+    //       `${API_URL}?page=${currentPage}&limit=${patientsPerPage}`
+
+    //     );
+    //     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    //     const data = await res.json();
+
+    //     const sorted = data.patients.sort(
+    //       (a, b) =>
+    //         new Date(b.Date_of_registration) - new Date(a.Date_of_registration)
+    //     );
+
+    //     setPatients(sorted);
+    //     setTotalPages(data.total_pages);
+    //   } catch (err) {
+    //     console.error(err);
+    //     toast.error("Failed to fetch patient data.");
+    //     setError("Could not fetch patient data.");
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    // };
     const fetchPatients = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        const res = await fetch(
-          `${API_URL}?page=${currentPage}&limit=${patientsPerPage}`
-        );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const response = await fetch(
+          `${API_URL}?page=${currentPage}&limit=${patientsPerPage}`,
 
-        const sorted = data.patients.sort(
-          (a, b) =>
-            new Date(b.Date_of_registration) - new Date(a.Date_of_registration)
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
         );
 
-        setPatients(sorted);
-        setTotalPages(data.total_pages);
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to fetch patient data.");
-        setError("Could not fetch patient data.");
+        const contentType = response.headers.get("content-type");
+
+        // if (
+        //   response.ok &&
+        //   contentType &&
+        //   contentType.includes("application/json")
+        // ) {
+        //   const data = await response.json();
+        //   console.log("Fetched patients:", data.patients);
+        //   setPatients(data.patients);
+        // } else {
+        //   const text = await response.text();
+        //   console.error("Unexpected response format:", text);
+        // }
+
+        if (
+          response.ok &&
+          contentType &&
+          contentType.includes("application/json")
+        ) {
+          const data = await response.json();
+          console.log("Fetched patients:", data.patients);
+          const sorted = data.patients.sort(
+            (a, b) =>
+              new Date(b.Date_of_registration) -
+              new Date(a.Date_of_registration)
+          );
+          setPatients(sorted);
+          setTotalPages(data.total_pages); // ✅ required for page buttons
+        }
+      } catch (error) {
+        console.error("Network error", error);
       } finally {
         setIsLoading(false);
       }
@@ -200,7 +302,10 @@ const PatientCard = ({ patient }) => {
       setModalOpen(true);
     } catch (err) {
       console.error("Error fetching retinopathy data:", err);
-      toast.error("Failed to fetch data(give feedback and upload eye images): " + err.message);
+      toast.error(
+        "Failed to fetch data(give feedback and upload eye images): " +
+          err.message
+      );
     } finally {
       setLoading(false);
     }
@@ -218,7 +323,6 @@ const PatientCard = ({ patient }) => {
             <Edit size={18} />
           </button>
 
-          
           <h2 className="text-xl font-bold  ">
             {patient.name.charAt(0).toUpperCase() + patient.name.slice(1)}
           </h2>
@@ -267,7 +371,7 @@ const PatientCard = ({ patient }) => {
           </p>
           <p>
             <strong>Hospital:</strong>
-         
+
             {patient.Hospital_name.charAt(0).toUpperCase() +
               patient.Hospital_name.slice(1)}
           </p>
