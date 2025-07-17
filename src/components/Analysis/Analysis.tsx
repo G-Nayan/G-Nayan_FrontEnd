@@ -366,7 +366,7 @@ export function Analysis() {
 
     try {
       const resp = await fetch(
-        `http://192.168.11.101:8000/infer_for_diabetic_retinopathy/upload%20images?patient_id=${encodeURIComponent(
+        `https://chat.google.com/room/aaqaz_7umfe/tblluokabkg/tblluokabkg?cls=10/infer_for_diabetic_retinopathy/upload%20images?patient_id=${encodeURIComponent(
           modalPatientId
         )}`,
         { method: "POST", body: formData }
@@ -418,7 +418,7 @@ export function Analysis() {
     };
     try {
       const resp = await fetch(
-        "http://192.168.11.101:8000/submit_feedback_from_frontend/from_json_to_db/",
+        "https://chat.google.com/room/aaqaz_7umfe/tblluokabkg/tblluokabkg?cls=10/submit_feedback_from_frontend/from_json_to_db/",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

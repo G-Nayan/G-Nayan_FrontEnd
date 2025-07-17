@@ -18,7 +18,7 @@ const EditPatientModal = ({ patient, onClose, onUpdated }) => {
     try {
       setSubmitting(true);
       const response = await fetch(
-        `http://192.168.11.101:8000/update/${patient.patient_id}`,
+        `https://chat.google.com/room/aaqaz_7umfe/tblluokabkg/tblluokabkg?cls=10/update/${patient.patient_id}`,
         {
           method: "PATCH",
           headers: {
