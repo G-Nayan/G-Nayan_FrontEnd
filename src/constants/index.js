@@ -1,3 +1,4 @@
+
 import {
   benefitIcon1,
   benefitIcon2,
@@ -36,36 +37,50 @@ import {
   yourlogo,
   python,
   Airflow,
-kafka,
-kubernetes,
-mlflow,
-scikitlearn,
-mongo,
-spark
-  
+  kafka,
+  kubernetes,
+  mlflow,
+  scikitlearn,
+  mongo,
+  spark,
 } from "../assets";
 
-
 export const navigation = [
-  
+
+  // {
+  //   id: "0",
+  //   title: "Home",
+  //   url: "/",
+  // },
   {
     id: "1",
     title: "DETECTION",
-    url: "#detection",
+    url: "/#detection",
   },
   {
     id: "2",
     title: "EFFICIENCY",
-    url: "#efficiency",
+    url: "/#efficiency",
   },
   {
     id: "3",
     title: "Roadmap",
-    url: "#roadmap",
+    url: "/#roadmap",
   },
-
+  // --- ADDED NEW LINKS HERE ---
+  {
+    id: "4",
+    title: "Register-Patient",
+    url: "/register-patient",
+  },
   {
     id: "5",
+    title: "Patient-List",
+    url: "/patient-list",
+  },
+  // --- END OF ADDED LINKS ---
+  {
+    id: "6",
     title: "Sign in",
     url: "#login",
     onlyMobile: true,
@@ -102,8 +117,6 @@ export const roadmap = [
     imageUrl: roadmap1,
     colorful: true,
   },
- 
-
   {
     id: "3",
     title: "Integration with APIs",
@@ -114,15 +127,15 @@ export const roadmap = [
   },
 ];
 export const collabText =
-"AI provides objective  classification  reduces subjectivity in diagnosis and treatment planning.";
+  "AI provides objective classification reduces subjectivity in diagnosis and treatment planning.";
 
 export const collabText1 =
   "AI-powered tools reduce the time it takes to analyze images, allowing ophthalmologists to see more patients.";
-  
+
 export const collabText2 =
-  "AI algorithms are trained on vast datasets to improve diagnostic accuracy, ensuring reliable detection of retinal diseases."
+  "AI algorithms are trained on vast datasets to improve diagnostic accuracy, ensuring reliable detection of retinal diseases.";
 export const collabText3 =
-  "AI systems continuously learn from new data, enhancing their detection capabilities and staying up-to-date with the latest medical advancements."
+  "AI systems continuously learn from new data, enhancing their detection capabilities and staying up-to-date with the latest medical advancements.";
 
 export const collabContent = [
   {
@@ -145,7 +158,6 @@ export const collabContent = [
     title: "Continuous Learning and Improvement",
     text: collabText3,
   },
-  
 ];
 
 export const collabApps = [

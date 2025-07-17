@@ -72,7 +72,44 @@ export default {
           "conic-gradient(from 225deg, #FFC876, #79FFF7, #9F53FF, #FF98E2, #FFC876)",
       },
       animation: {
-        'spin-slow': 'spin 20s linear infinite',
+        "spin-slow": "spin 20s linear infinite",
+      },
+       screens: {
+        'xs': '560px', // custom screen
+      },
+      keyframes: {
+        "bounce-in": {
+          "0%": { transform: "scale(0)" },
+          "50%": { transform: "scale(1.1)" },
+          "100%": { transform: "scale(1)" },
+        },
+        "draw-check": {
+          "0%": { strokeDasharray: "100", strokeDashoffset: "100" },
+          "100%": { strokeDasharray: "100", strokeDashoffset: "0" },
+        },
+        "confetti-burst": {
+          "0%": {
+            transform:
+              "translate(-50%, -50%) rotate(var(--rotation, 0deg)) translateY(0px) scale(0)",
+            opacity: "1",
+          },
+          "100%": {
+            transform:
+              "translate(-50%, -50%) rotate(var(--rotation, 0deg)) translateY(-60px) scale(1)",
+            opacity: "0",
+          },
+        },
+        "pop-in": {
+          "0%": { transform: "scale(0.9)", opacity: "0" },
+          "50%": { transform: "scale(1.05)" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
+      },
+      animation: {
+        "bounce-in": "bounce-in 0.5s ease-out",
+        "draw-check": "draw-check 0.3s ease-in-out",
+        "confetti-burst": "confetti-burst 0.4s ease-out forwards",
+        "pop-in": "pop-in 0.4s ease-out",
       },
     },
   },
@@ -131,6 +168,5 @@ export default {
         },
       });
     }),
-    
   ],
 };
