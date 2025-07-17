@@ -158,18 +158,6 @@ const DiabetesPatientList = () => {
 
         const contentType = response.headers.get("content-type");
 
-        // if (
-        //   response.ok &&
-        //   contentType &&
-        //   contentType.includes("application/json")
-        // ) {
-        //   const data = await response.json();
-        //   console.log("Fetched patients:", data.patients);
-        //   setPatients(data.patients);
-        // } else {
-        //   const text = await response.text();
-        //   console.error("Unexpected response format:", text);
-        // }
 
         if (
           response.ok &&
@@ -282,7 +270,18 @@ const PatientCard = ({ patient }) => {
   const fetchRetinoData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${COMBINED_BASE}/${patient.patient_id}`);
+      const res = await fetch(
+        `${COMBINED_BASE}/${patient.patient_id}`,
+
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => null);
         const errorMessage =
