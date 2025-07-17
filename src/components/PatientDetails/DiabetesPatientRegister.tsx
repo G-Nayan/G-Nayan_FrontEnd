@@ -297,7 +297,7 @@ const DiabetesPatientRegister = () => {
       delete (payload as any).num_visits;
     }
 
-    const API_URL = `http://localhost:8000/?patient_id=${formData.patient_id}`;
+    const API_URL = `http://192.168.11.101:8000/?patient_id=${formData.patient_id}`;
 
     try {
       const response = await fetch(API_URL, {

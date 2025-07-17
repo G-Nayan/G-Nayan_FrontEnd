@@ -42,7 +42,7 @@ const Hero = () => {
           <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8" style={{ color: "#1e40af" }}>
             Fast and Accurate
           </p>
-          <Button href="https://retinopathy-dashboard.vercel.app/">Get started</Button>
+          {/* <Button href="https://retinopathy-dashboard.vercel.app/">Get started</Button> */}
         </div>
 
        
