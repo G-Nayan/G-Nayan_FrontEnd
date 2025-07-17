@@ -6,8 +6,8 @@ import { useNavigate } from "react-router-dom";
 
 import EditPatientModal from "../PatientDetails/PatientModel"; // Assuming you have this component for editing patient details
 
-const API_URL = "http://localhost:8000/patients";
-const COMBINED_BASE = "http://localhost:8000/combined-report";
+const API_URL = "http://192.168.11.101:8000/patients";
+const COMBINED_BASE = "http://192.168.11.101:8000/combined-report";
 
 const DiabetesPatientList = () => {
   const [patients, setPatients] = useState([]);
