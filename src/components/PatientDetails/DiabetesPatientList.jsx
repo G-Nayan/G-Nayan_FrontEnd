@@ -282,7 +282,18 @@ const PatientCard = ({ patient }) => {
   const fetchRetinoData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${COMBINED_BASE}/${patient.patient_id}`);
+      const res = await fetch(
+        `${COMBINED_BASE}/${patient.patient_id}`,
+
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => null);
         const errorMessage =
