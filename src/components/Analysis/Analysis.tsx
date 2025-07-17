@@ -366,7 +366,8 @@ export function Analysis() {
 
     try {
       const resp = await fetch(
-        `https://chat.google.com/room/aaqaz_7umfe/tblluokabkg/tblluokabkg?cls=10/infer_for_diabetic_retinopathy/upload%20images?patient_id=${encodeURIComponent(
+        `https://c4bb55d851d5.ngrok-free.app
+/infer_for_diabetic_retinopathy/upload%20images?patient_id=${encodeURIComponent(
           modalPatientId
         )}`,
         { method: "POST", body: formData }
@@ -418,13 +419,16 @@ export function Analysis() {
     };
     try {
       const resp = await fetch(
-        "https://chat.google.com/room/aaqaz_7umfe/tblluokabkg/tblluokabkg?cls=10/submit_feedback_from_frontend/from_json_to_db/",
+        "https://c4bb55d851d5.ngrok-free.app/submit_feedback_from_frontend/from_json_to_db",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(payload),
         }
       );
+
       if (!resp.ok) {
         const errorData = await resp
           .json()
