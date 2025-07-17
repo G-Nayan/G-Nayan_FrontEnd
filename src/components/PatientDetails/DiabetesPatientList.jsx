@@ -158,18 +158,6 @@ const DiabetesPatientList = () => {
 
         const contentType = response.headers.get("content-type");
 
-        // if (
-        //   response.ok &&
-        //   contentType &&
-        //   contentType.includes("application/json")
-        // ) {
-        //   const data = await response.json();
-        //   console.log("Fetched patients:", data.patients);
-        //   setPatients(data.patients);
-        // } else {
-        //   const text = await response.text();
-        //   console.error("Unexpected response format:", text);
-        // }
 
         if (
           response.ok &&
