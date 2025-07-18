@@ -54,6 +54,7 @@ interface FormErrors {
   BMI?: string;
   Cholesterol?: string;
   Albuminuria?: string;
+  num_visits?: string;
 }
 
 const DiabetesPatientRegister = () => {
@@ -182,8 +183,7 @@ const DiabetesPatientRegister = () => {
     } else {
       const alb = parseFloat(Albuminuria);
       if (isNaN(alb) || alb < 0 || alb > 1000) {
-        newErrors.Albuminuria =
-          "Albuminuria must be between 0 and 1000 mg/dL.";
+        newErrors.Albuminuria = "Albuminuria must be between 0 and 1000 mg/dL.";
       }
     }
 
@@ -196,6 +196,14 @@ const DiabetesPatientRegister = () => {
       newErrors.Hospital_name = "Hospital name is required.";
     if (!data.Date_of_registration)
       newErrors.Date_of_registration = "Registration date is required.";
+    if (data.num_visits.trim() === "") {
+      newErrors.num_visits = "Number of visits is required.";
+    } else {
+      const visits = parseInt(data.num_visits, 10);
+      if (isNaN(visits) || visits < 1) {
+        newErrors.num_visits = "Enter a valid number of visits (1 or more).";
+      }
+    }
     return newErrors;
   };
 
@@ -266,6 +274,7 @@ const DiabetesPatientRegister = () => {
       const step3Fields: (keyof FormErrors)[] = [
         "Hospital_name",
         "Date_of_registration",
+        "num_visits",
       ];
 
       if (step1Fields.some((key) => formErrors[key])) setCurrentStep(1);
@@ -288,7 +297,7 @@ const DiabetesPatientRegister = () => {
       BMI: parseFloat(formData.BMI),
       Albuminuria: parseFloat(formData.Albuminuria),
       Duration_of_Diabetes: parseInt(formData.Duration_of_Diabetes),
-      num_visits: formData.num_visits ? parseInt(formData.num_visits) : 0,
+      num_visits: formData.num_visits ? formData.num_visits : 0,
       Date_of_registration:
         formData.Date_of_registration.toISOString().split("T")[0],
     };
@@ -567,46 +576,6 @@ const DiabetesPatientRegister = () => {
                   )}
                 </div>
 
-                {/* <div className="space-y-2">
-                  <label htmlFor="gender" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <Badge variant="destructive" className="px-1 py-0 text-xs">*</Badge>
-                    Gender
-                  </label>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-between text-left font-normal transition-all duration-200",
-                          !formData.gender && "text-muted-foreground",
-                          errors.gender && "border-red-500"
-                        )}
-                      >
-                        {formData.gender || "Select gender"}
-                        <ChevronDown className="h-4 w-4 opacity-50" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-full bg-white shadow-lg border">
-                      {["Male", "Female", "Other"].map((option) => (
-                        <DropdownMenuItem
-                          key={option}
-                          onSelect={() =>
-                            setFormData((prev) => ({ ...prev, gender: option }))
-                          }
-                          className="cursor-pointer hover:bg-gray-50"
-                        >
-                          {option}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  {errors.gender && (
-                    <p className="text-red-500 text-sm flex items-center gap-1">
-                      <AlertCircle className="h-4 w-4" />
-                      {errors.gender}
-                    </p>
-                  )}
-                </div>  */}
                 <div className="space-y-2">
                   <label
                     htmlFor="gender"
@@ -689,161 +658,6 @@ const DiabetesPatientRegister = () => {
             </div>
           </div>
         );
-
-      // case 2:
-      //   return (
-      //     <div className="space-y-6">
-      //       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      //         {[
-      //           {
-      //             id: "HbA1c_Level",
-      //             label: "HbA1c Level",
-      //             unit: "%",
-      //             icon: Heart,
-      //             step: "0.1",
-      //           },
-      //           {
-      //             id: "Fasting_Blood_Glucose",
-      //             label: "Fasting Glucose",
-      //             unit: "mg/dL",
-      //             icon: Activity,
-      //             step: "0.1",
-      //           },
-      //           {
-      //             id: "Blood_Pressure",
-      //             label: "Blood Pressure",
-      //             unit: "mmHg",
-      //             icon: Heart,
-      //             step: "1",
-      //           },
-      //           {
-      //             id: "Cholesterol",
-      //             label: "Cholesterol",
-      //             unit: "mg/dL",
-      //             icon: Activity,
-      //             step: "1",
-      //           },
-      //           {
-      //             id: "BMI",
-      //             label: "BMI",
-      //             unit: "kg/m²",
-      //             icon: User,
-      //             step: "0.1",
-      //           },
-      //           {
-      //             id: "Albuminuria",
-      //             label: "Albuminuria",
-      //             unit: "mg/dL",
-      //             icon: Activity,
-      //             step: "0.1",
-      //           },
-      //         ].map(({ id, label, unit, icon: Icon, step }) => (
-      //           <div key={id} className="space-y-2">
-      //             <label
-      //               htmlFor={id}
-      //               className="text-sm font-medium text-gray-700 flex items-center gap-2"
-      //             >
-      //               <Icon className="h-4 w-4 text-green-600" />
-      //               {label} ({unit})
-      //             </label>
-      //             <Input
-      //               type="number"
-      //               step={step}
-      //               id={id}
-      //               name={id}
-      //               value={formData[id as keyof typeof formData] as string}
-      //               onChange={handleChange}
-      //               className={cn(
-      //                 "transition-all duration-200 hover:border-green-300 focus:border-green-500",
-      //                 errors[id as keyof FormErrors] &&
-      //                   "border-red-500 focus:border-red-500"
-      //               )}
-      //               placeholder={`Enter ${label.toLowerCase()}`}
-      //             />
-      //             {errors[id as keyof FormErrors] && (
-      //               <p className="text-red-500 text-sm flex items-center gap-1">
-      //                 <AlertCircle className="h-4 w-4" />
-      //                 {errors[id as keyof FormErrors]}
-      //               </p>
-      //             )}
-      //           </div>
-      //         ))}
-      //       </div>
-
-      //       {/* <Separator /> */}
-
-      //       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      //         <div className="space-y-2">
-      //           <label
-      //             htmlFor="Duration_of_Diabetes"
-      //             className="text-sm font-medium text-gray-700 flex items-center gap-2"
-      //           >
-      //             <Calendar className="h-4 w-4 text-green-600" />
-      //             Diabetes Duration (Years)
-      //           </label>
-      //           <Input
-      //             type="number"
-      //             step="1"
-      //             id="Duration_of_Diabetes"
-      //             name="Duration_of_Diabetes"
-      //             value={formData.Duration_of_Diabetes}
-      //             onChange={handleChange}
-      //             className={cn(
-      //               "transition-all duration-200 hover:border-green-300 focus:border-green-500",
-      //               errors.Duration_of_Diabetes &&
-      //                 "border-red-500 focus:border-red-500"
-      //             )}
-      //             placeholder="Years with diabetes"
-      //           />
-      //           {errors.Duration_of_Diabetes && (
-      //             <p className="text-red-500 text-sm flex items-center gap-1">
-      //               <AlertCircle className="h-4 w-4" />
-      //               {errors.Duration_of_Diabetes}
-      //             </p>
-      //           )}
-      //         </div>
-
-      //         <div className="space-y-2">
-      //           <label
-      //             htmlFor="Visual_Acuity"
-      //             className="text-sm font-medium text-gray-700 flex items-center gap-2"
-      //           >
-      //             <Eye className="h-4 w-4 text-green-600" />
-      //             Visual Acuity
-      //           </label>
-      //           <DropdownMenu>
-      //             <DropdownMenuTrigger asChild>
-      //               <Button
-      //                 variant="outline"
-      //                 className="w-full justify-between text-left font-normal transition-all duration-200 hover:border-green-300"
-      //               >
-      //                 {formData.Visual_Acuity}
-      //                 <ChevronDown className="h-4 w-4 opacity-50" />
-      //               </Button>
-      //             </DropdownMenuTrigger>
-      //             <DropdownMenuContent className="w-full bg-white shadow-lg border">
-      //               {["Normal", "Mild", "Moderate", "Severe", "Blind"].map(
-      //                 (option) => (
-      //                   <DropdownMenuItem
-      //                     key={option}
-      //                     onSelect={() =>
-      //                       setFormData((prev) => ({
-      //                         ...prev,
-      //                         Visual_Acuity: option,
-      //                       }))
-      //                     }
-      //                     className="cursor-pointer hover:bg-gray-50"
-      //                   >
-      //                     {option}
-      //                   </DropdownMenuItem>
-      //                 )
-      //               )}
-      //             </DropdownMenuContent>
-      //           </DropdownMenu>
-      //         </div>
-      //       </div>
-      //     </div>
-      //   );
 
       case 2:
         return (
@@ -1102,13 +916,20 @@ const DiabetesPatientRegister = () => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                   
-                     <CalendarComponent
+                    <CalendarComponent
                       mode="single"
                       selected={formData.Date_of_registration}
-                      onSelect={(date) => setFormData((prev) => ({ ...prev, Date_of_registration: date || new Date() }))}
+                      onSelect={(date) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          Date_of_registration: date || new Date(),
+                        }))
+                      }
                       // THIS IS THE CHANGE: Only today is selectable
-                      disabled={(date) => format(date, 'yyyy-MM-dd') !== format(new Date(), 'yyyy-MM-dd')}
+                      disabled={(date) =>
+                        format(date, "yyyy-MM-dd") !==
+                        format(new Date(), "yyyy-MM-dd")
+                      }
                       initialFocus
                       className="p-3 pointer-events-auto bg-white"
                     />
@@ -1140,6 +961,12 @@ const DiabetesPatientRegister = () => {
                   className="transition-all duration-200 hover:border-purple-300 focus:border-purple-500"
                   placeholder="Number of previous visits "
                 />
+                {errors.num_visits && (
+                  <p className="text-red-500 text-sm flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.num_visits}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -1236,7 +1063,10 @@ const DiabetesPatientRegister = () => {
                     : "N/A"}
                 </div>
                 <div className="sm:col-span-2">
-                  <strong>Previous Visits:</strong> {formData.num_visits || "0"}
+                  <strong>Previous Visits:</strong>{" "}
+                  {formData.num_visits.trim() !== ""
+                    ? formData.num_visits
+                    : "0"}
                 </div>
               </div>
             </div>
@@ -1271,7 +1101,9 @@ const DiabetesPatientRegister = () => {
 
   // Show success animation if registration is complete
   if (registrationComplete) {
-    return <SuccessAnimation onContinue={handleContinueToUpload} mode="register" />;
+    return (
+      <SuccessAnimation onContinue={handleContinueToUpload} mode="register" />
+    );
   }
 
   return (
