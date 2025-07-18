@@ -366,7 +366,7 @@ export function Analysis() {
 
     try {
       const resp = await fetch(
-        `https://c4bb55d851d5.ngrok-free.app
+        `https://4ceae994c8fa.ngrok-free.app
 /infer_for_diabetic_retinopathy/upload%20images?patient_id=${encodeURIComponent(
           modalPatientId
         )}`,
@@ -419,7 +419,7 @@ export function Analysis() {
     };
     try {
       const resp = await fetch(
-        "https://c4bb55d851d5.ngrok-free.app/submit_feedback_from_frontend/from_json_to_db",
+        "https://4ceae994c8fa.ngrok-free.app/submit_feedback_from_frontend/from_json_to_db",
         {
           method: "POST",
           headers: {

@@ -6,9 +6,9 @@ import { useNavigate } from "react-router-dom";
 
 import EditPatientModal from "../PatientDetails/PatientModel"; // Assuming you have this component for editing patient details
 
-const API_URL = "https://c4bb55d851d5.ngrok-free.app/patients";
+const API_URL = "https://4ceae994c8fa.ngrok-free.app/patients";
 
-const COMBINED_BASE = "https://c4bb55d851d5.ngrok-free.app/combined-report";
+const COMBINED_BASE = "https://4ceae994c8fa.ngrok-free.app/combined-report";
 
 const DiabetesPatientList = () => {
   const [patients, setPatients] = useState([]);
