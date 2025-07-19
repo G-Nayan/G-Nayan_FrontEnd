@@ -1,4 +1,3 @@
-
 // src/App.jsx
 import React, { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
@@ -14,6 +13,8 @@ import Roadmap from "./components/Roadmap";
 import DiabetesPatientRegister from "./components/PatientDetails/DiabetesPatientRegister";
 import DiabetesPatientList from "./components/PatientDetails/DiabetesPatientList";
 import AnalysisPage from "./components/Analysis/Analysis";
+import Login from "./components/(auth)/login/page";
+import AdminDashboard from "./components/Dashboard/admin/page";
 
 // ✅ Scroll to hash utility
 const ScrollToHashElement = () => {
@@ -35,34 +36,50 @@ const ScrollToHashElement = () => {
 // ✅ Landing Page
 const LandingPage = () => (
   <>
-    <div id="hero"><Hero /></div>
-    <div id="collaboration"><Collaboration /></div>
-    <div id="benefits"><Benefits /></div>
-    <div id="roadmap"><Roadmap /></div>
+    <div id="hero">
+      <Hero />
+    </div>
+    <div id="collaboration">
+      <Collaboration />
+    </div>
+    <div id="benefits">
+      <Benefits />
+    </div>
+    <div id="roadmap">
+      <Roadmap />
+    </div>
   </>
 );
 
 const App = () => {
   const location = useLocation();
 
-  // ❌ Hide footer on these routes
+  // ❌ Hide header/footer on these routes
+  const hideHeaderFooterRoutes = ["/login"];
   const hideFooterRoutes = ["/register-patient", "/patient-list", "/Analysis"];
-  const shouldShowFooter = !hideFooterRoutes.includes(location.pathname);
+
+  const shouldShowHeader = !hideHeaderFooterRoutes.includes(location.pathname);
+  const shouldShowFooter = !hideFooterRoutes.includes(location.pathname) && !hideHeaderFooterRoutes.includes(location.pathname);
+
+  // ✅ Remove padding for login route
+  const shouldAddTopPadding = !hideHeaderFooterRoutes.includes(location.pathname);
 
   return (
     <>
       <Toaster position="top-right" />
 
-      <div className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden">
-        <Header />
+      {shouldShowHeader && <Header />}
 
+      <div className={shouldAddTopPadding ? "pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden" : "overflow-hidden"}>
         <ScrollToHashElement />
 
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/register-patient" element={<DiabetesPatientRegister />} />
           <Route path="/patient-list" element={<DiabetesPatientList />} />
           <Route path="/Analysis" element={<AnalysisPage />} />
+          <Route path="/AdminDashboard" element={<AdminDashboard />} />
         </Routes>
 
         {shouldShowFooter && <Footer />}

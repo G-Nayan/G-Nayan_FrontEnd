@@ -73,17 +73,17 @@ export const navigation = [
     title: "Register-Patient",
     url: "/register-patient",
   },
-  {
-    id: "5",
-    title: "Patient-List",
-    url: "/patient-list",
-  },
+  // {
+  //   id: "5",
+  //   title: "Patient-List",
+  //   url: "/patient-list",
+  // },
   // --- END OF ADDED LINKS ---
   {
     id: "6",
-    title: "Sign in",
-    url: "#login",
-    onlyMobile: true,
+    title: "login",
+    url: "/login",
+    // onlyMobile: true,
   },
 ];
 

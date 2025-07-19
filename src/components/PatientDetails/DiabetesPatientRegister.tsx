@@ -1132,7 +1132,7 @@ const DiabetesPatientRegister = () => {
         </div>
 
         {/* Desktop Sidebar */}
-        <div className="hidden md:block w-80 h-screen bg-white w-1/5 min-w-[300px]  border-r border-gray-200 overflow-y-auto">
+        <div className="hidden md:block w-[80\] h-screen bg-white w-1/5 min-w-[300px]  border-r border-gray-200 overflow-y-auto">
           <StepperContent />
         </div>
 
