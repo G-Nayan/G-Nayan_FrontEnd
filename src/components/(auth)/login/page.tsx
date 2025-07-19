@@ -54,9 +54,9 @@ export default function Login() {
               src="/logo.svg"
               alt="Logo"
               loading="lazy"
-              width={60}
-              height={60}
-              className="w-20 h-20"
+              width={200}
+              height={200}
+              className="w-200 h-200"
             />
           </Link>
         </div>
