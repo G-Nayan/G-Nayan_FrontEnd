@@ -49,22 +49,7 @@ const Header = () => {
           } fixed top-[5rem] left-0 right-0 bottom-0 bg-n-1 lg:static lg:flex lg:mx-auto lg:bg-transparent`}
         >
           <div className="relative z-2 flex flex-col items-center justify-center m-auto lg:flex-row">
-            {/* {navigation.map((item) => (
-              <a
-                key={item.id}
-                href={item.url}
-                onClick={handleClick}
-                className={`block relative font-code text-2xl uppercase text-n-8 transition-colors hover:text-color-1 ${
-                  item.onlyMobile ? "lg:hidden" : ""
-                } px-2 py-2 md:py-8 lg:-mr-0.25 lg:text-xs lg:font-semibold ${
-                  item.url === pathname.hash
-                    ? "z-2 lg:text-n-8"
-                    : "lg:text-n-8/50"
-                } lg:leading-5 lg:hover:text-n-8 xl:px-8`}
-              >
-                {item.title}
-              </a>
-            ))} */}
+           
             {navigation.map((item) => (
               <Link
                 key={item.id}
