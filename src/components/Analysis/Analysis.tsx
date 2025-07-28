@@ -321,6 +321,15 @@ export function Analysis() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showBenefitsInitially, setShowBenefitsInitially] = useState(true);
 
+  const [patientId, setPatientId] = useState("");
+
+  useEffect(() => {
+    const storedId = localStorage.getItem("patient_id");
+    if (storedId) {
+      setPatientId(storedId);
+    }
+  }, []);
+
   const handleImageUpload = (file: File | null, eye: "left" | "right") => {
     if (!file) return;
     const url = URL.createObjectURL(file);
@@ -346,7 +355,7 @@ export function Analysis() {
   const handlePatientIdSubmit = async () => {
     if (isSubmittingPatientId || isLoading) return;
 
-    if (!modalPatientId.trim()) {
+    if (!patientId.trim()) {
       setError("Please enter a Patient ID.");
       toast.error("Please enter a Patient ID.");
       return;
@@ -368,7 +377,7 @@ export function Analysis() {
       const resp = await fetch(
         `https://05fce2ff8086.ngrok-free.app
 /infer_for_diabetic_retinopathy/upload%20images?patient_id=${encodeURIComponent(
-          modalPatientId
+          patientId
         )}`,
         { method: "POST", body: formData }
       );
@@ -580,17 +589,16 @@ export function Analysis() {
                       </p>
                       <FileUpload
                         onChange={(file) => handleImageUpload(file, "right")}
-                   
                       />
                       {rightEyePreview && (
-                         <div className="mt-2 flex items-center justify-center relative overflow-hidden">
+                        <div className="mt-2 flex items-center justify-center relative overflow-hidden">
                           <MovingImage
                             src={rightEyePreview}
                             alt="Right Eye Preview"
                             isMoving={isMoving}
                             isAnalyzing={isAnalyzing}
                           />
-                         </div>
+                        </div>
                       )}
                     </div>
                     <div className="space-y-2">
@@ -692,8 +700,11 @@ export function Analysis() {
             <Input
               type="text"
               placeholder="Patient ID"
-              value={modalPatientId}
-              onChange={(e) => setModalPatientId(e.target.value)}
+              // value={modalPatientId}
+              // onChange={(e) => setModalPatientId(e.target.value)}
+
+              value={patientId}
+              onChange={(e) => setPatientId(e.target.value)}
               className="w-full border-indigo-400 focus:border-indigo-300 focus:ring-indigo-300 bg-[#1A2C4E] text-white placeholder-gray-500"
             />
             <DialogFooter>
@@ -709,8 +720,11 @@ export function Analysis() {
                 type="button"
                 onClick={handlePatientIdSubmit}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                // disabled={
+                //   !modalPatientId.trim() || isSubmittingPatientId || isLoading
+                // }
                 disabled={
-                  !modalPatientId.trim() || isSubmittingPatientId || isLoading
+                  !patientId.trim() || isSubmittingPatientId || isLoading
                 }
               >
                 {isSubmittingPatientId ? "Submitting..." : "Submit"}
