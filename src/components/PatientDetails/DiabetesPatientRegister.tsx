@@ -354,6 +354,7 @@ const DiabetesPatientRegister = () => {
 
       // If response.ok is true
       // toast.success("Patient registered successfully!");
+      localStorage.setItem("patient_id", formData.patient_id);
       setRegistrationComplete(true);
     } catch (error) {
       // This catch block handles:
@@ -369,8 +370,17 @@ const DiabetesPatientRegister = () => {
   };
 
   const handleContinueToUpload = () => {
-    window.location.href = "/Analysis";
+    const patientId = localStorage.getItem("patient_id");
+    if (patientId) {
+      window.location.href = `/analysis/`;
+    } else {
+      alert("Patient ID not found. Please register first.");
+    }
   };
+
+  // const handleContinueToUpload = () => {
+  //   navigate(`/analysis/${formData.patient_id}`);
+  // };
 
   const progressPercentage = (currentStep / totalSteps) * 100;
 
