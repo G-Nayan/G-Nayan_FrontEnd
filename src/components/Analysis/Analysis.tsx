@@ -366,7 +366,7 @@ export function Analysis() {
 
     try {
       const resp = await fetch(
-        `https://4ceae994c8fa.ngrok-free.app
+        `https://05fce2ff8086.ngrok-free.app
 /infer_for_diabetic_retinopathy/upload%20images?patient_id=${encodeURIComponent(
           modalPatientId
         )}`,
@@ -419,7 +419,7 @@ export function Analysis() {
     };
     try {
       const resp = await fetch(
-        "https://4ceae994c8fa.ngrok-free.app/submit_feedback_from_frontend/from_json_to_db",
+        "https://05fce2ff8086.ngrok-free.app/submit_feedback_from_frontend/from_json_to_db",
         {
           method: "POST",
           headers: {
@@ -580,16 +580,17 @@ export function Analysis() {
                       </p>
                       <FileUpload
                         onChange={(file) => handleImageUpload(file, "right")}
+                   
                       />
                       {rightEyePreview && (
-                        <div className="mt-2 flex items-center justify-center relative overflow-hidden">
+                         <div className="mt-2 flex items-center justify-center relative overflow-hidden">
                           <MovingImage
                             src={rightEyePreview}
                             alt="Right Eye Preview"
                             isMoving={isMoving}
                             isAnalyzing={isAnalyzing}
                           />
-                        </div>
+                         </div>
                       )}
                     </div>
                     <div className="space-y-2">

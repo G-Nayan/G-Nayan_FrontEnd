@@ -69,9 +69,9 @@ export const FileUpload = ({ onChange }: { onChange?: (file: File | null) => voi
           )}
 
           {file && (
-            <p className="relative z-20 font-sans font-normal text-gray-300 text-base">
-              {file.name}
-            </p>
+            <p className="relative z-20 font-sans font-normal text-gray-900 text-base bg-gray-50 p-2 rounded-md">
+              {file.name} 
+            </p>           
           )}
 
           {!file && (
