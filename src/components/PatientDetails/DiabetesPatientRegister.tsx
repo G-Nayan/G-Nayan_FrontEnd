@@ -306,7 +306,7 @@ const DiabetesPatientRegister = () => {
       delete (payload as any).num_visits;
     }
 
-    const API_URL = `https://4ceae994c8fa.ngrok-free.app/?patient_id=${formData.patient_id}`;
+    const API_URL = `https://05fce2ff8086.ngrok-free.app/?patient_id=${formData.patient_id}`;
 
     try {
       const response = await fetch(API_URL, {
