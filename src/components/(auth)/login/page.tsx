@@ -20,38 +20,47 @@ export default function Login() {
     };
   }, []);
 
-  const handleLogin = async (e) => {
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const response = await fetch("http://localhost:8000/token", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/x-www-form-urlencoded",
+  //       },
+  //       body: new URLSearchParams({
+  //         username: "admin",
+  //         password: "admin123",
+  //         grant_type: "password",
+  //         scope: "",
+  //         client_id: "string",
+  //         client_secret: "password", // Make sure this is the correct secret
+  //       }),
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error("Login failed");
+  //     }
+
+  //     const data = await response.json();
+  //     console.log("Login successful:", data);
+
+  //     // Optional: Save the token
+  //     localStorage.setItem("token", data.access_token);
+
+  //     // Redirect to dashboard
+  //     navigate("/admindashboard");
+  //   } catch (error) {
+  //     console.error("Login error:", error);
+  //   }
+  // };
+
+   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const response = await fetch("http://localhost:8000/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          username: "admin",
-          password: "admin123",
-          grant_type: "password",
-          scope: "",
-          client_id: "string",
-          client_secret: "password", // Make sure this is the correct secret
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-
-      const data = await response.json();
-      console.log("Login successful:", data);
-
-      // Optional: Save the token
-      localStorage.setItem("token", data.access_token);
-
-      // Redirect to dashboard
+    if (username === "admin" && password === "admin") {
       navigate("/admindashboard");
-    } catch (error) {
-      console.error("Login error:", error);
+    } else {
+      setError("Invalid credentials");
     }
   };
 
