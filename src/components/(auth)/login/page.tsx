@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, Router } from "react-router-dom";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -20,12 +20,38 @@ export default function Login() {
     };
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (username === "admin" && password === "admin") {
+    try {
+      const response = await fetch("http://localhost:8000/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          username: "admin",
+          password: "admin123",
+          grant_type: "password",
+          scope: "",
+          client_id: "string",
+          client_secret: "password", // Make sure this is the correct secret
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+
+      const data = await response.json();
+      console.log("Login successful:", data);
+
+      // Optional: Save the token
+      localStorage.setItem("token", data.access_token);
+
+      // Redirect to dashboard
       navigate("/admindashboard");
-    } else {
-      setError("Invalid credentials");
+    } catch (error) {
+      console.error("Login error:", error);
     }
   };
 
@@ -63,7 +89,9 @@ export default function Login() {
 
         {/* Form Container */}
         <div className="w-auto md:w-[420px] h-auto m-auto mt-12">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome back!</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Welcome back!
+          </h1>
           <p className="text-gray-500 mb-6">
             Enter your credentials to access your account
           </p>
