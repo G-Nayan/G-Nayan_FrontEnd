@@ -94,9 +94,9 @@ const App = () => {
           <Route path="/patient-list" element={<DiabetesPatientList />} />
           <Route path="/Analysis" element={<AnalysisPage />} />
 
-          {/* <Route element={<PrivateRoute />}> */}
-          <Route path="/admindashboard" element={<AdminDashboard />} />
-          {/* </Route> */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/admindashboard" element={<AdminDashboard />} />
+          </Route>
         </Routes>
 
         {shouldShowFooter && <Footer />}

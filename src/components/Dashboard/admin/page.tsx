@@ -23,42 +23,6 @@ const DiabetesPatientList = () => {
 
   const patientsPerPage = 9;
 
-  // Search globally across all pages when Search button is clicked
-  // const searchPatientsGlobally = async (id) => {
-  //   try {
-  //     setIsLoading(true);
-  //     setIsSearching(true);
-  //     let allPatients = [];
-  //     let page = 1;
-  //     let hasMore = true;
-
-  //     while (hasMore) {
-  //       const res = await fetch(
-  //         `${API_URL}?page=${page}&limit=${patientsPerPage}`
-  //       );
-  //       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  //       const data = await res.json();
-  //       allPatients = [...allPatients, ...data.patients];
-  //       page++;
-  //       hasMore = page <= data.total_pages;
-  //     }
-
-  //     const filtered = allPatients.filter((p) =>
-  //       p.patient_id.toString().includes(id.trim())
-  //     );
-
-  //     setPatients(filtered);
-  //     setTotalPages(1);
-  //     setCurrentPage(1);
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.error("Failed to search patient data.");
-  //     setError("Could not search patient data.");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const searchPatientsGlobally = async (id) => {
     try {
       setIsLoading(true);
@@ -67,12 +31,19 @@ const DiabetesPatientList = () => {
       let page = 1;
       let hasMore = true;
 
+      const token = localStorage.getItem("token"); // ✅ Fetch token here
+
+      if (!token) {
+        throw new Error("No token found. Please log in again.");
+      }
+
       while (hasMore) {
         const res = await fetch(
           `${API_URL}?page=${page}&limit=${patientsPerPage}`,
           {
             method: "GET",
             headers: {
+              Authorization: `Bearer ${token}`,
               Accept: "application/json",
               "ngrok-skip-browser-warning": "true",
             },
@@ -116,40 +87,21 @@ const DiabetesPatientList = () => {
   useEffect(() => {
     if (isSearching) return;
 
-    // const fetchPatients = async () => {
-    //   try {
-    //     setIsLoading(true);
-    //     const res = await fetch(
-    //       `${API_URL}?page=${currentPage}&limit=${patientsPerPage}`
-
-    //     );
-    //     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    //     const data = await res.json();
-
-    //     const sorted = data.patients.sort(
-    //       (a, b) =>
-    //         new Date(b.Date_of_registration) - new Date(a.Date_of_registration)
-    //     );
-
-    //     setPatients(sorted);
-    //     setTotalPages(data.total_pages);
-    //   } catch (err) {
-    //     console.error(err);
-    //     toast.error("Failed to fetch patient data.");
-    //     setError("Could not fetch patient data.");
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // };
     const fetchPatients = async () => {
       setIsLoading(true);
       try {
+        const token = localStorage.getItem("token"); // ✅ Fetch token here
+
+        if (!token) {
+          throw new Error("No token found. Please log in again.");
+        }
         const response = await fetch(
           `${API_URL}?page=${currentPage}&limit=${patientsPerPage}`,
 
           {
             method: "GET",
             headers: {
+              Authorization: `Bearer ${token}`,
               Accept: "application/json",
               "ngrok-skip-browser-warning": "true",
             },
