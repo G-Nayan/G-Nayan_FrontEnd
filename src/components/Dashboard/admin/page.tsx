@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 
@@ -7,9 +6,9 @@ import { useNavigate } from "react-router-dom";
 
 import EditPatientModal from "../../PatientDetails/PatientModel"; // Assuming you have this component for editing patient details
 
-const API_URL = "https://4ceae994c8fa.ngrok-free.app/patients";
+const API_URL = "https://05fce2ff8086.ngrok-free.app/patients";
 
-const COMBINED_BASE = "https://4ceae994c8fa.ngrok-free.app/combined-report";
+const COMBINED_BASE = "https://05fce2ff8086.ngrok-free.app/combined-report";
 
 const DiabetesPatientList = () => {
   const [patients, setPatients] = useState([]);
@@ -158,7 +157,6 @@ const DiabetesPatientList = () => {
         );
 
         const contentType = response.headers.get("content-type");
-
 
         if (
           response.ok &&
@@ -311,10 +309,9 @@ const PatientCard = ({ patient }) => {
     }
   };
 
- const dem = ()=>{
-
-    console.log("print demo")
- }
+  const dem = () => {
+    console.log("print demo");
+  };
 
   return (
     <>
@@ -364,7 +361,11 @@ const PatientCard = ({ patient }) => {
             value={patient.Duration_of_Diabetes}
             unit="Yrs"
           />
-          <DataPoint label="Visual Acuity" value={patient.Visual_Acuity}  unit={""}/>
+          <DataPoint
+            label="Visual Acuity"
+            value={patient.Visual_Acuity}
+            unit={""}
+          />
         </div>
 
         <div className="p-3 bg-gray-50 border-t text-sm">
@@ -407,8 +408,7 @@ const PatientCard = ({ patient }) => {
         <EditPatientModal
           patient={patient}
           onClose={() => setEditModalOpen(false)}
-          onUpdated={()=> dem}
-
+          onUpdated={() => dem}
         />
       )}
     </>

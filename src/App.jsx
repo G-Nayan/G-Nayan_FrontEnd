@@ -15,6 +15,7 @@ import DiabetesPatientList from "./components/PatientDetails/DiabetesPatientList
 import AnalysisPage from "./components/Analysis/Analysis";
 import Login from "./components/(auth)/login/page";
 import AdminDashboard from "./components/Dashboard/admin/page";
+import PrivateRoute from "./components/(auth)/PrivateRoute";
 
 // ✅ Scroll to hash utility
 const ScrollToHashElement = () => {
@@ -59,10 +60,14 @@ const App = () => {
   const hideFooterRoutes = ["/register-patient", "/patient-list", "/Analysis"];
 
   const shouldShowHeader = !hideHeaderFooterRoutes.includes(location.pathname);
-  const shouldShowFooter = !hideFooterRoutes.includes(location.pathname) && !hideHeaderFooterRoutes.includes(location.pathname);
+  const shouldShowFooter =
+    !hideFooterRoutes.includes(location.pathname) &&
+    !hideHeaderFooterRoutes.includes(location.pathname);
 
   // ✅ Remove padding for login route
-  const shouldAddTopPadding = !hideHeaderFooterRoutes.includes(location.pathname);
+  const shouldAddTopPadding = !hideHeaderFooterRoutes.includes(
+    location.pathname
+  );
 
   return (
     <>
@@ -70,16 +75,28 @@ const App = () => {
 
       {shouldShowHeader && <Header />}
 
-      <div className={shouldAddTopPadding ? "pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden" : "overflow-hidden"}>
+      <div
+        className={
+          shouldAddTopPadding
+            ? "pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden"
+            : "overflow-hidden"
+        }
+      >
         <ScrollToHashElement />
 
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register-patient" element={<DiabetesPatientRegister />} />
+          <Route
+            path="/register-patient"
+            element={<DiabetesPatientRegister />}
+          />
           <Route path="/patient-list" element={<DiabetesPatientList />} />
           <Route path="/Analysis" element={<AnalysisPage />} />
-          <Route path="/AdminDashboard" element={<AdminDashboard />} />
+
+          <Route element={<PrivateRoute />}>
+            <Route path="/admindashboard" element={<AdminDashboard />} />
+          </Route>
         </Routes>
 
         {shouldShowFooter && <Footer />}
