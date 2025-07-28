@@ -23,17 +23,18 @@ const DiabetesPatientList = () => {
 
   const patientsPerPage = 9;
 
-  const searchPatientsGlobally = async (id) => {
+  const searchPatientsGlobally = async (id: string) => {
     try {
       setIsLoading(true);
       setIsSearching(true);
-      let allPatients = [];
+      let allPatients: any[] = [];
       let page = 1;
       let hasMore = true;
 
-      const token = localStorage.getItem("token"); // ✅ Fetch token here
+      const token = localStorage.getItem("token");
 
       if (!token) {
+        toast.error("No token found. Please log in again.");
         throw new Error("No token found. Please log in again.");
       }
 
@@ -90,14 +91,14 @@ const DiabetesPatientList = () => {
     const fetchPatients = async () => {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem("token"); // ✅ Fetch token here
+        const token = localStorage.getItem("token");
 
         if (!token) {
+          toast.error("No token found. Please log in again.");
           throw new Error("No token found. Please log in again.");
         }
         const response = await fetch(
           `${API_URL}?page=${currentPage}&limit=${patientsPerPage}`,
-
           {
             method: "GET",
             headers: {
@@ -117,16 +118,21 @@ const DiabetesPatientList = () => {
         ) {
           const data = await response.json();
           console.log("Fetched patients:", data.patients);
+          // Fixed: Convert dates to timestamps for proper arithmetic operations
           const sorted = data.patients.sort(
-            (a, b) =>
-              new Date(b.Date_of_registration) -
-              new Date(a.Date_of_registration)
+            (a: any, b: any) =>
+              new Date(b.Date_of_registration).getTime() -
+              new Date(a.Date_of_registration).getTime()
           );
           setPatients(sorted);
-          setTotalPages(data.total_pages); // ✅ required for page buttons
+          setTotalPages(data.total_pages);
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
       } catch (error) {
         console.error("Network error", error);
+        toast.error("Failed to fetch patient data.");
+        setError("Could not fetch patient data.");
       } finally {
         setIsLoading(false);
       }
@@ -135,7 +141,7 @@ const DiabetesPatientList = () => {
     fetchPatients();
   }, [currentPage, isSearching]);
 
-  //  NEW: reset search mode when searchTerm is cleared
+  // Reset search mode when searchTerm is cleared
   useEffect(() => {
     if (searchTerm.trim() === "") {
       setIsSearching(false);
@@ -212,57 +218,83 @@ const DiabetesPatientList = () => {
   );
 };
 
-const PatientCard = ({ patient }) => {
-  const [modalOpen, setModalOpen] = useState(false); // Retino modal
-  const [editModalOpen, setEditModalOpen] = useState(false); // Edit modal
+const PatientCard = ({ patient }: { patient: any }) => {
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [retinoData, setRetinoData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-  const fetchRetinoData = async () => {
+  const fetchRetinoData = async (patient_id: number) => {
+    // Try different token keys that might be stored
+    let token = localStorage.getItem("token") || 
+                localStorage.getItem("access_token") || 
+                localStorage.getItem("authToken");
+    
     setLoading(true);
+    
     try {
-      const res = await fetch(
-        `${COMBINED_BASE}/${patient.patient_id}`,
+      if (!token) {
+        toast.error("No authentication token found. Please log in again.");
+        return;
+      }
 
+      console.log("Fetching retinopathy data for patient:", patient_id);
+
+      const res = await fetch(
+        `${COMBINED_BASE}/${patient_id}`,
         {
           method: "GET",
           headers: {
+            Authorization: `Bearer ${token}`,
             Accept: "application/json",
+            "Content-Type": "application/json",
             "ngrok-skip-browser-warning": "true",
           },
         }
       );
 
+      console.log("Retinopathy API response status:", res.status);
+
       if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        const errorMessage =
-          errorData?.detail || errorData?.message || `HTTP ${res.status}`;
-        throw new Error(errorMessage);
+        const errorText = await res.text();
+        console.error("Retinopathy API error response:", errorText);
+        
+        if (res.status === 401) {
+          toast.error("Authentication failed for retinopathy data. Please log in again.");
+          return;
+        }
+        throw new Error(`HTTP ${res.status}: ${res.statusText} - ${errorText}`);
+      }
+
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const textResponse = await res.text();
+        console.error("Non-JSON response:", textResponse);
+        throw new Error("Invalid response format from retinopathy API");
       }
 
       const data = await res.json();
-      const left = data.find((entry) => entry.eye_scan_id?.endsWith("left"));
-      const right = data.find((entry) => entry.eye_scan_id?.endsWith("right"));
-
-      setRetinoData({
-        left_eye: left,
-        right_eye: right,
-        email_id: data[0]?.email_id,
-      });
-      setModalOpen(true);
+      console.log("Retinopathy data received:", data);
+      
+      if (Array.isArray(data) && data.length > 0) {
+        setRetinoData(data);
+        setShowModal(true);
+        toast.success("Retinopathy data loaded successfully!");
+      } else {
+        toast.error("No retinopathy data found for this patient.");
+      }
     } catch (err) {
       console.error("Error fetching retinopathy data:", err);
-      toast.error(
-        "Failed to fetch data(give feedback and upload eye images): " +
-          err.message
-      );
+      toast.error(`Failed to fetch retinopathy data: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const dem = () => {
-    console.log("print demo");
+  const handlePatientUpdate = () => {
+    // Refresh the parent component data if needed
+    console.log("Patient updated successfully");
+    toast.success("Patient updated successfully");
   };
 
   return (
@@ -277,19 +309,19 @@ const PatientCard = ({ patient }) => {
             <Edit size={18} />
           </button>
 
-          <h2 className="text-xl font-bold  ">
-            {patient.name.charAt(0).toUpperCase() + patient.name.slice(1)}
+          <h2 className="text-xl font-bold">
+            {patient.name?.charAt(0).toUpperCase() + patient.name?.slice(1)}
           </h2>
           <p className="text-sm">
             {patient.Age} yrs, &nbsp; {patient.gender}
           </p>
-          <p className="text-sm ">
+          <p className="text-sm">
             Mobile number: &nbsp;
             {patient.mobile_number}
           </p>
         </div>
 
-        <div className="p-3 grid grid-cols-2 gap-">
+        <div className="p-3 grid grid-cols-2 gap-2">
           <DataPoint label="HbA1c" value={patient.HbA1c_Level} unit="%" />
           <DataPoint
             label="Glucose"
@@ -316,7 +348,7 @@ const PatientCard = ({ patient }) => {
           <DataPoint
             label="Visual Acuity"
             value={patient.Visual_Acuity}
-            unit={""}
+            unit=""
           />
         </div>
 
@@ -328,10 +360,9 @@ const PatientCard = ({ patient }) => {
             <strong>Patient ID:</strong> {patient.patient_id}
           </p>
           <p>
-            <strong>Hospital:</strong>
-
-            {patient.Hospital_name.charAt(0).toUpperCase() +
-              patient.Hospital_name.slice(1)}
+            <strong>Hospital:</strong>{" "}
+            {patient.Hospital_name?.charAt(0).toUpperCase() +
+              patient.Hospital_name?.slice(1)}
           </p>
           <p>
             <strong>Date:</strong>{" "}
@@ -341,7 +372,7 @@ const PatientCard = ({ patient }) => {
 
         <div className="p-3 border-t">
           <button
-            onClick={fetchRetinoData}
+            onClick={() => fetchRetinoData(patient.patient_id)}
             disabled={loading}
             className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
           >
@@ -351,8 +382,14 @@ const PatientCard = ({ patient }) => {
       </div>
 
       {/* Retinopathy Report Modal */}
-      {modalOpen && retinoData && (
-        <RetinoModal data={retinoData} onClose={() => setModalOpen(false)} />
+      {showModal && retinoData && (
+        <RetinoModal 
+          data={retinoData} 
+          onClose={() => {
+            setShowModal(false);
+            setRetinoData(null);
+          }} 
+        />
       )}
 
       {/* Edit Modal */}
@@ -360,48 +397,116 @@ const PatientCard = ({ patient }) => {
         <EditPatientModal
           patient={patient}
           onClose={() => setEditModalOpen(false)}
-          onUpdated={() => dem}
+          onUpdated={handlePatientUpdate}
         />
       )}
     </>
   );
 };
 
-const RetinoModal = ({ data, onClose }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-lg w-full max-w-3xl shadow-lg p-6 relative overflow-y-auto max-h-[90vh]">
-      <button
-        onClick={onClose}
-        className="absolute top-3 right-3 text-gray-600 hover:text-black text-xl"
-      >
-        &times;
-      </button>
-      <h2 className="text-xl font-semibold mb-4">Retinopathy Report</h2>
-      <p className="mb-4">
-        <strong>Email ID:</strong> {data.email_id || "N/A"}
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {data.left_eye && <EyeSection title="Left Eye" data={data.left_eye} />}
-        {data.right_eye && (
-          <EyeSection title="Right Eye" data={data.right_eye} />
+const RetinoModal = ({ data, onClose }: { data: any; onClose: () => void }) => {
+  // Process the array data to separate left and right eye data
+  const leftEyeData = data.find((item: any) => item.eye_scan_id?.includes('_left'));
+  const rightEyeData = data.find((item: any) => item.eye_scan_id?.includes('_right'));
+  
+  // Get patient info from first record
+  const patientInfo = data[0] || {};
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg w-full max-w-4xl shadow-lg p-6 relative overflow-y-auto max-h-[90vh]">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-600 hover:text-black text-xl"
+        >
+          &times;
+        </button>
+        
+        <h2 className="text-2xl font-semibold mb-4">Retinopathy Report</h2>
+        
+        {/* Patient Information */}
+        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+          <h3 className="text-lg font-semibold mb-2">Patient Information</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            <p><strong>Name:</strong> {patientInfo.name}</p>
+            <p><strong>Patient ID:</strong> {patientInfo.patient_id}</p>
+            <p><strong>Age:</strong> {patientInfo.Age} years</p>
+            <p><strong>Gender:</strong> {patientInfo.gender}</p>
+            <p><strong>Hospital:</strong> {patientInfo.Hospital_name}</p>
+            <p><strong>Date:</strong> {new Date(patientInfo.Date_of_registration).toLocaleDateString()}</p>
+          </div>
+        </div>
+
+        {/* Eye Scan Results */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {leftEyeData && (
+            <RetinoEyeSection title="Left Eye" data={leftEyeData} />
+          )}
+          {rightEyeData && (
+            <RetinoEyeSection title="Right Eye" data={rightEyeData} />
+          )}
+        </div>
+
+        {/* Summary if both eyes have data */}
+        {leftEyeData && rightEyeData && (
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h3 className="text-lg font-semibold mb-2">Summary</h3>
+            <p className="text-sm">
+              <strong>Left Eye:</strong> {leftEyeData.Stage} (Confidence: {leftEyeData.Confidence}%)
+            </p>
+            <p className="text-sm">
+              <strong>Right Eye:</strong> {rightEyeData.Stage} (Confidence: {rightEyeData.Confidence}%)
+            </p>
+          </div>
         )}
       </div>
+    </div>
+  );
+};
+
+const RetinoEyeSection = ({ title, data }: { title: string; data: any }) => (
+  <div className="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
+    <h3 className="font-semibold text-lg mb-3 text-indigo-600">{title}</h3>
+    
+    {/* Diagnosis Information */}
+    <div className="mb-4 p-3 bg-red-50 rounded">
+      <h4 className="font-semibold text-sm text-red-800 mb-2">Diagnosis</h4>
+      <p className="text-sm"><strong>Stage:</strong> {data.Stage}</p>
+      <p className="text-sm"><strong>Confidence:</strong> {data.Confidence}%</p>
+      <p className="text-sm"><strong>Risk Factor:</strong> {data.Risk_Factor}</p>
+    </div>
+
+    {/* Clinical Details */}
+    <div className="mb-4 p-3 bg-blue-50 rounded">
+      <h4 className="font-semibold text-sm text-blue-800 mb-2">Clinical Details</h4>
+      <p className="text-sm mb-2"><strong>Explanation:</strong></p>
+      <p className="text-xs text-gray-700 mb-2">{data.Explanation}</p>
+      <p className="text-sm mb-2"><strong>Doctor's Diagnosis:</strong></p>
+      <p className="text-xs text-gray-700">{data.Doctors_Diagnosis}</p>
+    </div>
+
+    {/* Recommendations */}
+    <div className="mb-4 p-3 bg-green-50 rounded">
+      <h4 className="font-semibold text-sm text-green-800 mb-2">Recommendations</h4>
+      <p className="text-xs text-gray-700 mb-2">{data.Note}</p>
+      {data.Feedback && (
+        <>
+          <p className="text-sm mb-1"><strong>Patient Feedback:</strong></p>
+          <p className="text-xs text-gray-700">{data.Feedback}</p>
+        </>
+      )}
+    </div>
+
+    {/* Additional Info */}
+    <div className="text-xs text-gray-500 border-t pt-2">
+      <p><strong>Eye Scan ID:</strong> {data.eye_scan_id}</p>
+      <p><strong>Review Status:</strong> {data.Review}</p>
+      <p><strong>Timestamp:</strong> {new Date(data.timestamp).toLocaleString()}</p>
     </div>
   </div>
 );
 
-const EyeSection = ({ title, data }) => (
-  <div className="bg-gray-100 p-4 rounded shadow-sm">
-    <h3 className="font-semibold text-lg mb-2">{title}</h3>
-    {Object.entries(data).map(([key, val]) => (
-      <p key={key}>
-        <strong>{key.replace(/_/g, " ")}:</strong> {val?.toString()}
-      </p>
-    ))}
-  </div>
-);
-
-const DataPoint = ({ label, value, unit }) => (
+const DataPoint = ({ label, value, unit }: { label: string; value: any; unit: string }) => (
   <div>
     <p className="text-xs text-gray-500 uppercase">{label}</p>
     <p className="text-lg font-semibold text-gray-800">
