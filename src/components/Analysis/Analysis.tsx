@@ -373,13 +373,26 @@ export function Analysis() {
     formData.append("left_image", leftEyeImage!);
     formData.append("right_image", rightEyeImage!);
 
+    let token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("authToken");
+
     try {
       const resp = await fetch(
         `https://05fce2ff8086.ngrok-free.app
 /infer_for_diabetic_retinopathy/upload%20images?patient_id=${encodeURIComponent(
           patientId
         )}`,
-        { method: "POST", body: formData }
+        {
+          method: "POST",
+
+          body: formData,
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (!resp.ok) {
         const errorData = await resp
@@ -426,12 +439,19 @@ export function Analysis() {
       left_eye: { ...apiData?.left_eye!, ...fb.left_eye },
       right_eye: { ...apiData?.right_eye!, ...fb.right_eye },
     };
+
+    let token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("authToken");
+
     try {
       const resp = await fetch(
         "https://05fce2ff8086.ngrok-free.app/submit_feedback_from_frontend/from_json_to_db",
         {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),

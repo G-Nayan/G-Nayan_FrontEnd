@@ -226,12 +226,13 @@ const PatientCard = ({ patient }: { patient: any }) => {
 
   const fetchRetinoData = async (patient_id: number) => {
     // Try different token keys that might be stored
-    let token = localStorage.getItem("token") || 
-                localStorage.getItem("access_token") || 
-                localStorage.getItem("authToken");
-    
+    let token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("authToken");
+
     setLoading(true);
-    
+
     try {
       if (!token) {
         toast.error("No authentication token found. Please log in again.");
@@ -240,27 +241,26 @@ const PatientCard = ({ patient }: { patient: any }) => {
 
       console.log("Fetching retinopathy data for patient:", patient_id);
 
-      const res = await fetch(
-        `${COMBINED_BASE}/${patient_id}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true",
-          },
-        }
-      );
+      const res = await fetch(`${COMBINED_BASE}/${patient_id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
 
       console.log("Retinopathy API response status:", res.status);
 
       if (!res.ok) {
         const errorText = await res.text();
         console.error("Retinopathy API error response:", errorText);
-        
+
         if (res.status === 401) {
-          toast.error("Authentication failed for retinopathy data. Please log in again.");
+          toast.error(
+            "Authentication failed for retinopathy data. Please log in again."
+          );
           return;
         }
         throw new Error(`HTTP ${res.status}: ${res.statusText} - ${errorText}`);
@@ -275,11 +275,11 @@ const PatientCard = ({ patient }: { patient: any }) => {
 
       const data = await res.json();
       console.log("Retinopathy data received:", data);
-      
+
       if (Array.isArray(data) && data.length > 0) {
         setRetinoData(data);
         setShowModal(true);
-        toast.success("Retinopathy data loaded successfully!");
+        // toast.success("Retinopathy data loaded successfully!");
       } else {
         toast.error("No retinopathy data found for this patient.");
       }
@@ -383,12 +383,12 @@ const PatientCard = ({ patient }: { patient: any }) => {
 
       {/* Retinopathy Report Modal */}
       {showModal && retinoData && (
-        <RetinoModal 
-          data={retinoData} 
+        <RetinoModal
+          data={retinoData}
           onClose={() => {
             setShowModal(false);
             setRetinoData(null);
-          }} 
+          }}
         />
       )}
 
@@ -406,34 +406,53 @@ const PatientCard = ({ patient }: { patient: any }) => {
 
 const RetinoModal = ({ data, onClose }: { data: any; onClose: () => void }) => {
   // Process the array data to separate left and right eye data
-  const leftEyeData = data.find((item: any) => item.eye_scan_id?.includes('_left'));
-  const rightEyeData = data.find((item: any) => item.eye_scan_id?.includes('_right'));
-  
+  const leftEyeData = data.find((item: any) =>
+    item.eye_scan_id?.includes("_left")
+  );
+  const rightEyeData = data.find((item: any) =>
+    item.eye_scan_id?.includes("_right")
+  );
+
   // Get patient info from first record
   const patientInfo = data[0] || {};
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg w-full max-w-4xl shadow-lg p-6 relative overflow-y-auto max-h-[90vh]">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-600 hover:text-black text-xl"
-        >
-          &times;
-        </button>
-        
-        <h2 className="text-2xl font-semibold mb-4">Retinopathy Report</h2>
-        
+      <div className="bg-white rounded-lg w-full max-w-4xl shadow-lg p-6 pt-0 relative overflow-y-auto max-h-[90vh]">
+        <div className="sticky top-0 bg-white z-10 p-3">
+          <h2 className="text-2xl top-3 font-semibold mb-4 ">Retinopathy Report</h2>
+
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 text-gray-600 bg-gray-50 hover:text-black text-xl p-1 rounded"
+          >
+            X
+          </button>
+        </div>
+
         {/* Patient Information */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+        <div className="bg-gray-50 p-4 rounded-lg mb-6 ">
           <h3 className="text-lg font-semibold mb-2">Patient Information</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-            <p><strong>Name:</strong> {patientInfo.name}</p>
-            <p><strong>Patient ID:</strong> {patientInfo.patient_id}</p>
-            <p><strong>Age:</strong> {patientInfo.Age} years</p>
-            <p><strong>Gender:</strong> {patientInfo.gender}</p>
-            <p><strong>Hospital:</strong> {patientInfo.Hospital_name}</p>
-            <p><strong>Date:</strong> {new Date(patientInfo.Date_of_registration).toLocaleDateString()}</p>
+            <p>
+              <strong>Name:</strong> {patientInfo.name}
+            </p>
+            <p>
+              <strong>Patient ID:</strong> {patientInfo.patient_id}
+            </p>
+            <p>
+              <strong>Age:</strong> {patientInfo.Age} years
+            </p>
+            <p>
+              <strong>Gender:</strong> {patientInfo.gender}
+            </p>
+            <p>
+              <strong>Hospital:</strong> {patientInfo.Hospital_name}
+            </p>
+            <p>
+              <strong>Date:</strong>{" "}
+              {new Date(patientInfo.Date_of_registration).toLocaleDateString()}
+            </p>
           </div>
         </div>
 
@@ -452,10 +471,12 @@ const RetinoModal = ({ data, onClose }: { data: any; onClose: () => void }) => {
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <h3 className="text-lg font-semibold mb-2">Summary</h3>
             <p className="text-sm">
-              <strong>Left Eye:</strong> {leftEyeData.Stage} (Confidence: {leftEyeData.Confidence}%)
+              <strong>Left Eye:</strong> {leftEyeData.Stage} (Confidence:{" "}
+              {leftEyeData.Confidence}%)
             </p>
             <p className="text-sm">
-              <strong>Right Eye:</strong> {rightEyeData.Stage} (Confidence: {rightEyeData.Confidence}%)
+              <strong>Right Eye:</strong> {rightEyeData.Stage} (Confidence:{" "}
+              {rightEyeData.Confidence}%)
             </p>
           </div>
         )}
@@ -467,31 +488,47 @@ const RetinoModal = ({ data, onClose }: { data: any; onClose: () => void }) => {
 const RetinoEyeSection = ({ title, data }: { title: string; data: any }) => (
   <div className="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
     <h3 className="font-semibold text-lg mb-3 text-indigo-600">{title}</h3>
-    
+
     {/* Diagnosis Information */}
     <div className="mb-4 p-3 bg-red-50 rounded">
       <h4 className="font-semibold text-sm text-red-800 mb-2">Diagnosis</h4>
-      <p className="text-sm"><strong>Stage:</strong> {data.Stage}</p>
-      <p className="text-sm"><strong>Confidence:</strong> {data.Confidence}%</p>
-      <p className="text-sm"><strong>Risk Factor:</strong> {data.Risk_Factor}</p>
+      <p className="text-sm">
+        <strong>Stage:</strong> {data.Stage}
+      </p>
+      <p className="text-sm">
+        <strong>Confidence:</strong> {data.Confidence}%
+      </p>
+      <p className="text-sm">
+        <strong>Risk Factor:</strong> {data.Risk_Factor}
+      </p>
     </div>
 
     {/* Clinical Details */}
     <div className="mb-4 p-3 bg-blue-50 rounded">
-      <h4 className="font-semibold text-sm text-blue-800 mb-2">Clinical Details</h4>
-      <p className="text-sm mb-2"><strong>Explanation:</strong></p>
+      <h4 className="font-semibold text-sm text-blue-800 mb-2">
+        Clinical Details
+      </h4>
+      <p className="text-sm mb-2">
+        <strong>Explanation:</strong>
+      </p>
       <p className="text-xs text-gray-700 mb-2">{data.Explanation}</p>
-      <p className="text-sm mb-2"><strong>Doctor's Diagnosis:</strong></p>
+      <p className="text-sm mb-2">
+        <strong>Doctor's Diagnosis:</strong>
+      </p>
       <p className="text-xs text-gray-700">{data.Doctors_Diagnosis}</p>
     </div>
 
     {/* Recommendations */}
     <div className="mb-4 p-3 bg-green-50 rounded">
-      <h4 className="font-semibold text-sm text-green-800 mb-2">Recommendations</h4>
+      <h4 className="font-semibold text-sm text-green-800 mb-2">
+        Recommendations
+      </h4>
       <p className="text-xs text-gray-700 mb-2">{data.Note}</p>
       {data.Feedback && (
         <>
-          <p className="text-sm mb-1"><strong>Patient Feedback:</strong></p>
+          <p className="text-sm mb-1">
+            <strong>Patient Feedback:</strong>
+          </p>
           <p className="text-xs text-gray-700">{data.Feedback}</p>
         </>
       )}
@@ -499,14 +536,28 @@ const RetinoEyeSection = ({ title, data }: { title: string; data: any }) => (
 
     {/* Additional Info */}
     <div className="text-xs text-gray-500 border-t pt-2">
-      <p><strong>Eye Scan ID:</strong> {data.eye_scan_id}</p>
-      <p><strong>Review Status:</strong> {data.Review}</p>
-      <p><strong>Timestamp:</strong> {new Date(data.timestamp).toLocaleString()}</p>
+      <p>
+        <strong>Eye Scan ID:</strong> {data.eye_scan_id}
+      </p>
+      <p>
+        <strong>Review Status:</strong> {data.Review}
+      </p>
+      <p>
+        <strong>Timestamp:</strong> {new Date(data.timestamp).toLocaleString()}
+      </p>
     </div>
   </div>
 );
 
-const DataPoint = ({ label, value, unit }: { label: string; value: any; unit: string }) => (
+const DataPoint = ({
+  label,
+  value,
+  unit,
+}: {
+  label: string;
+  value: any;
+  unit: string;
+}) => (
   <div>
     <p className="text-xs text-gray-500 uppercase">{label}</p>
     <p className="text-lg font-semibold text-gray-800">

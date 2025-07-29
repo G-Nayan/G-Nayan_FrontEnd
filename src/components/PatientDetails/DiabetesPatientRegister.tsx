@@ -308,10 +308,18 @@ const DiabetesPatientRegister = () => {
 
     const API_URL = `https://05fce2ff8086.ngrok-free.app/?patient_id=${formData.patient_id}`;
 
+    let token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("authToken");
+
     try {
       const response = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(payload),
       });
 
