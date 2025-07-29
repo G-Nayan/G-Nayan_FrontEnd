@@ -39,6 +39,8 @@ import { ReportModal } from "@/components/Analysis/ReportModal";
 
 // ... (interfaces and helper components remain the same)
 interface EyeResult {
+  patient_id: string;
+  email_id: string;
   predicted_class: number;
   confidence: number;
   explanation: string;
@@ -48,6 +50,8 @@ interface EyeResult {
 }
 
 interface ApiResponse {
+  patient_id: string;
+  email_id: string;
   left_eye?: EyeResult;
   right_eye?: EyeResult;
   message?: string;
@@ -412,7 +416,9 @@ export function Analysis() {
         setShowBenefitsInitially(true);
         return;
       }
-      setApiData(data);
+      // setApiData(data);
+      setApiData({ ...data, patient_id: patientId });
+
       setShowInputCard(false);
       toast.success("Analysis complete! Please provide feedback.");
       // DO NOT auto-open feedback modal here anymore
@@ -434,7 +440,7 @@ export function Analysis() {
 
   const handleFeedbackSubmit = async (fb: FeedbackData) => {
     const payload = {
-      patient_id: modalPatientId,
+      patient_id: apiData?.patient_id,
       email_id: "iscs-client_hospital@gmail.com",
       left_eye: { ...apiData?.left_eye!, ...fb.left_eye },
       right_eye: { ...apiData?.right_eye!, ...fb.right_eye },
