@@ -23,7 +23,7 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://b5014431eeb6.ngrok-free.app/token", {
+      const response = await fetch("https://de0b4d489a7f.ngrok-free.app/token", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
