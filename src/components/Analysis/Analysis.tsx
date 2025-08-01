@@ -35,7 +35,7 @@ import ErrorModal from "@/components/Analysis/ErrorModal";
 import ModelRender from "@/components/Analysis/model-render";
 import Benefits from "@/components/Analysis/Benefits";
 import { FeedbackModal } from "@/components/Analysis/FeedbackModal";
-import { ReportModal } from "@/components/Analysis/ReportModal";
+import  {ReportModal}  from "@/components/Analysis/ReportModal";
 
 // ... (interfaces and helper components remain the same)
 interface EyeResult {
@@ -384,7 +384,7 @@ export function Analysis() {
 
     try {
       const resp = await fetch(
-        `https://b5014431eeb6.ngrok-free.app
+        `https://de0b4d489a7f.ngrok-free.app
 /infer_for_diabetic_retinopathy/upload%20images?patient_id=${encodeURIComponent(
           patientId
         )}`,
@@ -453,7 +453,7 @@ export function Analysis() {
 
     try {
       const resp = await fetch(
-        "https://b5014431eeb6.ngrok-free.app/submit_feedback_from_frontend/from_json_to_db",
+        "https://de0b4d489a7f.ngrok-free.app/submit_feedback_from_frontend/from_json_to_db",
         {
           method: "POST",
           headers: {
