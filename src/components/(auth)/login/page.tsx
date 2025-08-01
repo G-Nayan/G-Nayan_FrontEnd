@@ -64,8 +64,8 @@ export default function Login() {
           alt="Login Background"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-50" />
-        <div className="relative z-10 p-10 text-white self-end">
+        <div className="absolute inset-0" />
+        <div className="relative z-10 p-10 text-white self-end bg-black/40  w-full">
           <h1 className="text-4xl font-extrabold mb-2">G‑Nayana</h1>
           <p className="text-lg">AI‑Driven Diabetic Retinopathy Detection</p>
         </div>
