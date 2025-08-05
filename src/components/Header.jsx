@@ -40,7 +40,7 @@ const Header = () => {
     >
       <div className="flex items-center px-5 lg:px-7.5 xl:px-10 max-lg:py-4">
         <a className="block w-[12rem] xl:mr-0" href="/">
-          <img src={AIRAlogo} width={40} height={40} alt="AIRA" />
+          <img src={AIRAlogo} width={60} height={60} alt="AIRA" />
         </a>
 
         <nav
