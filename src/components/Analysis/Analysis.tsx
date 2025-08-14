@@ -35,9 +35,11 @@ import ErrorModal from "@/components/Analysis/ErrorModal";
 import ModelRender from "@/components/Analysis/model-render";
 import Benefits from "@/components/Analysis/Benefits";
 import { FeedbackModal } from "@/components/Analysis/FeedbackModal";
-import  {ReportModal}  from "@/components/Analysis/ReportModal";
+import { ReportModal } from "@/components/Analysis/ReportModal";
 
 // ... (interfaces and helper components remain the same)
+
+const apiBase = import.meta.env.VITE_API_BASE;
 interface EyeResult {
   patient_id: string;
   email_id: string;
@@ -51,11 +53,15 @@ interface EyeResult {
 
 interface ApiResponse {
   patient_id: string;
-  email_id: string;
+  email_id?: string;
   left_eye?: EyeResult;
   right_eye?: EyeResult;
   message?: string;
   error?: string;
+  results?: {
+    left_eye?: EyeResult;
+    right_eye?: EyeResult;
+  };
 }
 
 interface ChartDataItem {
@@ -308,8 +314,8 @@ const MovingImage = ({
 export function Analysis() {
   const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
   const [rightEyeImage, setRightEyeImage] = useState<File | null>(null);
-  const [leftEyePreview, setLeftEyePreview] = useState<string | null>(null);
-  const [rightEyePreview, setRightEyePreview] = useState<string | null>(null);
+  const [leftEyePreview, setLeftEyePreview] = useState<string | undefined>();
+  const [rightEyePreview, setRightEyePreview] = useState<string | undefined>();
   const [apiData, setApiData] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -325,12 +331,12 @@ export function Analysis() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showBenefitsInitially, setShowBenefitsInitially] = useState(true);
 
-  const [patientId, setPatientId] = useState("");
+  const [compositeId, setCompositeId] = useState("");
 
   useEffect(() => {
-    const storedId = localStorage.getItem("patient_id");
-    if (storedId) {
-      setPatientId(storedId);
+    const savedCompositeId = localStorage.getItem("composite_id");
+    if (savedCompositeId) {
+      setCompositeId(savedCompositeId);
     }
   }, []);
 
@@ -359,7 +365,7 @@ export function Analysis() {
   const handlePatientIdSubmit = async () => {
     if (isSubmittingPatientId || isLoading) return;
 
-    if (!patientId.trim()) {
+    if (!compositeId.trim()) {
       setError("Please enter a Patient ID.");
       toast.error("Please enter a Patient ID.");
       return;
@@ -384,20 +390,18 @@ export function Analysis() {
 
     try {
       const resp = await fetch(
-        `https://631701654693.ngrok-free.app
-/infer_for_diabetic_retinopathy/upload%20images?patient_id=${encodeURIComponent(
-          patientId
+        `${apiBase}/prediction/infer_for_diabetic_retinopathy/upload_images?patient_id=${encodeURIComponent(
+          compositeId
         )}`,
         {
           method: "POST",
-
           body: formData,
-
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
+      
       if (!resp.ok) {
         const errorData = await resp
           .json()
@@ -406,24 +410,70 @@ export function Analysis() {
           errorData.detail || `HTTP error! status: ${resp.status}`
         );
       }
+      
       const data: ApiResponse = await resp.json();
-      if (data.message || data.error) {
-        const apiErrorMessage =
-          data.message || data.error || "An error occurred during analysis.";
+      
+      // Log the response for debugging
+      console.log("API Response:", data);
+      
+      // Check for error messages in the response (but not success messages)
+      if (data.message && data.message.toLowerCase().includes("error")) {
+        const apiErrorMessage = data.message || "An error occurred during analysis.";
         setError(apiErrorMessage);
         toast.error(apiErrorMessage);
         setShowInputCard(true);
         setShowBenefitsInitially(true);
         return;
       }
-      // setApiData(data);
-      setApiData({ ...data, patient_id: patientId });
+      
+      if (data.error) {
+        const apiErrorMessage = data.error || "An error occurred during analysis.";
+        setError(apiErrorMessage);
+        toast.error(apiErrorMessage);
+        setShowInputCard(true);
+        setShowBenefitsInitially(true);
+        return;
+      }
+      
+      // Extract eye data from results if it exists, otherwise use direct properties
+      const leftEyeData = data.results?.left_eye || data.left_eye;
+      const rightEyeData = data.results?.right_eye || data.right_eye;
+      
+      // Check if we have valid eye data
+      if (!leftEyeData && !rightEyeData) {
+        setError("No analysis results received. Please try again.");
+        toast.error("No analysis results received. Please try again.");
+        setShowInputCard(true);
+        setShowBenefitsInitially(true);
+        return;
+      }
+      
+      // Store the modal patient ID for use in other components
+      setModalPatientId(compositeId);
+      
+      // Set the API data with the extracted eye data and composite ID
+      const processedData: ApiResponse = {
+        ...data,
+        patient_id: compositeId,
+        left_eye: leftEyeData,
+        right_eye: rightEyeData,
+      };
+      
+      setApiData(processedData);
 
       setShowInputCard(false);
-      toast.success("Analysis complete! Please provide feedback.");
-      // DO NOT auto-open feedback modal here anymore
-      // setShowFeedbackModal(true);
+      
+      // Success message based on what data we received
+      if (leftEyeData && rightEyeData) {
+        toast.success("Analysis complete for both eyes!");
+      } else if (leftEyeData) {
+        toast.success("Analysis complete for left eye!");
+      } else if (rightEyeData) {
+        toast.success("Analysis complete for right eye!");
+      }
+      
     } catch (e) {
+      console.error("API Error:", e);
       const errorMessage =
         (e as Error).message || "An unknown error occurred during analysis.";
       setError(errorMessage);
@@ -438,114 +488,58 @@ export function Analysis() {
     }
   };
 
-  const handleFeedbackSubmit = async (fb: FeedbackData) => {
-    const payload = {
-      patient_id: apiData?.patient_id,
-      email_id: "iscs-client_hospital@gmail.com",
-      left_eye: { ...apiData?.left_eye!, ...fb.left_eye },
-      right_eye: { ...apiData?.right_eye!, ...fb.right_eye },
-    };
-
-    let token =
-      localStorage.getItem("token") ||
-      localStorage.getItem("access_token") ||
-      localStorage.getItem("authToken");
-
-    try {
-      const resp = await fetch(
-        "https://631701654693.ngrok-free.app/submit_feedback_from_frontend/from_json_to_db",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!resp.ok) {
-        const errorData = await resp
-          .json()
-          .catch(() => ({ detail: `HTTP error! status: ${resp.status}` }));
-        throw new Error(
-          errorData.detail || `HTTP error! status: ${resp.status}`
-        );
-      }
-      await resp.json();
-      setFeedbackSubmitted(true);
-      setShowFeedbackModal(false);
-      toast.success("Feedback submitted! Opening report...");
-      setShowReportModal(true);
-    } catch (e) {
-      toast.error(`Failed to submit feedback: ${(e as Error).message}`);
-    }
-  };
-
   const handleOpenFeedbackModal = () => {
-    if (apiData) {
-      // Only open if analysis data is present
-      setShowFeedbackModal(true);
-    } else {
-      toast.error("Please complete the analysis first.");
-    }
+    setShowFeedbackModal(true);
   };
 
   const handleCloseFeedbackModal = () => {
-    setShowFeedbackModal(false); // Always close it
-    if (apiData && !feedbackSubmitted) {
-      // If analysis was done but feedback not submitted yet
-      toast.error("Feedback is required to generate the report.", {
-        icon: <MessageSquareWarning className="text-yellow-400" />,
-      });
-    }
+    setShowFeedbackModal(false);
+  };
+
+  const handleFeedbackSubmit = (feedbackData: any) => {
+    setFeedbackSubmitted(true);
+    setShowFeedbackModal(false);
+    toast.success("Feedback submitted successfully!");
   };
 
   const handleGetReport = () => {
+    // If no data exists at all
     if (!apiData) {
       toast.error("Please complete the analysis first.");
       return;
     }
-    if (!feedbackSubmitted) {
-      toast.error(
-        "Feedback is required to view the report. Please provide feedback.",
-        { icon: <MessageSquareWarning className="text-yellow-400" /> }
-      );
-      setShowFeedbackModal(true); // Guide user back to feedback
+
+    // If the patient has no retinopathy results
+    if (!apiData.left_eye && !apiData.right_eye) {
+      toast.error("No retinopathy data found for this patient.");
       return;
     }
+
+    // Show the report directly (no feedback required)
     setShowReportModal(true);
   };
 
   const handleGoBack = () => {
-    if (apiData && !feedbackSubmitted) {
-      toast.error(
-        "Please provide feedback for the current analysis before starting a new one.",
-        { icon: <MessageSquareWarning className="text-yellow-400" /> }
-      );
-      setShowFeedbackModal(true); // Re-open feedback modal
-      return; // Prevent reset
-    }
-
-    // Proceed with reset
+    // Allow going back without feedback requirement
     setShowInputCard(true);
     setShowBenefitsInitially(true);
     setApiData(null);
     setLeftEyeImage(null);
     setRightEyeImage(null);
-    setLeftEyePreview(null);
-    setRightEyePreview(null);
+    setLeftEyePreview(undefined);
+    setRightEyePreview(undefined);
     setFeedbackSubmitted(false);
     setShowReportModal(false);
     setShowFeedbackModal(false);
     setError(null);
+    setModalPatientId("");
   };
 
   return (
     <>
       <div className="relative min-h-screen w-full bg-[#0A192F]">
         <div className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
-          {/* ... Hero section JSX ... */}
+          {/* Hero section */}
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[300px] h-[300px] opacity-20">
             <div className="w-full h-full border-2 border-white/20 rounded-full" />
             <div className="absolute inset-4 border-2 border-white/20 rounded-full" />
@@ -560,7 +554,6 @@ export function Analysis() {
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-tight max-w-5xl text-center">
               <span className="inline-block relative">
-                {" "}
                 G-NAYANA
                 <svg
                   viewBox="0 0 624 28"
@@ -606,8 +599,6 @@ export function Analysis() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 p-6">
-                  {" "}
-                  {/* ... Image Upload JSX ... */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <p className="text-sm font-bold text-gray-300">
@@ -677,28 +668,45 @@ export function Analysis() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <EyeAnalysisCard eye="Right" data={apiData.right_eye!} />
-                  <EyeAnalysisCard eye="Left" data={apiData.left_eye!} />
+                  {/* Only render cards if the eye data exists */}
+                  {apiData.right_eye && (
+                    <EyeAnalysisCard eye="Right" data={apiData.right_eye} />
+                  )}
+                  {apiData.left_eye && (
+                    <EyeAnalysisCard eye="Left" data={apiData.left_eye} />
+                  )}
+                  
+                  {/* If only one eye has data, show a message for the missing one */}
+                  {!apiData.right_eye && apiData.left_eye && (
+                    <Card className="w-full shadow-lg bg-[#112240] text-white border-gray-600">
+                      <CardContent className="p-6 flex flex-col items-center justify-center h-64">
+                        <Eye className="h-16 w-16 text-gray-400 mb-4" />
+                        <p className="text-gray-400 text-center">
+                          Right eye analysis not available
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                  
+                  {!apiData.left_eye && apiData.right_eye && (
+                    <Card className="w-full shadow-lg bg-[#112240] text-white border-gray-600">
+                      <CardContent className="p-6 flex flex-col items-center justify-center h-64">
+                        <Eye className="h-16 w-16 text-gray-400 mb-4" />
+                        <p className="text-gray-400 text-center">
+                          Left eye analysis not available
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
                 </motion.div>
 
-                {/* Buttons after analysis results are shown */}
                 <div className="flex flex-col items-center justify-center mt-8 space-y-4 md:space-y-0 md:flex-row md:space-x-4">
-                  {!feedbackSubmitted ? (
-                    <Button
-                      onClick={handleOpenFeedbackModal}
-                      className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg text-base shadow-lg animate-pulse" // Added animate-pulse for attraction
-                    >
-                      <MessageSquareWarning className="mr-2 h-5 w-5" /> Provide
-                      Feedback (Required)
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleGetReport} // This will now open the report directly
-                      className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg text-base shadow-lg"
-                    >
-                      View Report
-                    </Button>
-                  )}
+                  <Button
+                    onClick={handleGetReport}
+                    className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg text-base shadow-lg"
+                  >
+                    View Report
+                  </Button>
                   <Button
                     onClick={handleGoBack}
                     className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg text-base"
@@ -714,23 +722,18 @@ export function Analysis() {
         </div>
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          {/* ... Patient ID Modal JSX ... */}
           <DialogContent className="bg-[#112240] text-white border-indigo-500">
             <DialogHeader>
               <DialogTitle className="text-white">Enter Patient ID</DialogTitle>
               <DialogDescription className="text-gray-400">
-                {" "}
-                Please enter the Patient ID to proceed with the analysis.{" "}
+                Please enter the Patient ID to proceed with the analysis.
               </DialogDescription>
             </DialogHeader>
             <Input
               type="text"
-              placeholder="Patient ID"
-              // value={modalPatientId}
-              // onChange={(e) => setModalPatientId(e.target.value)}
-
-              value={patientId}
-              onChange={(e) => setPatientId(e.target.value)}
+              value={compositeId}
+              onChange={(e) => setCompositeId(e.target.value)}
+              placeholder="Enter Composite ID"
               className="w-full border-indigo-400 focus:border-indigo-300 focus:ring-indigo-300 bg-[#1A2C4E] text-white placeholder-gray-500"
             />
             <DialogFooter>
@@ -746,11 +749,8 @@ export function Analysis() {
                 type="button"
                 onClick={handlePatientIdSubmit}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                // disabled={
-                //   !modalPatientId.trim() || isSubmittingPatientId || isLoading
-                // }
                 disabled={
-                  !patientId.trim() || isSubmittingPatientId || isLoading
+                  !compositeId.trim() || isSubmittingPatientId || isLoading
                 }
               >
                 {isSubmittingPatientId ? "Submitting..." : "Submit"}
@@ -762,25 +762,25 @@ export function Analysis() {
         {apiData && (
           <FeedbackModal
             isOpen={showFeedbackModal}
-            onClose={handleCloseFeedbackModal} // Use new handler
+            onClose={handleCloseFeedbackModal}
             leftEyePreview={leftEyePreview || ""}
             rightEyePreview={rightEyePreview || ""}
             onSubmitFeedback={handleFeedbackSubmit}
             patientId={modalPatientId}
-            leftEyeData={apiData.left_eye!}
-            rightEyeData={apiData.right_eye!}
+            leftEyeData={apiData.left_eye as any}
+            rightEyeData={apiData.right_eye as any}
           />
         )}
 
-        {apiData && feedbackSubmitted && (
+        {apiData && (
           <ReportModal
             isOpen={showReportModal}
             onClose={() => setShowReportModal(false)}
             patientId={modalPatientId}
-            leftEyeImage={leftEyePreview}
-            rightEyeImage={rightEyePreview}
-            leftEyeData={apiData.left_eye}
-            rightEyeData={apiData.right_eye}
+            leftEyeImage={leftEyePreview || ""}
+            rightEyeImage={rightEyePreview || ""}
+            leftEyeData={apiData.left_eye as any}
+            rightEyeData={apiData.right_eye as any}
           />
         )}
 
