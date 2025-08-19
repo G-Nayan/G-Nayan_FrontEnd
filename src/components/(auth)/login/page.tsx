@@ -35,7 +35,7 @@ export default function Login() {
         const now = Date.now() / 1000;
 
         if (decoded.exp > now) {
-          navigate("/admindashboard", { replace: true });
+          navigate("/patient-record", { replace: true });
           return;
         } else {
           localStorage.removeItem("token");
@@ -75,7 +75,7 @@ export default function Login() {
 
       const data = await response.json();
       localStorage.setItem("token", data.access_token);
-      navigate("/admindashboard", { replace: true });
+      navigate("/patient-records", { replace: true });
     } catch (err) {
       console.error("Login error:", err);
       setError("Invalid username or password.");

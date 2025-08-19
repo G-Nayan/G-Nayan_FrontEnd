@@ -14,7 +14,8 @@ import DiabetesPatientRegister from "./components/PatientDetails/DiabetesPatient
 import DiabetesPatientList from "./components/PatientDetails/DiabetesPatientList";
 import AnalysisPage from "./components/Analysis/Analysis";
 import Login from "./components/(auth)/login/page";
-import AdminDashboard from "./components/Dashboard/admin/page";
+import Dashboard from "./components/Dashboard/admin/page";
+import AdminDashboard from "./components/adminDashboard/page";
 import PrivateRoute from "./components/(auth)/PrivateRoute";
 
 // ✅ Scroll to hash utility
@@ -95,8 +96,9 @@ const App = () => {
           <Route path="/Analysis" element={<AnalysisPage />} />
 
           <Route element={<PrivateRoute />}>
-            <Route path="/admindashboard" element={<AdminDashboard />} />
+            <Route path="/patient-records" element={<Dashboard/>} />
           </Route>
+          <Route path="/dashboard" element={<AdminDashboard />} />
         </Routes>
 
         {shouldShowFooter && <Footer />}
