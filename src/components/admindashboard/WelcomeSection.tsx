@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Users, Calendar, Activity } from "lucide-react";
+import Authmodel from "@/components/(auth)/Model/page"; // your modal component
 
 const WelcomeSection = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   return (
     <div className="mb-8">
       <Card className="bg-gradient-primary text-primary-foreground shadow-dashboard border-0">
@@ -31,17 +36,25 @@ const WelcomeSection = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex flex-col space-y-3">
-              <Button 
-                variant="secondary" 
-                className="bg-white/10 hover:bg-white/20 text-primary-foreground border-white/20 font-medium"
+              {/* <Button 
+                  variant="secondary" 
+                  className="bg-white/10 hover:bg-white/20 text-primary-foreground border-white/20 font-medium"
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  View Analytics
+                </Button> */}
+              <Button
+                variant="secondary"
+                className="bg-white/10 hover:bg-white/20 text-primary-foreground border-white/20 font-medium bg-blue-600 text-white"
+                onClick={openModal}
               >
-                <TrendingUp className="h-4 w-4 mr-2" />
-                View Analytics
+                {/* <TrendingUp className="h-4 w-4 mr-2" /> */}
+                Create Admin
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="border-white/30 text-primary-foreground hover:bg-white/10 font-medium"
               >
                 Quick Actions
@@ -50,6 +63,14 @@ const WelcomeSection = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Render the modal */}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 ">
+          <Authmodel onClose={closeModal}  />
+        </div>
+      )}
     </div>
   );
 };
