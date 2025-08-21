@@ -57,7 +57,8 @@ interface FormErrors {
   Cholesterol?: string;
   Albuminuria?: string;
   num_visits?: string;
-   visits_id?: number | string; 
+  visits_id?: number | string;
+  assigned_doctor?: string;
 }
 
 const DiabetesPatientRegister: React.FC = () => {
@@ -67,6 +68,8 @@ const DiabetesPatientRegister: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const totalSteps = 4;
+
+  const [registerMode, setRegisterMode] = useState<"new" | "op">("new");
 
   const [formData, setFormData] = useState<any>({
     patient_id: "",
@@ -84,13 +87,47 @@ const DiabetesPatientRegister: React.FC = () => {
     Duration_of_Diabetes: "",
     Visual_Acuity: "Normal",
     Hospital_name: "",
+    assigned_doctor: "",
     Date_of_registration: new Date(),
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
 
+  // const validateStep1 = (data: typeof formData): FormErrors => {
+  //   const newErrors: FormErrors = {};
+  //   if (!data.name || !data.name.trim())
+  //     newErrors.name = "Patient name is required.";
+  //   if (!data.age && data.age !== 0) {
+  //     newErrors.age = "Age is required.";
+  //   } else {
+  //     const ageNum = parseInt(String(data.age), 10);
+  //     if (isNaN(ageNum) || ageNum < 18 || ageNum > 90) {
+  //       newErrors.age = "Age must be an integer between 18 and 90 years.";
+  //     }
+  //   }
+  //   if (!data.gender) newErrors.gender = "Gender is required.";
+  //   if (!data.mobile_number || !String(data.mobile_number).trim())
+  //     newErrors.mobile_number = "Mobile number is required.";
+  //   else if (!/^\d{10}$/.test(String(data.mobile_number)))
+  //     newErrors.mobile_number = "Enter a valid 10 digit mobile number.";
+
+  //   return newErrors;
+  // };
   const validateStep1 = (data: typeof formData): FormErrors => {
     const newErrors: FormErrors = {};
+
+    // If OP mode, patient_id is required and must be positive integer
+    if (registerMode === "op") {
+      if (!data.patient_id && data.patient_id !== 0) {
+        newErrors.patient_id = "Patient ID is required for OP patients.";
+      } else {
+        const pid = parseInt(String(data.patient_id), 10);
+        if (isNaN(pid) || pid <= 0) {
+          newErrors.patient_id = "Patient ID must be a positive integer.";
+        }
+      }
+    }
+
     if (!data.name || !data.name.trim())
       newErrors.name = "Patient name is required.";
     if (!data.age && data.age !== 0) {
@@ -221,6 +258,8 @@ const DiabetesPatientRegister: React.FC = () => {
     const newErrors: FormErrors = {};
     if (!data.Hospital_name || !String(data.Hospital_name).trim())
       newErrors.Hospital_name = "Hospital name is required.";
+    if (!data.assigned_doctor || !String(data.assigned_doctor).trim())
+      newErrors.assigned_doctor = "Hospital name is required.";
     if (!data.Date_of_registration)
       newErrors.Date_of_registration = "Registration date is required.";
     return newErrors;
@@ -299,6 +338,7 @@ const DiabetesPatientRegister: React.FC = () => {
       const step3Fields: (keyof FormErrors)[] = [
         "Hospital_name",
         "Date_of_registration",
+        "assigned_doctor",
       ];
 
       if (step1Fields.some((key) => formErrors[key])) setCurrentStep(1);
@@ -312,6 +352,10 @@ const DiabetesPatientRegister: React.FC = () => {
 
     const payload: any = {
       name: formData.name,
+      // ...(formData.patient_id && String(formData.patient_id).trim() !== ""
+      //   ? { patient_id: parseOrUndefined(formData.patient_id) }
+      //   : {}),
+      // include patient_id only when provided (for OP mode it is required)
       ...(formData.patient_id && String(formData.patient_id).trim() !== ""
         ? { patient_id: parseOrUndefined(formData.patient_id) }
         : {}),
@@ -332,6 +376,7 @@ const DiabetesPatientRegister: React.FC = () => {
       Duration_of_Diabetes: parseOrUndefined(formData.Duration_of_Diabetes),
       Visual_Acuity: formData.Visual_Acuity,
       Hospital_name: formData.Hospital_name,
+      assigned_doctor: formData.assigned_doctor,
       Date_of_registration:
         formData.Date_of_registration instanceof Date
           ? formData.Date_of_registration.toISOString().split("T")[0]
@@ -392,17 +437,40 @@ const DiabetesPatientRegister: React.FC = () => {
         throw new Error(apiErrorMessage);
       }
 
+      // const data = await response.json();
+
+      // // ✅ Save composite_id if returned
+      // const compositeId =
+      //   data?.identifiers?.composite_id ?? data?.composite_id ?? null;
+      // if (compositeId) {
+      //   localStorage.setItem("composite_id", String(compositeId));
+      //   localStorage.setItem("patient_id", String(compositeId)); // compatibility
+      // } else if (data?.patient_id) {
+      //   localStorage.setItem("patient_id", String(data.patient_id));
+      // } else if (payload.patient_id) {
+      //   localStorage.setItem("patient_id", String(payload.patient_id));
+      // }
+
       const data = await response.json();
 
-      // ✅ Save composite_id if returned
+      // Save composite_id or patient_id depending on response (backwards compatibility)
       const compositeId =
         data?.identifiers?.composite_id ?? data?.composite_id ?? null;
       if (compositeId) {
         localStorage.setItem("composite_id", String(compositeId));
-        localStorage.setItem("patient_id", String(compositeId)); // compatibility
+        // Do NOT overwrite patient_id with composite_id in all cases; set patient_id properly if returned
+        if (data?.identifiers?.patient_id) {
+          localStorage.setItem(
+            "patient_id",
+            String(data.identifiers.patient_id)
+          );
+        } else if (data?.patient_id) {
+          localStorage.setItem("patient_id", String(data.patient_id));
+        }
       } else if (data?.patient_id) {
         localStorage.setItem("patient_id", String(data.patient_id));
       } else if (payload.patient_id) {
+        // If OP mode and backend didn't return anything but we sent patient_id, store it
         localStorage.setItem("patient_id", String(payload.patient_id));
       }
 
@@ -535,10 +603,229 @@ const DiabetesPatientRegister: React.FC = () => {
 
   const renderFormStep = () => {
     switch (currentStep) {
+      // case 1:
+      // return (
+      //   <div className="space-y-6">
+      //     <div className="grid grid-cols-1 gap-3">
+      //       <div className="space-y-2">
+      //         <label
+      //           htmlFor="name"
+      //           className="text-sm font-medium text-gray-700 flex items-center gap-2"
+      //         >
+      //           <Badge variant="destructive" className="px-1 py-0 text-xs">
+      //             *
+      //           </Badge>
+      //           Full Name
+      //         </label>
+      //         <Input
+      //           id="name"
+      //           name="name"
+      //           value={formData.name}
+      //           onChange={handleChange}
+      //           className={cn(
+      //             "transition-all duration-200",
+      //             errors.name && "border-red-500 focus:border-red-500"
+      //           )}
+      //           placeholder="Enter patient's full name"
+      //         />
+      //         {errors.name && (
+      //           <p className="text-red-500 text-sm flex items-center gap-1">
+      //             <AlertCircle className="h-4 w-4" />
+      //             {errors.name}
+      //           </p>
+      //         )}
+      //       </div>
+
+      //       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      //         <div className="space-y-2">
+      //           <label
+      //             htmlFor="age"
+      //             className="text-sm font-medium text-gray-700 flex items-center gap-2"
+      //           >
+      //             <Badge variant="destructive" className="px-1 py-0 text-xs">
+      //               *
+      //             </Badge>
+      //             Age
+      //           </label>
+      //           <Input
+      //             type="number"
+      //             id="age"
+      //             name="age"
+      //             value={formData.age}
+      //             onChange={handleChange}
+      //             step="1"
+      //             className={cn(
+      //               "transition-all duration-200",
+      //               errors.age && "border-red-500 focus:border-red-500"
+      //             )}
+      //             placeholder="Enter age in years"
+      //           />
+      //           {errors.age && (
+      //             <p className="text-red-500 text-sm flex items-center gap-1">
+      //               <AlertCircle className="h-4 w-4" />
+      //               {errors.age}
+      //             </p>
+      //           )}
+      //         </div>
+
+      //         <div className="space-y-2">
+      //           <label
+      //             htmlFor="gender"
+      //             className="text-sm font-medium text-gray-700 flex items-center gap-2"
+      //           >
+      //             <Badge variant="destructive" className="px-1 py-0 text-xs">
+      //               *
+      //             </Badge>
+      //             Gender
+      //           </label>
+      //           <DropdownMenu>
+      //             <DropdownMenuTrigger asChild>
+      //               <Button
+      //                 variant="outline"
+      //                 className={cn(
+      //                   "w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm shadow-sm",
+      //                   "flex items-center justify-between",
+      //                   !formData.gender && "text-muted-foreground",
+      //                   errors.gender && "border-red-500 focus:ring-red-500"
+      //                 )}
+      //               >
+      //                 {formData.gender || "Select gender"}
+      //                 <ChevronDown className="h-4 w-4 opacity-50 ml-2" />
+      //               </Button>
+      //             </DropdownMenuTrigger>
+      //             <DropdownMenuContent className="w-full bg-white shadow-md border mt-1 z-50">
+      //               {["Male", "Female", "Other"].map((option) => (
+      //                 <DropdownMenuItem
+      //                   key={option}
+      //                   onSelect={() =>
+      //                     setFormData((prev: any) => ({
+      //                       ...prev,
+      //                       gender: option,
+      //                     }))
+      //                   }
+      //                   className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-100"
+      //                 >
+      //                   {option}
+      //                 </DropdownMenuItem>
+      //               ))}
+      //             </DropdownMenuContent>
+      //           </DropdownMenu>
+      //           {errors.gender && (
+      //             <p className="text-red-500 text-sm flex items-center gap-1">
+      //               <AlertCircle className="h-4 w-4" />
+      //               {errors.gender}
+      //             </p>
+      //           )}
+      //         </div>
+      //       </div>
+
+      //       <div className="space-y-2">
+      //         <label
+      //           htmlFor="mobile_number"
+      //           className="text-sm font-medium text-gray-700 flex items-center gap-2"
+      //         >
+      //           <Badge variant="destructive" className="px-1 py-0 text-xs">
+      //             *
+      //           </Badge>
+      //           <Phone className="h-4 w-4" />
+      //           Mobile Number
+      //         </label>
+      //         <Input
+      //           type="tel"
+      //           id="mobile_number"
+      //           name="mobile_number"
+      //           value={formData.mobile_number}
+      //           onChange={handleChange}
+      //           className={cn(
+      //             "transition-all duration-200",
+      //             errors.mobile_number &&
+      //               "border-red-500 focus:border-red-500"
+      //           )}
+      //           placeholder="Enter mobile number"
+      //         />
+      //         {errors.mobile_number && (
+      //           <p className="text-red-500 text-sm flex items-center gap-1">
+      //             <AlertCircle className="h-4 w-4" />
+      //             {errors.mobile_number}
+      //           </p>
+      //         )}
+      //       </div>
+      //     </div>
+      //   </div>
+      // );
+
       case 1:
         return (
           <div className="space-y-6">
+            {/* NEW: Register Mode Toggle */}
+            <div className="flex items-center gap-3">
+              <div className="text-sm font-medium">Registration Type:</div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRegisterMode("new")}
+                  className={cn(
+                    "px-3 py-1 rounded-md border",
+                    registerMode === "new"
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white text-gray-700"
+                  )}
+                >
+                  New Patient
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRegisterMode("op")}
+                  className={cn(
+                    "px-3 py-1 rounded-md border",
+                    registerMode === "op"
+                      ? "bg-indigo-600 text-white border-indigo-600"
+                      : "bg-white text-gray-700"
+                  )}
+                >
+                  OP / Existing Patient
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">
+              {registerMode === "new"
+                ? "Register a brand new patient. No patient_id required."
+                : "Link this visit to an existing patient by entering their patient_id (required)."}
+            </p>
+
             <div className="grid grid-cols-1 gap-3">
+              {/* patient_id input shows only for OP mode */}
+              {registerMode === "op" && (
+                <div className="space-y-2">
+                  <label
+                    htmlFor="patient_id"
+                    className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                  >
+                    <Badge variant="destructive" className="px-1 py-0 text-xs">
+                      *
+                    </Badge>
+                    Patient ID (Existing)
+                  </label>
+                  <Input
+                    id="patient_id"
+                    name="patient_id"
+                    value={formData.patient_id}
+                    onChange={handleChange}
+                    placeholder="Enter existing patient ID (numeric)"
+                    className={cn(
+                      "transition-all duration-200",
+                      errors.patient_id && "border-red-500 focus:border-red-500"
+                    )}
+                  />
+                  {errors.patient_id && (
+                    <p className="text-red-500 text-sm flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {errors.patient_id}
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="space-y-2">
                 <label
                   htmlFor="name"
@@ -610,44 +897,45 @@ const DiabetesPatientRegister: React.FC = () => {
                     </Badge>
                     Gender
                   </label>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm shadow-sm",
-                          "flex items-center justify-between",
-                          !formData.gender && "text-muted-foreground",
-                          errors.gender && "border-red-500 focus:ring-red-500"
-                        )}
-                      >
-                        {formData.gender || "Select gender"}
-                        <ChevronDown className="h-4 w-4 opacity-50 ml-2" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-full bg-white shadow-md border mt-1 z-50">
-                      {["Male", "Female", "Other"].map((option) => (
-                        <DropdownMenuItem
-                          key={option}
-                          onSelect={() =>
-                            setFormData((prev: any) => ({
-                              ...prev,
-                              gender: option,
-                            }))
-                          }
-                          className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-100"
+                  <div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm shadow-sm",
+                            !formData.gender && "text-muted-foreground",
+                            errors.gender && "border-red-500 focus:ring-red-500"
+                          )}
                         >
-                          {option}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  {errors.gender && (
-                    <p className="text-red-500 text-sm flex items-center gap-1">
-                      <AlertCircle className="h-4 w-4" />
-                      {errors.gender}
-                    </p>
-                  )}
+                          {formData.gender || "Select gender"}
+                          <ChevronDown className="h-4 w-4 opacity-50 ml-2" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-full bg-white shadow-md border mt-1 z-50">
+                        {["Male", "Female", "Other"].map((option) => (
+                          <DropdownMenuItem
+                            key={option}
+                            onSelect={() =>
+                              setFormData((prev: any) => ({
+                                ...prev,
+                                gender: option,
+                              }))
+                            }
+                            className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-100"
+                          >
+                            {option}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    {errors.gender && (
+                      <p className="text-red-500 text-sm flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.gender}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -967,6 +1255,38 @@ const DiabetesPatientRegister: React.FC = () => {
                     {errors.Date_of_registration}
                   </p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="Hospital_name"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    *
+                  </Badge>
+                  <Building2 className="h-4 w-4 text-purple-600" />
+                  assigned_doctor
+                </label>
+                <Input
+                  type="text"
+                  id="assigned_doctor"
+                  name="assigned_doctor"
+                  value={formData.assigned_doctor}
+                  onChange={handleChange}
+                  className={cn(
+                    "transition-all duration-200"
+                    // errors.assigned_doctor &&
+                    //   "border-red-500 focus:border-red-500"
+                  )}
+                  placeholder="Enter hospital name"
+                />
+                {/* {errors.Hospital_name && (
+                  <p className="text-red-500 text-sm flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.Hospital_name}
+                  </p>
+                )} */}
               </div>
             </div>
           </div>
