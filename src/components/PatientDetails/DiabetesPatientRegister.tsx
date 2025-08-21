@@ -306,7 +306,7 @@ const DiabetesPatientRegister = () => {
       delete (payload as any).num_visits;
     }
 
-    const API_URL = `https://631701654693.ngrok-free.app/?patient_id=${formData.patient_id}`;
+    const API_URL = `https://791367af3e6e.ngrok-free.app/?patient_id=${formData.patient_id}`;
 
     let token =
       localStorage.getItem("token") ||
