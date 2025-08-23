@@ -1,15 +1,13 @@
 "use client";
-
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, Eye, FileText, Printer } from "lucide-react";
+import { Download, FileText, Printer } from "lucide-react";
 import html2pdf from "html2pdf.js";
 
 interface EyeData {
@@ -25,10 +23,10 @@ interface ReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   patientId: string;
-  leftEyeImage: string;
-  rightEyeImage: string;
-  leftEyeData: EyeData;
-  rightEyeData: EyeData;
+  leftEyeImage?: string;
+  rightEyeImage?: string;
+  leftEyeData?: EyeData;
+  rightEyeData?: EyeData;
   patientName?: string;
   dateOfBirth?: string;
   gender?: string;
@@ -53,7 +51,8 @@ const PDFReport = ({
   institutionName = "[Institution Name]",
   reportId = `RPT-${Date.now()}`,
 }: Omit<ReportModalProps, "isOpen" | "onClose">) => {
-  const getSeverityColor = (stage: string) => {
+  const getSeverityColor = (stage?: string) => {
+    if (!stage) return "text-gray-600";
     switch (stage.toLowerCase()) {
       case "no dr":
         return "text-green-600";
@@ -70,7 +69,9 @@ const PDFReport = ({
     }
   };
 
-  const getRiskLevel = (riskFactor: number) => {
+  const getRiskLevel = (riskFactor?: number) => {
+    if (riskFactor == null || Number.isNaN(riskFactor))
+      return { level: "N/A", color: "text-gray-600" };
     if (riskFactor <= 2) return { level: "Low", color: "text-green-600" };
     if (riskFactor <= 4) return { level: "Moderate", color: "text-yellow-600" };
     return { level: "High", color: "text-red-600" };
@@ -83,54 +84,16 @@ const PDFReport = ({
     >
       <style>{`
         @media print {
-          body {
-            margin: 0;
-            padding: 0;
-            -webkit-print-color-adjust: exact;
-            color-adjust: exact;
-          }
-          .no-print {
-            display: none !important;
-          }
-          .page-break {
-            page-break-before: always;
-          }
-          .avoid-break {
-            page-break-inside: avoid;
-          }
-          table {
-            page-break-inside: auto;
-          }
-          tr {
-            page-break-inside: avoid;
-            page-break-after: auto;
-          }
-          td {
-            page-break-inside: avoid;
-            page-break-after: auto;
-          }
-          .print-header {
-            position: running(header);
-            font-size: 12px;
-            text-align: center;
-            color: #666;
-          }
-          @page {
-            margin: 20mm;
-            size: A4;
-            @top-center {
-              content: element(header);
-            }
-          }
+          body { margin:0; padding:0; -webkit-print-color-adjust: exact; color-adjust: exact; }
+          .no-print { display: none !important; }
+          .page-break { page-break-before: always; }
+          .avoid-break { page-break-inside: avoid; }
+          table { page-break-inside: auto; }
+          tr, td { page-break-inside: avoid; page-break-after: auto; }
         }
       `}</style>
 
-      {/* Print Header */}
-      <div className="print-header no-screen">
-        Medical Report - {patientName} - Page
-      </div>
-
-      {/* Header Section */}
+      {/* Header */}
       <div className="border-b-4 border-blue-600 pb-6 mb-8 avoid-break">
         <div className="flex justify-between items-start mb-4">
           <div>
@@ -234,24 +197,32 @@ const PDFReport = ({
                   Fundus Image
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
-                  <div className="w-32 h-32 mx-auto bg-black flex items-center justify-center rounded-lg shadow-md">
-                    <img
-                      src={rightEyeImage}
-                      alt="Right Eye Fundus"
-                      className="w-full h-full object-cover rounded-lg"
-                      style={{ maxWidth: "128px", maxHeight: "128px" }}
-                    />
-                  </div>
+                  {rightEyeImage ? (
+                    <div className="w-32 h-32 mx-auto bg-black flex items-center justify-center rounded-lg shadow-md">
+                      <img
+                        src={rightEyeImage}
+                        alt="Right Eye Fundus"
+                        className="w-full h-full object-cover rounded-lg"
+                        style={{ maxWidth: 128, maxHeight: 128 }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-gray-600">N/A</div>
+                  )}
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
-                  <div className="w-32 h-32 mx-auto bg-black flex items-center justify-center rounded-lg shadow-md">
-                    <img
-                      src={leftEyeImage}
-                      alt="Left Eye Fundus"
-                      className="w-full h-full object-cover rounded-lg"
-                      style={{ maxWidth: "128px", maxHeight: "128px" }}
-                    />
-                  </div>
+                  {leftEyeImage ? (
+                    <div className="w-32 h-32 mx-auto bg-black flex items-center justify-center rounded-lg shadow-md">
+                      <img
+                        src={leftEyeImage}
+                        alt="Left Eye Fundus"
+                        className="w-full h-full object-cover rounded-lg"
+                        style={{ maxWidth: 128, maxHeight: 128 }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-gray-600">N/A</div>
+                  )}
                 </td>
               </tr>
 
@@ -260,28 +231,40 @@ const PDFReport = ({
                   DR Severity Level
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
-                  <span
-                    className={`font-bold text-lg ${getSeverityColor(
-                      rightEyeData.Stage
-                    )}`}
-                  >
-                    {rightEyeData.Stage}
-                  </span>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Grade: {rightEyeData.predicted_class}
-                  </div>
+                  {rightEyeData ? (
+                    <>
+                      <span
+                        className={`font-bold text-lg ${getSeverityColor(
+                          rightEyeData.Stage
+                        )}`}
+                      >
+                        {rightEyeData.Stage}
+                      </span>
+                      <div className="text-sm text-gray-600 mt-1">
+                        Grade: {rightEyeData.predicted_class}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-gray-600">N/A</div>
+                  )}
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
-                  <span
-                    className={`font-bold text-lg ${getSeverityColor(
-                      leftEyeData.Stage
-                    )}`}
-                  >
-                    {leftEyeData.Stage}
-                  </span>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Grade: {leftEyeData.predicted_class}
-                  </div>
+                  {leftEyeData ? (
+                    <>
+                      <span
+                        className={`font-bold text-lg ${getSeverityColor(
+                          leftEyeData.Stage
+                        )}`}
+                      >
+                        {leftEyeData.Stage}
+                      </span>
+                      <div className="text-sm text-gray-600 mt-1">
+                        Grade: {leftEyeData.predicted_class}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-gray-600">N/A</div>
+                  )}
                 </td>
               </tr>
 
@@ -290,30 +273,40 @@ const PDFReport = ({
                   Confidence Level
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
-                  <div className="font-bold text-lg">
-                    {rightEyeData.confidence.toFixed(1)}%
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Confidence:{" "}
-                    {rightEyeData.confidence > 80
-                      ? "High"
-                      : rightEyeData.confidence > 60
-                      ? "Medium"
-                      : "Low"}
-                  </div>
+                  {rightEyeData ? (
+                    <>
+                      <div className="font-bold text-lg">
+                        {rightEyeData.confidence.toFixed(1)}%
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {rightEyeData.confidence > 80
+                          ? "High"
+                          : rightEyeData.confidence > 60
+                          ? "Medium"
+                          : "Low"}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-gray-600">N/A</div>
+                  )}
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
-                  <div className="font-bold text-lg">
-                    {leftEyeData.confidence.toFixed(1)}%
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Confidence:{" "}
-                    {leftEyeData.confidence > 80
-                      ? "High"
-                      : leftEyeData.confidence > 60
-                      ? "Medium"
-                      : "Low"}
-                  </div>
+                  {leftEyeData ? (
+                    <>
+                      <div className="font-bold text-lg">
+                        {leftEyeData.confidence.toFixed(1)}%
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {leftEyeData.confidence > 80
+                          ? "High"
+                          : leftEyeData.confidence > 60
+                          ? "Medium"
+                          : "Low"}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-gray-600">N/A</div>
+                  )}
                 </td>
               </tr>
 
@@ -322,37 +315,46 @@ const PDFReport = ({
                   Risk Assessment
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
-                  <span
-                    className={`font-bold text-lg ${
-                      getRiskLevel(rightEyeData.Risk_Factor).color
-                    }`}
-                  >
-                    {getRiskLevel(rightEyeData.Risk_Factor).level}
-                  </span>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Score: {rightEyeData.Risk_Factor}/5
-                  </div>
+                  {rightEyeData ? (
+                    <>
+                      <span
+                        className={`font-bold text-lg ${
+                          getRiskLevel(rightEyeData.Risk_Factor).color
+                        }`}
+                      >
+                        {getRiskLevel(rightEyeData.Risk_Factor).level}
+                      </span>
+                      <div className="text-sm text-gray-600 mt-1">
+                        Score: {rightEyeData.Risk_Factor}/5
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-gray-600">N/A</div>
+                  )}
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
-                  <span
-                    className={`font-bold text-lg ${
-                      getRiskLevel(leftEyeData.Risk_Factor).level
-                    }`}
-                  >
-                    {getRiskLevel(leftEyeData.Risk_Factor).level}
-                  </span>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Score: {leftEyeData.Risk_Factor}/5
-                  </div>
+                  {leftEyeData ? (
+                    <>
+                      <span
+                        className={`font-bold text-lg ${
+                          getRiskLevel(leftEyeData.Risk_Factor).color
+                        }`}
+                      >
+                        {getRiskLevel(leftEyeData.Risk_Factor).level}
+                      </span>
+                      <div className="text-sm text-gray-600 mt-1">
+                        Score: {leftEyeData.Risk_Factor}/5
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-gray-600">N/A</div>
+                  )}
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
-
-      {/* Page Break for Multi-page content */}
-      <div className="page-break"></div>
 
       {/* Detailed Clinical Interpretation */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 avoid-break">
@@ -363,13 +365,17 @@ const PDFReport = ({
           <div className="space-y-3">
             <div>
               <span className="font-semibold text-gray-700">Findings:</span>
-              <p className="text-gray-800 mt-1">{rightEyeData.explanation}</p>
+              <p className="text-gray-800 mt-1">
+                {rightEyeData?.explanation ?? "N/A"}
+              </p>
             </div>
             <div>
               <span className="font-semibold text-gray-700">
                 Clinical Notes:
               </span>
-              <p className="text-gray-800 mt-1">{rightEyeData.Note}</p>
+              <p className="text-gray-800 mt-1">
+                {rightEyeData?.Note ?? "N/A"}
+              </p>
             </div>
           </div>
         </div>
@@ -381,19 +387,21 @@ const PDFReport = ({
           <div className="space-y-3">
             <div>
               <span className="font-semibold text-gray-700">Findings:</span>
-              <p className="text-gray-800 mt-1">{leftEyeData.explanation}</p>
+              <p className="text-gray-800 mt-1">
+                {leftEyeData?.explanation ?? "N/A"}
+              </p>
             </div>
             <div>
               <span className="font-semibold text-gray-700">
                 Clinical Notes:
               </span>
-              <p className="text-gray-800 mt-1">{leftEyeData.Note}</p>
+              <p className="text-gray-800 mt-1">{leftEyeData?.Note ?? "N/A"}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Clinical Recommendations */}
+      {/* Clinical Recommendations & Disclaimers */}
       <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-8 avoid-break">
         <h4 className="font-bold text-yellow-800 mb-4 text-lg">
           CLINICAL RECOMMENDATIONS
@@ -409,7 +417,6 @@ const PDFReport = ({
         </div>
       </div>
 
-      {/* Important Disclaimers */}
       <div className="bg-red-50 border-2 border-red-200 p-6 mb-8 avoid-break">
         <h4 className="font-bold text-red-800 mb-3 text-lg">
           IMPORTANT MEDICAL DISCLAIMERS
@@ -425,14 +432,6 @@ const PDFReport = ({
             clinical correlation and should not replace comprehensive
             ophthalmological examination.
           </p>
-          <p>
-            ⚠️ <strong>LIMITATION:</strong> AI analysis may have limitations in
-            detecting certain pathologies. Clinical judgment remains paramount.
-          </p>
-          <p>
-            ⚠️ <strong>URGENT REFERRAL:</strong> Any concerning findings require
-            immediate ophthalmological consultation.
-          </p>
         </div>
       </div>
 
@@ -447,7 +446,7 @@ const PDFReport = ({
             <p className="text-gray-600">
               Diabetic Retinopathy Analysis Platform
             </p>
-            <p className="text-gray-600">Version 2.0 | FDA Cleared</p>
+            <p className="text-gray-600">Version 2.0</p>
           </div>
 
           <div className="text-center">
@@ -468,146 +467,73 @@ const PDFReport = ({
             </div>
           </div>
         </div>
-
-        <div className="text-center mt-6 pt-4 border-t border-gray-200 gap-6">
-          <p className="text-xs text-gray-500 mb-8">
-            This report complies with international medical documentation
-            standards (ISO 27799, HL7 FHIR, DICOM SR)
-          </p>
-          <p>
-
-          </p>
-        </div>
       </div>
     </div>
   );
 };
 
-export function ReportModal({
-  isOpen,
-  onClose,
-  patientId,
-  leftEyeImage,
-  rightEyeImage,
-  leftEyeData,
-  rightEyeData,
-  patientName,
-  dateOfBirth,
-  gender,
-  examDate,
-  physicianName,
-  institutionName,
-  reportId,
-}: ReportModalProps) {
+export function ReportModal(props: ReportModalProps) {
+  const {
+    isOpen,
+    onClose,
+    patientId,
+    leftEyeImage,
+    rightEyeImage,
+    leftEyeData,
+    rightEyeData,
+    patientName,
+    dateOfBirth,
+    gender,
+    examDate,
+    physicianName,
+    institutionName,
+    reportId,
+  } = props;
+
   const targetRef = useRef<HTMLDivElement | null>(null);
-  const canRenderReport =
-    leftEyeImage && rightEyeImage && leftEyeData && rightEyeData;
+
+  const canRenderReport = Boolean(
+    leftEyeImage && rightEyeImage && leftEyeData && rightEyeData
+  );
 
   const handlePrintReport = () => {
-    if (targetRef.current) {
-      const printWindow = window.open("", "_blank", "width=1200,height=800");
-      if (printWindow) {
-        const reportHTML = targetRef.current.innerHTML;
-
-        printWindow.document.write(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>Medical Report - ${patientName || patientId}</title>
-              <meta charset="utf-8">
-              <style>
-                * { box-sizing: border-box; }
-                body { 
-                  margin: 0; 
-                  padding: 20px;
-                  font-family: 'Times New Roman', Times, serif;
-                  line-height: 1.4;
-                  color: #000;
-                  background: white;
-                }
-                .bg-blue-50 { background-color: #eff6ff !important; }
-                .bg-gray-50 { background-color: #f9fafb !important; }
-                .bg-blue-100 { background-color: #dbeafe !important; }
-                .bg-yellow-50 { background-color: #fefce8 !important; }
-                .bg-red-50 { background-color: #fef2f2 !important; }
-                .bg-green-50 { background-color: #f0fdf4 !important; }
-                .text-blue-800 { color: #1e40af !important; }
-                .text-gray-600 { color: #4b5563 !important; }
-                .text-gray-700 { color: #374151 !important; }
-                .text-gray-800 { color: #1f2937 !important; }
-                .text-red-800 { color: #991b1b !important; }
-                .text-yellow-800 { color: #92400e !important; }
-                .text-green-800 { color: #166534 !important; }
-                .text-green-600 { color: #16a34a !important; }
-                .text-yellow-600 { color: #ca8a04 !important; }
-                .text-orange-600 { color: #ea580c !important; }
-                .text-red-600 { color: #dc2626 !important; }
-                .border-blue-600 { border-color: #2563eb !important; }
-                .border-yellow-400 { border-color: #facc15 !important; }
-                .border-red-200 { border-color: #fecaca !important; }
-                .border-gray-300 { border-color: #d1d5db !important; }
-                table { border-collapse: collapse; width: 100%; margin: 10px 0; }
-                th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
-                th { background-color: #2563eb !important; color: white !important; font-weight: bold; }
-                .rounded-lg { border-radius: 8px; }
-                .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-                img { max-width: 100%; height: auto; }
-                
-                @media print {
-                  body { 
-                    margin: 0; 
-                    padding: 15mm;
-                    -webkit-print-color-adjust: exact;
-                    color-adjust: exact;
-                  }
-                  .page-break { page-break-before: always; }
-                  .avoid-break { page-break-inside: avoid; }
-                  @page { 
-                    margin: 15mm;
-                    size: A4;
-                  }
-                  table { page-break-inside: auto; }
-                  tr { page-break-inside: avoid; page-break-after: auto; }
-                }
-              </style>
-            </head>
-            <body>
-              ${reportHTML}
-            </body>
-          </html>
-        `);
-
-        printWindow.document.close();
-        printWindow.focus();
-
-        // Wait for images to load before printing
-        setTimeout(() => {
-          printWindow.print();
-        }, 1000);
-      }
-    }
+    if (!targetRef.current) return;
+    const html = targetRef.current.innerHTML;
+    const w = window.open("", "_blank", "width=1200,height=800");
+    if (!w) return;
+    w.document.write(`
+      <!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Medical Report</title>
+          <style>
+            body { font-family: 'Times New Roman', Times, serif; padding: 20px; color: #000; background: #fff; }
+            img { max-width:100%; height:auto; }
+          </style>
+        </head>
+        <body>
+          ${html}
+        </body>
+      </html>
+    `);
+    w.document.close();
+    setTimeout(() => w.print(), 700);
   };
 
   const handleDownloadPDF = () => {
-    if (targetRef.current) {
-      const opt = {
+    if (!targetRef.current) return;
+    html2pdf()
+      .set({
         margin: [0.5, 0.5],
         filename: `${patientName || patientId}-MedicalReport.pdf`,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-        },
-        jsPDF: {
-          unit: "in",
-          format: "a4",
-          orientation: "portrait",
-        },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
         pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-      };
-
-      html2pdf().set(opt).from(targetRef.current).save();
-    }
+      })
+      .from(targetRef.current)
+      .save();
   };
 
   return (
@@ -622,7 +548,6 @@ export function ReportModal({
 
         {canRenderReport ? (
           <div className="space-y-4">
-            {/* Preview Section */}
             <div className="bg-white rounded-lg p-4 max-h-[90vh] overflow-y-auto">
               <div ref={targetRef}>
                 <PDFReport
@@ -642,7 +567,6 @@ export function ReportModal({
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex gap-2 justify-center flex-wrap">
               <Button
                 onClick={handlePrintReport}
@@ -671,3 +595,5 @@ export function ReportModal({
     </Dialog>
   );
 }
+
+export default ReportModal;

@@ -533,7 +533,11 @@ const DiabetesPatientRegister: React.FC = () => {
             {Math.round(progressPercentage)}%
           </span>
         </div>
-        <Progress value={progressPercentage} className="h-2" />
+
+        <Progress
+          value={progressPercentage}
+          className="h-2 [&>div]:bg-green-600 bg-gray-200"
+        />
       </div>
       <div className="p-2 md:p-2 space-y-2">
         {steps.map((step) => {
@@ -636,9 +640,9 @@ const DiabetesPatientRegister: React.FC = () => {
                     htmlFor="patient_id"
                     className="text-sm font-medium text-gray-700 flex items-center gap-2"
                   >
-                    <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                       *
-                    </Badge>
+                    </Badge> */}
                     Patient ID (Existing)
                   </label>
                   <Input
@@ -666,9 +670,9 @@ const DiabetesPatientRegister: React.FC = () => {
                   htmlFor="name"
                   className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                  {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                     *
-                  </Badge>
+                  </Badge> */}
                   Full Name
                 </label>
                 <Input
@@ -696,9 +700,9 @@ const DiabetesPatientRegister: React.FC = () => {
                     htmlFor="age"
                     className="text-sm font-medium text-gray-700 flex items-center gap-2"
                   >
-                    <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                       *
-                    </Badge>
+                    </Badge> */}
                     Age
                   </label>
                   <Input
@@ -727,9 +731,9 @@ const DiabetesPatientRegister: React.FC = () => {
                     htmlFor="gender"
                     className="text-sm font-medium text-gray-700 flex items-center gap-2"
                   >
-                    <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                       *
-                    </Badge>
+                    </Badge> */}
                     Gender
                   </label>
                   <div>
@@ -747,7 +751,7 @@ const DiabetesPatientRegister: React.FC = () => {
                           <ChevronDown className="h-4 w-4 opacity-50 ml-2" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-full bg-white shadow-md border mt-1 z-50">
+                      <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-white shadow-md border mt-1 z-50">
                         {["Male", "Female", "Other"].map((option) => (
                           <DropdownMenuItem
                             key={option}
@@ -779,9 +783,9 @@ const DiabetesPatientRegister: React.FC = () => {
                   htmlFor="mobile_number"
                   className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                  {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                     *
-                  </Badge>
+                  </Badge> */}
                   <Phone className="h-4 w-4" />
                   Mobile Number
                 </label>
@@ -1008,9 +1012,9 @@ const DiabetesPatientRegister: React.FC = () => {
                   htmlFor="Hospital_name"
                   className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                  {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                     *
-                  </Badge>
+                  </Badge> */}
                   <Building2 className="h-4 w-4 text-purple-600" />
                   Hospital Name
                 </label>
@@ -1040,9 +1044,9 @@ const DiabetesPatientRegister: React.FC = () => {
                   htmlFor="Date_of_registration"
                   className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                  {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                     *
-                  </Badge>
+                  </Badge> */}
                   <Calendar className="h-4 w-4 text-purple-600" />
                   Date of Registration
                 </label>
@@ -1097,9 +1101,9 @@ const DiabetesPatientRegister: React.FC = () => {
                   htmlFor="Hospital_name"
                   className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                  {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                     *
-                  </Badge>
+                  </Badge> */}
                   <Building2 className="h-4 w-4 text-purple-600" />
                   assigned_doctor
                 </label>
