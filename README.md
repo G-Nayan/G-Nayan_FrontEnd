@@ -876,3 +876,7 @@ And if you're hungry for more than just a course and want to understand how we l
 </a>
 
 #
+# Super  Admin Access
+ADMIN_USER="iscssuperadmin"
+ADMIN_PASS="Iscs5114-10"
+ADMIN_EMAIL="github@iscstech.co.in"

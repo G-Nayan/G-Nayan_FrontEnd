@@ -449,7 +449,7 @@ export function Analysis() {
   return (
     <>
       <div className="relative min-h-screen w-full bg-[#0A192F]">
-        <div className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
+        <div className="relative min-h-[40vh] flex items-center justify-center overflow-hidden">
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-tight max-w-5xl text-center">
               <span className="inline-block relative">G-NAYANA</span>
@@ -460,7 +460,7 @@ export function Analysis() {
           </div>
         </div>
 
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-0">
           <div className="max-w-6xl mx-auto">
             {showInputCard && (
               <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-[#112240] text-white">

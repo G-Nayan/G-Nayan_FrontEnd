@@ -94,7 +94,7 @@ const PDFReport = ({
       `}</style>
 
       {/* Header */}
-      <div className="border-b-4 border-blue-600 pb-6 mb-8 avoid-break">
+      <div className="border-b-4 border-blue-600 pb-6 mb-4 avoid-break">
         <div className="flex justify-between items-start mb-4">
           <div>
             <h1 className="text-3xl font-bold text-blue-800 mb-2">
@@ -110,17 +110,17 @@ const PDFReport = ({
           </div>
         </div>
 
-        <div className="bg-blue-50 p-4 rounded-lg">
+        <div className=" p-4 rounded-lg">
           <h2 className="font-bold text-blue-800 mb-2">
             Institution Information
           </h2>
-          <p className="font-semibold">{institutionName}</p>
-          <p>Attending Physician: {physicianName}</p>
+          <p className="font-semibold">{institutionName || "Not mentioned"} </p>
+          {/* <p>Attending Physician: {physicianName}</p> */}
         </div>
       </div>
 
       {/* Patient Demographics */}
-      <div className="grid grid-cols-2 gap-6 mb-8 avoid-break">
+      <div className="grid grid-cols-2 gap-3 mb-4 avoid-break">
         <div className="bg-gray-50 p-4 rounded-lg">
           <h3 className="font-bold text-gray-800 mb-3 border-b border-gray-300 pb-2">
             PATIENT DEMOGRAPHICS
@@ -134,10 +134,10 @@ const PDFReport = ({
               <span className="font-medium">Patient ID:</span>
               <span className="font-mono">{patientId}</span>
             </div>
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between">
               <span className="font-medium">Date of Birth:</span>
               <span>{dateOfBirth}</span>
-            </div>
+            </div> */}
             <div className="flex justify-between">
               <span className="font-medium">Gender:</span>
               <span>{gender}</span>
@@ -162,24 +162,24 @@ const PDFReport = ({
               <span className="font-medium">Analysis Method:</span>
               <span>AI-Assisted</span>
             </div>
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between">
               <span className="font-medium">Standard:</span>
               <span>ICDR Classification</span>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
 
       {/* Clinical Findings */}
-      <div className="mb-8 avoid-break">
-        <h3 className="text-xl font-bold text-gray-800 mb-4 bg-blue-100 p-3 rounded-lg">
+      <div className="mb-4 avoid-break">
+        <h3 className="text-xl font-bold text-gray-800 mb-4  p-3 rounded-lg">
           CLINICAL FINDINGS & ANALYSIS
         </h3>
 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse border-2 border-gray-300">
             <thead>
-              <tr className="bg-blue-600 text-white">
+              <tr className="bg-blue-100 text-gray-900">
                 <th className="border border-gray-300 px-4 py-3 text-left font-bold">
                   PARAMETER
                 </th>
@@ -198,12 +198,12 @@ const PDFReport = ({
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
                   {rightEyeImage ? (
-                    <div className="w-32 h-32 mx-auto bg-black flex items-center justify-center rounded-lg shadow-md">
+                    <div className="w-44 h-44 mx-auto bg-black flex items-center justify-center rounded-lg shadow-md">
                       <img
                         src={rightEyeImage}
                         alt="Right Eye Fundus"
                         className="w-full h-full object-cover rounded-lg"
-                        style={{ maxWidth: 128, maxHeight: 128 }}
+                        style={{ maxWidth: 264, maxHeight: 264 }}
                       />
                     </div>
                   ) : (
@@ -212,12 +212,12 @@ const PDFReport = ({
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
                   {leftEyeImage ? (
-                    <div className="w-32 h-32 mx-auto bg-black flex items-center justify-center rounded-lg shadow-md">
+                    <div className="w-44 h-44 mx-auto bg-gray-50 flex items-center justify-center rounded-lg shadow-md">
                       <img
                         src={leftEyeImage}
                         alt="Left Eye Fundus"
                         className="w-full h-full object-cover rounded-lg"
-                        style={{ maxWidth: 128, maxHeight: 128 }}
+                        style={{ maxWidth: 264, maxHeight: 264 }}
                       />
                     </div>
                   ) : (
@@ -357,7 +357,7 @@ const PDFReport = ({
       </div>
 
       {/* Detailed Clinical Interpretation */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 avoid-break">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4 avoid-break">
         <div className="bg-blue-50 p-6 rounded-lg">
           <h4 className="font-bold text-blue-800 mb-4 text-lg">
             RIGHT EYE (OD) - CLINICAL INTERPRETATION
@@ -402,8 +402,8 @@ const PDFReport = ({
       </div>
 
       {/* Clinical Recommendations & Disclaimers */}
-      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-8 avoid-break">
-        <h4 className="font-bold text-yellow-800 mb-4 text-lg">
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-2 mb-4 avoid-break">
+        <h4 className="font-bold text-yellow-800 mb-2 text-lg">
           CLINICAL RECOMMENDATIONS
         </h4>
         <div className="space-y-2 text-gray-800">
@@ -417,7 +417,7 @@ const PDFReport = ({
         </div>
       </div>
 
-      <div className="bg-red-50 border-2 border-red-200 p-6 mb-8 avoid-break">
+      <div className="bg-red-50 border-2 border-red-200 p-2 mb-4 avoid-break">
         <h4 className="font-bold text-red-800 mb-3 text-lg">
           IMPORTANT MEDICAL DISCLAIMERS
         </h4>
@@ -436,7 +436,7 @@ const PDFReport = ({
       </div>
 
       {/* Footer */}
-      <div className="border-t-2 border-gray-300 pt-6 avoid-break">
+      <div className="border-t-2 border-gray-300 pt-3 mb-3 avoid-break">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
           <div>
             <h5 className="font-bold text-gray-800 mb-2">
@@ -521,20 +521,36 @@ export function ReportModal(props: ReportModalProps) {
     setTimeout(() => w.print(), 700);
   };
 
+  // const handleDownloadPDF = () => {
+  //   if (!targetRef.current) return;
+  //   html2pdf()
+  //     .set({
+  //       margin: [0.5, 0.5],
+  //       filename: `${patientName || patientId}-MedicalReport.pdf`,
+  //       image: { type: "jpeg", quality: 0.98 },
+  //       html2canvas: { scale: 2, useCORS: true },
+  //       jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+  //       pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+  //     })
+  //     .from(targetRef.current)
+  //     .save();
+  // };
+
   const handleDownloadPDF = () => {
-    if (!targetRef.current) return;
-    html2pdf()
-      .set({
-        margin: [0.5, 0.5],
-        filename: `${patientName || patientId}-MedicalReport.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-      })
-      .from(targetRef.current)
-      .save();
-  };
+  if (!targetRef.current) return;
+
+  html2pdf()
+    .set({
+      margin: [0.5, 0.5],
+      filename: `${patientName || patientId}-MedicalReport.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["css", "legacy"] }, // ✅ allow .page-break to work
+    })
+    .from(targetRef.current)
+    .save();
+};
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -568,13 +584,13 @@ export function ReportModal(props: ReportModalProps) {
             </div>
 
             <div className="flex gap-2 justify-center flex-wrap">
-              <Button
+              {/* <Button
                 onClick={handlePrintReport}
                 className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
               >
                 <Printer className="h-4 w-4" />
                 Print/Save as PDF
-              </Button>
+              </Button> */}
               <Button
                 onClick={handleDownloadPDF}
                 className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"

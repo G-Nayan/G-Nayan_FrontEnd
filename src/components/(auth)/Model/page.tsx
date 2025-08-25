@@ -43,7 +43,8 @@ export default function CreateAdminCard({ onClose }: CreateAdminCardProps) {
 
     if (!form.username.trim()) newErrors.username = "Username is required";
     if (!form.email.includes("@")) newErrors.email = "Invalid email";
-    if (!form.first_name.trim()) newErrors.first_name = "First name is required";
+    if (!form.first_name.trim())
+      newErrors.first_name = "First name is required";
     if (!form.last_name.trim()) newErrors.last_name = "Last name is required";
     if (!form.mobile_number.trim())
       newErrors.mobile_number = "Mobile number is required";
@@ -138,7 +139,10 @@ export default function CreateAdminCard({ onClose }: CreateAdminCardProps) {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4"
+          >
             {/* Left column */}
             <div className="space-y-4">
               {/* Username */}
@@ -254,7 +258,9 @@ export default function CreateAdminCard({ onClose }: CreateAdminCardProps) {
                   onChange={handleChange}
                 />
                 {errors.confirm_password && (
-                  <p className="text-red-500 text-sm">{errors.confirm_password}</p>
+                  <p className="text-red-500 text-sm">
+                    {errors.confirm_password}
+                  </p>
                 )}
               </div>
 
@@ -281,7 +287,8 @@ export default function CreateAdminCard({ onClose }: CreateAdminCardProps) {
             <div className="col-span-1 md:col-span-2">
               <Button
                 type="submit"
-                className="w-full bg-blue-600 text-white"
+                // className="w-full bg-blue-600 text-white"
+                className="w-full text-blue-foreground border-white/20 font-medium bg-blue-600 text-white hover:bg-blue-700"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Creating..." : "Create Admin"}
