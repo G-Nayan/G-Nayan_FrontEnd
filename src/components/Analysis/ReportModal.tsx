@@ -9,6 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Download, FileText, Printer } from "lucide-react";
 import html2pdf from "html2pdf.js";
+import { useNavigate, Link } from "react-router-dom";
+import AIRAlogo from "../../assets/G-nayanalogo.png";
 
 interface EyeData {
   predicted_class: number;
@@ -105,14 +107,31 @@ const PDFReport = ({
             </p>
           </div>
           <div className="text-right text-sm">
-            <p className="font-semibold">Report ID: {reportId}</p>
-            <p>Generated: {examDate}</p>
+            {/* <p className="font-semibold">Report ID: {reportId}</p>
+            <p>Generated: {examDate}</p> */}
+
+            <Link to="" className="flex justify-center">
+              <img
+                src={AIRAlogo}
+                alt="Logo"
+                loading="lazy"
+                width={80}
+                height={80}
+                className="w-200 h-200"
+              />
+            </Link>
+            <div className="mt-1 text-center ">
+            <p className="font-semibold text-blue-700">G-Nayana AI System</p>
+            <p className="text-gray-600">
+              Diabetic Retinopathy Analysis Platform
+            </p>
+            </div>
           </div>
         </div>
 
-        <div className=" p-4 rounded-lg">
+        <div className=" p-4 rounded-lg flex gap-2 mb-2">
           <h2 className="font-bold text-blue-800 mb-2">
-            Institution Information
+           Hospital Name :
           </h2>
           <p className="font-semibold">{institutionName || "Not mentioned"} </p>
           {/* <p>Attending Physician: {physicianName}</p> */}
@@ -446,7 +465,7 @@ const PDFReport = ({
             <p className="text-gray-600">
               Diabetic Retinopathy Analysis Platform
             </p>
-            <p className="text-gray-600">Version 2.0</p>
+            {/* <p className="text-gray-600">Version 2.0</p> */}
           </div>
 
           <div className="text-center">
@@ -537,20 +556,20 @@ export function ReportModal(props: ReportModalProps) {
   // };
 
   const handleDownloadPDF = () => {
-  if (!targetRef.current) return;
+    if (!targetRef.current) return;
 
-  html2pdf()
-    .set({
-      margin: [0.5, 0.5],
-      filename: `${patientName || patientId}-MedicalReport.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-      pagebreak: { mode: ["css", "legacy"] }, // ✅ allow .page-break to work
-    })
-    .from(targetRef.current)
-    .save();
-};
+    html2pdf()
+      .set({
+        margin: [0.5, 0.5],
+        filename: `${patientName || patientId}-MedicalReport.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["css", "legacy"] }, // ✅ allow .page-break to work
+      })
+      .from(targetRef.current)
+      .save();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
