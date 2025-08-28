@@ -18,6 +18,7 @@ import Dashboard from "./components/Dashboard/admin/page";
 import AdminDashboard from "./components/adminDashboard/page";
 import PrivateRoute from "./components/(auth)/PrivateRoute";
 import Authmodel from "./components/(auth)/Model/page";
+import PatientLookup from "./components/adminDashboard/PatientLookup";
 
 // ✅ Scroll to hash utility
 const ScrollToHashElement = () => {
@@ -58,7 +59,7 @@ const App = () => {
   const location = useLocation();
 
   // ❌ Hide header/footer on these routes
-  const hideHeaderFooterRoutes = ["/login","/Authmodel"];
+  const hideHeaderFooterRoutes = ["/login", "/Authmodel"];
   const hideFooterRoutes = ["/register-patient", "/patient-list", "/Analysis"];
 
   const shouldShowHeader = !hideHeaderFooterRoutes.includes(location.pathname);
@@ -97,10 +98,11 @@ const App = () => {
           <Route path="/Analysis" element={<AnalysisPage />} />
 
           <Route element={<PrivateRoute />}>
-            <Route path="/patient-records" element={<Dashboard/>} />
+            <Route path="/patient-records" element={<Dashboard />} />
           </Route>
           <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/Authmodel" element={<Authmodel />} />
+          <Route path="/patient-search" element={<PatientLookup />} />
         </Routes>
 
         {shouldShowFooter && <Footer />}
