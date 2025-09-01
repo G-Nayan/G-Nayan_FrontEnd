@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { Hospital } from "lucide-react";
 
 interface CreateAdminCardProps {
   onClose: () => void;
@@ -23,6 +24,7 @@ export default function CreateAdminCard({ onClose }: CreateAdminCardProps) {
     role: "",
     created_at: new Date().toISOString(),
     password_last_updated: new Date().toISOString(),
+    hospital_name: "",
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -53,7 +55,8 @@ export default function CreateAdminCard({ onClose }: CreateAdminCardProps) {
     if (form.password !== form.confirm_password)
       newErrors.confirm_password = "Passwords do not match";
     if (!form.role) newErrors.role = "Role is required";
-
+    if (!form.hospital_name)
+      newErrors.hospital_name = "Hospital name is required";
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -110,11 +113,12 @@ export default function CreateAdminCard({ onClose }: CreateAdminCardProps) {
         role: "",
         created_at: new Date().toISOString(),
         password_last_updated: new Date().toISOString(),
+        hospital_name: "",
       });
       setErrors({});
       onClose();
     } catch (err: any) {
-      toast.error(err.message || "Something went wrong");
+      toast.error(err.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -279,6 +283,20 @@ export default function CreateAdminCard({ onClose }: CreateAdminCardProps) {
                 </select>
                 {errors.role && (
                   <p className="text-red-500 text-sm">{errors.role}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="Hospital">Hospital</Label>
+                <Input
+                  id="hospital_name"
+                  name="hospital_name"
+                  placeholder="hospital_name"
+                  value={form.hospital_name}
+                  onChange={handleChange}
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.hospital_name}</p>
                 )}
               </div>
             </div>

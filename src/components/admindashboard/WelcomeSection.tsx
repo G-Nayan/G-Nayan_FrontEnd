@@ -133,7 +133,7 @@ const WelcomeSection = () => {
               <h1 className="text-3xl lg:text-4xl font-bold mb-2">
                 Welcome back, {user ? `${user.first_name} ${user.last_name}` : "Loading..."}
               </h1>
-              <p className="text-blue-foreground/90 text-lg mb-4">
+              {/* <p className="text-blue-foreground/90 text-lg mb-4">
                 Role: {user?.role} | Email: {user?.email}
               </p>
 
@@ -150,7 +150,7 @@ const WelcomeSection = () => {
                   <Activity className="h-5 w-5" />
                   <span>3 Urgent Cases</span>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Actions */}
@@ -162,12 +162,12 @@ const WelcomeSection = () => {
               >
                 Create Admin
               </Button>
-              <Button
+              {/* <Button
                 variant="outline"
                 className="border-white/30 text-blue-foreground hover:bg-white/10 font-medium"
               >
                 Quick Actions
-              </Button>
+              </Button> */}
             </div>
           </div>
         </CardContent>
