@@ -25,49 +25,50 @@ const Index = () => {
       localStorage.getItem("authToken")
     );
   };
-  useEffect(() => {
-    const token = getAuthToken();
+  // useEffect(() => {
+  //   const token = getAuthToken();
 
-    if (!token) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("authToken");
-      navigate("/"); // redirect to home
-      throw new Error("No token found");
-    }
-    const fetchPatientsCount = async () => {
-      try {
-        const res = await fetch(
-          "http://localhost:8000/analytics/patients/count",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              "ngrok-skip-browser-warning": "true",
-            },
-          }
-        );
+  //   if (!token) {
+  //     localStorage.removeItem("token");
+  //     localStorage.removeItem("access_token");
+  //     localStorage.removeItem("authToken");
+  //     navigate("/"); // redirect to home
+  //     throw new Error("No token found");
+  //   }
+  //   const fetchPatientsCount = async () => {
+  //     try {
+  //       const res = await fetch(
+  //         "http://localhost:8000/analytics/patients/count",
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //             Accept: "application/json",
+  //             "Content-Type": "application/json",
+  //             "ngrok-skip-browser-warning": "true",
+  //           },
+  //         }
+  //       );
 
-        if (!res.ok) {
-          throw new Error(`HTTP error! Status: ${res.status}`);
-        }
+  //       if (!res.ok) {
+  //         throw new Error(`HTTP error! Status: ${res.status}`);
+  //       }
 
-        const data = await res.json();
-        setTotalPatients(data.total_patients);
-      } catch (error) {
-        console.error("Error fetching patients count:", error);
-      }
-    };
+  //       const data = await res.json();
+  //       setTotalPatients(data.total_patients);
+  //     } catch (error) {
+  //       console.error("Error fetching patients count:", error);
+  //     }
+  //   };
 
-    fetchPatientsCount();
-  }, []);
+  //   fetchPatientsCount();
+  // }, []);
 
   const statsData = [
     {
       title: "Total Patients",
-      value: totalPatients !== null ? totalPatients.toString() : "...",
+      // value: totalPatients !== null ? totalPatients.toString() : "...",
+      value: "92",
       description: "Registered in system",
       icon: Users,
       //  trend: { value: "12", isPositive: true },
@@ -127,7 +128,7 @@ const Index = () => {
         </div>
 
         {/* Charts Section */}
-        <ChartsSection />
+        {/*<ChartsSection />  */}
 
         {/* Navigation Buttons */}
         <NavigationButtons />
@@ -137,10 +138,10 @@ const Index = () => {
         </div>
 
         <div className="mt-10">
-          <RoleBasedUsers role="admin" />
+          <RoleBasedUsers role="client" />
         </div>
 
-        
+
       </main>
     </div>
   );

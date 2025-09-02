@@ -394,7 +394,7 @@ const DiabetesPatientRegister: React.FC = () => {
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
-          // Authorization: token ? `Bearer ${token}` : "",
+           Authorization: token ? `Bearer ${token}` : "",
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),

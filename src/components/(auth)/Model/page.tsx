@@ -279,7 +279,7 @@ export default function CreateAdminCard({ onClose }: CreateAdminCardProps) {
                   className="w-full border rounded-md p-2"
                 >
                   <option value="">Select role</option>
-                  <option value="admin">Admin</option>
+                  <option value="Client">Client</option>
                 </select>
                 {errors.role && (
                   <p className="text-red-500 text-sm">{errors.role}</p>
