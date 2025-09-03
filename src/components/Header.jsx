@@ -1,4 +1,3 @@
-
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { disablePageScroll, enablePageScroll } from "scroll-lock";
 import { AIRAlogo } from "../assets";
@@ -24,24 +23,42 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+const apiBase = import.meta.env.VITE_API_BASE;
+
 const Header = () => {
   const pathname = useLocation();
   const navigate = useNavigate();
   const [openNavigation, setOpenNavigation] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null); // ✅ null until fetched
 
-  // Mock user data (replace with real API/localStorage values)
-  const user = {
-    name: "ISCS Admin",
-    email: "iscsadmin.co.in",
-    avatar:
-      "",
-  };
-
-  // ✅ Check login state
+  // ✅ Check login + fetch profile
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
+
+    if (token) {
+      fetch(`${apiBase}/Get_patient_Clinical_and_PREDICTION_data/profile`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setUser({
+            name: `${data.first_name} ${data.last_name}`,
+            email: data.email,
+            username: data.username,
+            avatar: data.avatar_url || "", // fallback if no avatar
+            role:data.role,
+          });
+        })
+        .catch((err) => {
+          console.error("Profile fetch error:", err);
+        });
+    }
   }, [pathname]);
 
   const toggleNavigation = () => {
@@ -64,19 +81,17 @@ const Header = () => {
     navigate("/");
   };
 
-  // 🔹 Create navigation dynamically based on login
   const navItems = isLoggedIn
     ? [
-        ...navigation.filter((item) => item.title.toLowerCase() !== "login"),
-        { id: "99", title: "Patient Records", url: "/patient-records" },
-      ]
+      ...navigation.filter((item) => item.title.toLowerCase() !== "login"),
+      { id: "99", title: "Patient Records", url: "/patient-records" },
+    ]
     : navigation;
 
   return (
     <div
-      className={`fixed top-0 left-0 w-full z-50 border-b border-n-2 lg:bg-n-1/90 lg:backdrop-blur-sm ${
-        openNavigation ? "bg-n-1" : "bg-n-1/90 backdrop-blur-sm"
-      }`}
+      className={`fixed top-0 left-0 w-full z-50 border-b border-n-2 lg:bg-n-1/90 lg:backdrop-blur-sm ${openNavigation ? "bg-n-1" : "bg-n-1/90 backdrop-blur-sm"
+        }`}
     >
       <div className="flex items-center px-5 lg:px-7.5 xl:px-10 max-lg:py-4">
         <a className="block w-[12rem] xl:mr-0" href="/">
@@ -85,9 +100,8 @@ const Header = () => {
 
         {/* Navigation */}
         <nav
-          className={`${
-            openNavigation ? "flex" : "hidden"
-          } fixed top-[5rem] left-0 right-0 bottom-0 bg-n-1 lg:static lg:flex lg:mx-auto lg:bg-transparent`}
+          className={`${openNavigation ? "flex" : "hidden"
+            } fixed top-[5rem] left-0 right-0 bottom-0 bg-n-1 lg:static lg:flex lg:mx-auto lg:bg-transparent`}
         >
           <div className="relative z-2 flex flex-col items-center justify-center m-auto lg:flex-row">
             {navItems.map((item) => (
@@ -95,13 +109,11 @@ const Header = () => {
                 key={item.id}
                 to={item.url}
                 onClick={handleClick}
-                className={`block relative font-code text-2xl uppercase text-n-8 transition-colors hover:text-color-1 ${
-                  item.onlyMobile ? "lg:hidden" : ""
-                } px-2 py-2 md:py-8 lg:-mr-0.25 lg:text-xs lg:font-semibold ${
-                  item.url === pathname.hash
+                className={`block relative font-code text-2xl uppercase text-n-8 transition-colors hover:text-color-1 ${item.onlyMobile ? "lg:hidden" : ""
+                  } px-2 py-2 md:py-8 lg:-mr-0.25 lg:text-xs lg:font-semibold ${item.url === pathname.hash
                     ? "z-2 lg:text-n-8"
                     : "lg:text-n-8/50"
-                } lg:leading-5 lg:hover:text-n-8 xl:px-8`}
+                  } lg:leading-5 lg:hover:text-n-8 xl:px-8`}
               >
                 {item.title}
               </Link>
@@ -111,12 +123,14 @@ const Header = () => {
         </nav>
 
         {/* Avatar Menu if logged in */}
-        {isLoggedIn ? (
+        {isLoggedIn && user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="ml-auto cursor-pointer">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                <AvatarFallback>
+                  {user.name ? user.name.charAt(0) : "U"}
+                </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
@@ -133,9 +147,12 @@ const Header = () => {
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
                   Profile Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                  Dashboard
-                </DropdownMenuItem>
+                {user?.role === "superadmin" && (
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                    Dashboard
+                  </DropdownMenuItem>
+                )}
+
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
@@ -158,4 +175,3 @@ const Header = () => {
 };
 
 export default Header;
-

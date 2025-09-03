@@ -82,14 +82,7 @@ const Index = () => {
       trend: { value: "8%", isPositive: true },
       variant: "success" as const,
     },
-    // {
-    //   title: "Appointments Today",
-    //   value: "12",
-    //   description: "Scheduled consultations",
-    //   icon: Calendar,
-    //   trend: { value: "3", isPositive: true },
-    //   variant: "info" as const,
-    // },
+
     {
       title: "Average Age",
       value: "42",
@@ -97,22 +90,7 @@ const Index = () => {
       icon: TrendingUp,
       variant: "default" as const,
     },
-    // {
-    //   title: "Critical Cases",
-    //   value: "3",
-    //   description: "Requiring immediate attention",
-    //   icon: Heart,
-    //   trend: { value: "2", isPositive: false },
-    //   variant: "warning" as const,
-    // },
-    // {
-    //   title: "System Health",
-    //   value: "99.9%",
-    //   description: "Uptime this month",
-    //   icon: Shield,
-    //   trend: { value: "0.1%", isPositive: true },
-    //   variant: "success" as const,
-    // },
+
   ];
 
   return (
@@ -128,7 +106,7 @@ const Index = () => {
         </div>
 
         {/* Charts Section */}
-        {/*<ChartsSection />  */}
+        <ChartsSection />
 
         {/* Navigation Buttons */}
         <NavigationButtons />

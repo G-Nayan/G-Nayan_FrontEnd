@@ -86,33 +86,13 @@ const DiabetesPatientRegister: React.FC = () => {
     Albuminuria: "",
     Duration_of_Diabetes: "",
     Visual_Acuity: "Normal",
-    Hospital_name: "",
+    // Hospital_name: "",
     assigned_doctor: "",
     Date_of_registration: new Date(),
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
 
-  // const validateStep1 = (data: typeof formData): FormErrors => {
-  //   const newErrors: FormErrors = {};
-  //   if (!data.name || !data.name.trim())
-  //     newErrors.name = "Patient name is required.";
-  //   if (!data.age && data.age !== 0) {
-  //     newErrors.age = "Age is required.";
-  //   } else {
-  //     const ageNum = parseInt(String(data.age), 10);
-  //     if (isNaN(ageNum) || ageNum < 18 || ageNum > 90) {
-  //       newErrors.age = "Age must be an integer between 18 and 90 years.";
-  //     }
-  //   }
-  //   if (!data.gender) newErrors.gender = "Gender is required.";
-  //   if (!data.mobile_number || !String(data.mobile_number).trim())
-  //     newErrors.mobile_number = "Mobile number is required.";
-  //   else if (!/^\d{10}$/.test(String(data.mobile_number)))
-  //     newErrors.mobile_number = "Enter a valid 10 digit mobile number.";
-
-  //   return newErrors;
-  // };
   const validateStep1 = (data: typeof formData): FormErrors => {
     const newErrors: FormErrors = {};
 
@@ -256,10 +236,10 @@ const DiabetesPatientRegister: React.FC = () => {
 
   const validateStep3 = (data: typeof formData): FormErrors => {
     const newErrors: FormErrors = {};
-    if (!data.Hospital_name || !String(data.Hospital_name).trim())
-      newErrors.Hospital_name = "Hospital name is required.";
+    // if (!data.Hospital_name || !String(data.Hospital_name).trim())
+    //   newErrors.Hospital_name = "Hospital name is required.";
     if (!data.assigned_doctor || !String(data.assigned_doctor).trim())
-      newErrors.assigned_doctor = "Hospital name is required.";
+      newErrors.assigned_doctor = "doctor name is required.";
     if (!data.Date_of_registration)
       newErrors.Date_of_registration = "Registration date is required.";
     return newErrors;
@@ -336,7 +316,7 @@ const DiabetesPatientRegister: React.FC = () => {
         "Albuminuria",
       ];
       const step3Fields: (keyof FormErrors)[] = [
-        "Hospital_name",
+        // "Hospital_name",
         "Date_of_registration",
         "assigned_doctor",
       ];
@@ -375,7 +355,7 @@ const DiabetesPatientRegister: React.FC = () => {
       Albuminuria: parseOrUndefined(formData.Albuminuria),
       Duration_of_Diabetes: parseOrUndefined(formData.Duration_of_Diabetes),
       Visual_Acuity: formData.Visual_Acuity,
-      Hospital_name: formData.Hospital_name,
+      // Hospital_name: formData.Hospital_name,
       assigned_doctor: formData.assigned_doctor,
       Date_of_registration:
         formData.Date_of_registration instanceof Date
@@ -1007,14 +987,12 @@ const DiabetesPatientRegister: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-3 ">
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <label
                   htmlFor="Hospital_name"
                   className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
-                  {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
-                    *
-                  </Badge> */}
+                
                   <Building2 className="h-4 w-4 text-purple-600" />
                   Hospital Name
                 </label>
@@ -1037,7 +1015,7 @@ const DiabetesPatientRegister: React.FC = () => {
                     {errors.Hospital_name}
                   </p>
                 )}
-              </div>
+              </div> */}
 
               <div className="space-y-2">
                 <label

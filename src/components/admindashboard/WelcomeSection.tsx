@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Calendar, Activity } from "lucide-react";
-import Authmodel from "@/components/(auth)/Model/page"; // modal
-
-type User = {
+import Authmodel from "@/components/(auth)/Model/page";
+import { useNavigate } from "react-router-dom";
+interface User {
   id: number;
   first_name: string;
   last_name: string;
@@ -13,36 +12,55 @@ type User = {
   mobile_number: string;
   role: string;
   hospital_name?: string | null;
+  tenant_id: string;
   created_at: string;
-};
+  password_last_updated: string;
+}
+
+const apiBase = import.meta.env.VITE_API_BASE;
 
 const WelcomeSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-
-  // ✅ Fetch logged-in user details from API
+  const navigate = useNavigate();
+  const getAuthToken = () => {
+    return (
+      localStorage.getItem("token") ||
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("authToken")
+    );
+  };
   useEffect(() => {
-    const token = localStorage.getItem("access_token"); // stored after login
-    if (!token) return;
+    const token = getAuthToken();
 
-    fetch("http://localhost:8000/admin/users?role=admin", {
+    if (!token) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("authToken");
+      navigate("/"); // redirect to home
+      throw new Error("No token found");
+    }
+
+
+    fetch(`${apiBase}/Get_patient_Clinical_and_PREDICTION_data/profile`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => res.json())
-      .then((data: User[]) => {
-        if (data && data.length > 0) {
-          // Assuming you want the first admin (logged-in one)
-          setUser(data[0]);
-        }
+      .then((res) => {
+        console.log("🔹 Fetch response status:", res.status);
+        return res.json();
+      })
+      .then((data: any) => {
+        console.log("🔹 Raw Profile API response:", data);
+        setUser(data);
       })
       .catch((err) => console.error("❌ Fetch user failed:", err));
   }, []);
+
 
   return (
     <div className="mb-8">
@@ -51,26 +69,8 @@ const WelcomeSection = () => {
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between">
             <div className="flex-1 mb-6 lg:mb-0">
               <h1 className="text-3xl lg:text-4xl font-bold mb-2">
-                Welcome back, {user ? `${user.first_name} ${user.last_name}` : "Loading..."}
+                Welcome back, {user ? user.username : "Loading..."}
               </h1>
-              {/* <p className="text-blue-foreground/90 text-lg mb-4">
-                Role: {user?.role} | Email: {user?.email}
-              </p>
-
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center space-x-2">
-                  <Users className="h-5 w-5" />
-                  <span>500 Total Patients</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="h-5 w-5" />
-                  <span>12 Appointments Today</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Activity className="h-5 w-5" />
-                  <span>3 Urgent Cases</span>
-                </div>
-              </div> */}
             </div>
 
             {/* Actions */}
@@ -82,12 +82,6 @@ const WelcomeSection = () => {
               >
                 Create Admin
               </Button>
-              {/* <Button
-                variant="outline"
-                className="border-white/30 text-blue-foreground hover:bg-white/10 font-medium"
-              >
-                Quick Actions
-              </Button> */}
             </div>
           </div>
         </CardContent>
@@ -95,8 +89,13 @@ const WelcomeSection = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 ">
-          <Authmodel onClose={closeModal} />
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={closeModal}
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            <Authmodel onClose={closeModal} />
+          </div>
         </div>
       )}
     </div>
