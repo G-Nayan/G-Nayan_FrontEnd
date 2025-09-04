@@ -18,7 +18,7 @@ const EditPatientModal = ({ patient, onClose, onUpdated }) => {
     try {
       setSubmitting(true);
       const response = await fetch(
-        `https://631701654693.ngrok-free.app/update/${patient.patient_id}`,
+        `https://d2313bf3e038.ngrok-free.app/update/${patient.patient_id}`,
         {
           method: "PATCH",
           headers: {
