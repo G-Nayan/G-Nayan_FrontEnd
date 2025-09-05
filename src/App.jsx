@@ -60,8 +60,9 @@ const App = () => {
   const location = useLocation();
 
   // ❌ Hide header/footer on these routes
-  const hideHeaderFooterRoutes = ["/login", "/Authmodel"];
+  const hideHeaderFooterRoutes = ["/login", "/Authmodel" ];
   const hideFooterRoutes = ["/register-patient", "/patient-list", "/Analysis", "/profile"];
+
 
   const shouldShowHeader = !hideHeaderFooterRoutes.includes(location.pathname);
   const shouldShowFooter =

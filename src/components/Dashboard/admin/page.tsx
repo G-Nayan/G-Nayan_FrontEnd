@@ -11,6 +11,8 @@ const apiBase = import.meta.env.VITE_API_BASE;
 const API_URL = `${apiBase}/logs/get_data_from_patient`;
 const COMBINED_BASE = `${apiBase}/Get_patient_Clinical_and_PREDICTION_data/combined-report`;
 
+
+
 interface Patient {
   id: number;
   patient_id: number;
@@ -56,6 +58,9 @@ const DiabetesPatientList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
+
+
+
 
   const navigate = useNavigate();
   const patientsPerPage = 9; // <-- ensures 9 cards per page
@@ -502,11 +507,10 @@ const DiabetesPatientList = () => {
               <button
                 key={pageNumber}
                 onClick={() => handlePageChange(pageNumber)}
-                className={`px-4 py-2 rounded-md ${
-                  currentPage === pageNumber
+                className={`px-4 py-2 rounded-md ${currentPage === pageNumber
                     ? "bg-indigo-600 text-white"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+                  }`}
               >
                 {pageNumber}
               </button>
@@ -918,7 +922,7 @@ const PatientCard = ({ patient }: { patient: Patient }) => {
         />
       )}
 
-      {showReportModal && retinoData && (
+      {/* {showReportModal && retinoData && (
         <ReportModal
           isOpen={showReportModal}
           onClose={() => {
@@ -933,7 +937,19 @@ const PatientCard = ({ patient }: { patient: Patient }) => {
           leftEyeData={retinoData.left_eye}
           rightEyeData={retinoData.right_eye}
         />
+      )} */}
+
+      {showReportModal && retinoData && (
+        <ReportModal
+          isOpen={showReportModal}
+          onClose={() => {
+            setShowReportModal(false);
+            setRetinoData(null);
+          }}
+          combinedReport={retinoData}   // ✅ Just pass combinedReport
+        />
       )}
+
 
       {editModalOpen && (
         <EditPatientModal

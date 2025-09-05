@@ -59,7 +59,7 @@ const NavigationButtons = () => {
       description: "View and manage all patient data and medical histories",
       icon: Users,
       onClick: () => window.open("/patient-records", "_blank"),
-      variant: "primary" as const,
+      variant: "secondary" as const,
     },
     {
       title: "Add New Patient",
