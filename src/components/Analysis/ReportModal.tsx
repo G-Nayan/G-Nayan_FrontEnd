@@ -63,103 +63,223 @@ interface ReportModalProps {
   physicianName?: string;
 }
 
-// ------------- PDFReport (renders the content to print/export) -------------
-const PDFReport = (props: Omit<ReportModalProps, "isOpen" | "onClose" | "combinedReport"> & { patientId?: string }) => {
-  const {
-    patientId,
-    leftEyeImage,
-    rightEyeImage,
-    leftEyeData,
-    rightEyeData,
-    patientName = "Patient Name",
-    gender = "Not Specified",
-    examDate = new Date().toISOString(),
-    physicianName = "Dr. [Physician Name]",
-    institutionName = "[Institution Name]",
-    reportId = `RPT-${Date.now()}`,
-  } = props;
+// ---------------- Utility functions ----------------
+const getSeverityColor = (stage?: string) => {
+  if (!stage) return "text-gray-600";
+  switch (stage.toLowerCase()) {
+    case "no dr":
+    case "normal":
+      return "text-green-600";
+    case "mild":
+      return "text-yellow-600";
+    case "moderate":
+      return "text-orange-600";
+    case "severe":
+      return "text-red-600";
+    case "proliferative":
+      return "text-red-800";
+    default:
+      return "text-gray-600";
+  }
+};
 
-  const ImageBox = ({ src, alt }: { src?: string; alt?: string }) =>
-    src ? (
-      <img
-        src={src}
-        alt={alt}
-        style={{ width: "100%", maxHeight: 220, objectFit: "contain", display: "block", borderRadius: 6 }}
-      />
-    ) : (
-      <div style={{
-        width: "100%", height: 180, display: "flex", alignItems: "center", justifyContent: "center",
-        border: "1px dashed #ddd", background: "#fafafa", color: "#666", fontSize: 12, borderRadius: 6
-      }}>
-        No image available
-      </div>
-    );
+const getRiskLevel = (riskFactor?: number) => {
+  if (riskFactor == null || Number.isNaN(riskFactor))
+    return { level: "N/A", color: "text-gray-600" };
+  if (riskFactor <= 2) return { level: "Low", color: "text-green-600" };
+  if (riskFactor <= 4) return { level: "Moderate", color: "text-yellow-600" };
+  return { level: "High", color: "text-red-600" };
+};
 
-  const renderEye = (label: string, img?: string, data?: EyeData) => {
-    const stage = data?.stage ?? data?.Stage ?? "N/A";
-    const confidence = data?.confidence != null ? `${Number(data.confidence).toFixed(2)}%` : "N/A";
-    const risk = data?.risk_factor ?? data?.Risk_Factor ?? "N/A";
-    const explanation = data?.explanation ?? data?.note ?? data?.Note ?? "No explanation provided";
-
-    return (
-      <div style={{ width: "48%", display: "inline-block", verticalAlign: "top" }}>
-        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>{label}</div>
-        <div style={{ marginBottom: 8 }}>
-          <ImageBox src={img} alt={`${label} fundus`} />
-        </div>
-        <div style={{ fontSize: 12, color: "#222" }}>
-          <p><strong>Stage:</strong> {stage}</p>
-          <p><strong>Confidence:</strong> {confidence}</p>
-          <p><strong>Risk factor:</strong> {risk}</p>
-          <p style={{ marginTop: 6 }}><strong>Clinical notes:</strong><br />{explanation}</p>
-        </div>
-      </div>
-    );
-  };
-
+// ---------------- PDFReport (new layout) ----------------
+const PDFReport = ({
+  patientId,
+  leftEyeImage,
+  rightEyeImage,
+  leftEyeData,
+  rightEyeData,
+  patientName = "Patient Name",
+  gender = "Not Specified",
+  examDate = new Date().toLocaleDateString(),
+  physicianName = "Dr. [Physician Name]",
+  institutionName = "[Institution Name]",
+  reportId = `RPT-${Date.now()}`,
+}: Omit<ReportModalProps, "isOpen" | "onClose" | "combinedReport"> & {
+  patientId?: string;
+}) => {
   return (
-    <div style={{ background: "#fff", color: "#111", fontFamily: "Times, serif", padding: 18 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <img src={AIRAlogo} alt="logo" style={{ height: 48 }} />
+    <div className="w-full bg-white text-black" style={{ fontFamily: "Times, serif" }}>
+      {/* Header */}
+      <div className="border-b-4 border-blue-600 pb-6 mb-4 avoid-break">
+        <div className="flex justify-between items-start mb-4">
           <div>
-            <div style={{ fontSize: 18, fontWeight: 700 }}>{institutionName}</div>
-            <div style={{ fontSize: 12, color: "#555" }}>Retinopathy Analysis Report</div>
+            <h1 className="text-3xl font-bold text-blue-800 mb-2">
+              DIABETIC RETINOPATHY ANALYSIS REPORT
+            </h1>
+            <p className="text-lg text-gray-600">
+              AI-Assisted Ophthalmological Assessment
+            </p>
+          </div>
+          <div className="text-right text-sm">
+            <img src={AIRAlogo} alt="Logo" width={80} height={80} className="mx-auto" />
+            <div className="mt-1 text-center ">
+              <p className="font-semibold text-blue-700">G-Nayana AI System</p>
+              <p className="text-gray-600">Diabetic Retinopathy Analysis Platform</p>
+            </div>
           </div>
         </div>
-
-        <div style={{ textAlign: "right", fontSize: 12 }}>
-          <div><strong>Report ID:</strong> {reportId}</div>
-          <div><strong>Date:</strong> {examDate ? new Date(examDate).toLocaleString() : new Date().toLocaleString()}</div>
+        <div className="p-4 rounded-lg flex gap-2 mb-2">
+          <h2 className="font-bold text-blue-800 mb-2">Hospital Name :</h2>
+          <p className="font-semibold">{institutionName || "Not mentioned"}</p>
         </div>
       </div>
 
-      <hr style={{ border: 0, borderTop: "1px solid #e6e6e6", margin: "10px 0 16px" }} />
-
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 14, fontWeight: 600 }}>Patient Information</div>
-        <div style={{ display: "flex", gap: 24, marginTop: 8, fontSize: 12 }}>
-          <div><strong>Name:</strong> {patientName}</div>
-          <div><strong>Composite ID:</strong> {patientId}</div>
-          <div><strong>Gender:</strong> {gender}</div>
+      {/* Patient Demographics */}
+      <div className="grid grid-cols-2 gap-3 mb-4 avoid-break">
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-bold text-gray-800 mb-3 border-b border-gray-300 pb-2">
+            PATIENT DEMOGRAPHICS
+          </h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="font-medium">Patient Name:</span>
+              <span className="font-semibold">{patientName}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Patient ID:</span>
+              <span className="font-mono">{patientId}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Gender:</span>
+              <span>{gender}</span>
+            </div>
+          </div>
+        </div>
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-bold text-gray-800 mb-3 border-b border-gray-300 pb-2">
+            EXAMINATION DETAILS
+          </h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="font-medium">Examination Date:</span>
+              <span>{examDate}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Modality:</span>
+              <span>Fundus Photography</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-medium">Analysis Method:</span>
+              <span>AI-Assisted</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div style={{ marginTop: 6 }}>
-        {renderEye("Left Eye", leftEyeImage, leftEyeData)}
-        <div style={{ display: "inline-block", width: "4%" }} />
-        {renderEye("Right Eye", rightEyeImage, rightEyeData)}
+      {/* Clinical Findings */}
+      <div className="mb-4 avoid-break">
+        <h3 className="text-xl font-bold text-gray-800 mb-4 p-3 rounded-lg">
+          CLINICAL FINDINGS & ANALYSIS
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border-2 border-gray-300 text-sm">
+            <thead>
+              <tr className="bg-blue-100 text-gray-900">
+                <th className="border border-gray-300 px-4 py-3 text-left font-bold">PARAMETER</th>
+                <th className="border border-gray-300 px-4 py-3 text-center font-bold">RIGHT EYE (OD)</th>
+                <th className="border border-gray-300 px-4 py-3 text-center font-bold">LEFT EYE (OS)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="bg-gray-50">
+                <td className="border border-gray-300 px-4 py-3 font-semibold">Fundus Image</td>
+                <td className="border border-gray-300 px-4 py-3 text-center">
+                  {rightEyeImage ? (
+                    <img src={rightEyeImage} alt="Right Eye Fundus" className="mx-auto w-44 h-44 object-cover rounded-lg shadow-md" />
+                  ) : "N/A"}
+                </td>
+                <td className="border border-gray-300 px-4 py-3 text-center">
+                  {leftEyeImage ? (
+                    <img src={leftEyeImage} alt="Left Eye Fundus" className="mx-auto w-44 h-44 object-cover rounded-lg shadow-md" />
+                  ) : "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 px-4 py-3 font-semibold">DR Severity Level</td>
+                <td className="border border-gray-300 px-4 py-3 text-center">
+                  {rightEyeData?.Stage ? <span className={`font-bold ${getSeverityColor(rightEyeData.Stage)}`}>{rightEyeData.Stage}</span> : "N/A"}
+                </td>
+                <td className="border border-gray-300 px-4 py-3 text-center">
+                  {leftEyeData?.Stage ? <span className={`font-bold ${getSeverityColor(leftEyeData.Stage)}`}>{leftEyeData.Stage}</span> : "N/A"}
+                </td>
+              </tr>
+              <tr className="bg-gray-50">
+                <td className="border border-gray-300 px-4 py-3 font-semibold">Confidence Level</td>
+                <td className="border border-gray-300 px-4 py-3 text-center">{rightEyeData?.confidence ? `${rightEyeData.confidence.toFixed(1)}%` : "N/A"}</td>
+                <td className="border border-gray-300 px-4 py-3 text-center">{leftEyeData?.confidence ? `${leftEyeData.confidence.toFixed(1)}%` : "N/A"}</td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 px-4 py-3 font-semibold">Risk Assessment</td>
+                <td className="border border-gray-300 px-4 py-3 text-center">
+                  {rightEyeData?.Risk_Factor != null ? getRiskLevel(rightEyeData.Risk_Factor).level : "N/A"}
+                </td>
+                <td className="border border-gray-300 px-4 py-3 text-center">
+                  {leftEyeData?.Risk_Factor != null ? getRiskLevel(leftEyeData.Risk_Factor).level : "N/A"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div style={{ marginTop: 18, fontSize: 12 }}>
-        <h4 style={{ marginBottom: 6 }}>Summary & Recommendations</h4>
-        <p><strong>Left:</strong> {leftEyeData?.stage ?? leftEyeData?.Stage ?? "N/A"} — {leftEyeData?.explanation ?? leftEyeData?.note ?? "No notes"}.</p>
-        <p><strong>Right:</strong> {rightEyeData?.stage ?? rightEyeData?.Stage ?? "N/A"} — {rightEyeData?.explanation ?? rightEyeData?.note ?? "No notes"}.</p>
-        <div style={{ marginTop: 12 }}><strong>Physician:</strong> {physicianName}</div>
+      {/* Interpretation */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4 avoid-break">
+        <div className="bg-blue-50 p-6 rounded-lg">
+          <h4 className="font-bold text-blue-800 mb-4 text-lg">RIGHT EYE (OD)</h4>
+          <p className="text-sm text-gray-800">{rightEyeData?.explanation || "N/A"}</p>
+          <p className="text-sm text-gray-800 mt-2"><strong>Notes:</strong> {rightEyeData?.Note || "N/A"}</p>
+        </div>
+        <div className="bg-green-50 p-6 rounded-lg">
+          <h4 className="font-bold text-green-800 mb-4 text-lg">LEFT EYE (OS)</h4>
+          <p className="text-sm text-gray-800">{leftEyeData?.explanation || "N/A"}</p>
+          <p className="text-sm text-gray-800 mt-2"><strong>Notes:</strong> {leftEyeData?.Note || "N/A"}</p>
+        </div>
       </div>
 
-      <div style={{ marginTop: 26, fontSize: 10, color: "#666" }}>
-        <em>Note: This is an automated analysis. Clinical decisions should be verified by a qualified ophthalmologist.</em>
+      {/* Recommendations */}
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-2 mb-4 avoid-break">
+        <h4 className="font-bold text-yellow-800 mb-2 text-lg">CLINICAL RECOMMENDATIONS</h4>
+        <ul className="list-disc list-inside text-sm text-gray-800">
+          <li>Regular ophthalmological follow-up</li>
+          <li>Diabetic control optimization</li>
+          <li>Blood pressure and lipid management</li>
+          <li>Patient education regarding DR progression</li>
+          <li>Referral to retinal specialist if indicated</li>
+        </ul>
+      </div>
+
+      {/* Disclaimer */}
+      <div className="bg-red-50 border-2 border-red-200 p-2 mb-4 avoid-break text-sm text-red-800">
+        <strong>⚠️ AI-ASSISTED ANALYSIS:</strong> This report is generated using AI as a diagnostic aid. Results must be verified by a qualified ophthalmologist.
+      </div>
+
+      {/* Footer */}
+      <div className="border-t-2 border-gray-300 pt-3 mb-3 avoid-break text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <h5 className="font-bold text-gray-800 mb-2">REPORT GENERATED BY:</h5>
+            <p className="font-semibold text-blue-700">G-Nayana AI System</p>
+          </div>
+          <div className="text-center">
+            <h5 className="font-bold text-gray-800 mb-2">QUALITY ASSURANCE:</h5>
+            <p className="text-gray-600">Report electronically signed</p>
+            <p className="text-gray-600">Checksum: {reportId.slice(-8)}</p>
+          </div>
+          <div className="text-right">
+            <h5 className="font-bold text-gray-800 mb-2">PHYSICIAN REVIEW:</h5>
+            <p className="font-semibold">{physicianName}</p>
+          </div>
+        </div>
       </div>
     </div>
   );
