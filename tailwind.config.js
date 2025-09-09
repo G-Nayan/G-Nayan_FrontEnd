@@ -77,7 +77,7 @@ export default {
   		},
   		fontFamily: {
   			sans: [
-  				'var(--font-sora)',
+  				'var( --font-inter)',
                     ...fontFamily.sans
                 ],
   			code: 'var(--font-code)',

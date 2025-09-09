@@ -155,7 +155,7 @@ const Header = () => {
 
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
+              <DropdownMenuItem onClick={handleLogout} className="text-red-500 font-semibold ">
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>

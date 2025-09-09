@@ -108,7 +108,7 @@ const PDFReport = ({
   patientId?: string;
 }) => {
   return (
-    <div className="w-full bg-white text-black" style={{ fontFamily: "Times, serif" }}>
+    <div className="w-full bg-white text-black">
       {/* Header */}
       <div className="border-b-4 border-blue-600 pb-6 mb-4 avoid-break">
         <div className="flex justify-between items-start mb-4">
@@ -121,10 +121,18 @@ const PDFReport = ({
             </p>
           </div>
           <div className="text-right text-sm">
-            <img src={AIRAlogo} alt="Logo" width={80} height={80} className="mx-auto" />
+            <img
+              src={AIRAlogo}
+              alt="Logo"
+              width={80}
+              height={80}
+              className="mx-auto"
+            />
             <div className="mt-1 text-center ">
               <p className="font-semibold text-blue-700">G-Nayana AI System</p>
-              <p className="text-gray-600">Diabetic Retinopathy Analysis Platform</p>
+              <p className="text-gray-600">
+                Diabetic Retinopathy Analysis Platform
+              </p>
             </div>
           </div>
         </div>
@@ -185,46 +193,104 @@ const PDFReport = ({
           <table className="w-full border-collapse border-2 border-gray-300 text-sm">
             <thead>
               <tr className="bg-blue-100 text-gray-900">
-                <th className="border border-gray-300 px-4 py-3 text-left font-bold">PARAMETER</th>
-                <th className="border border-gray-300 px-4 py-3 text-center font-bold">RIGHT EYE (OD)</th>
-                <th className="border border-gray-300 px-4 py-3 text-center font-bold">LEFT EYE (OS)</th>
+                <th className="border border-gray-300 px-4 py-3 text-left font-bold">
+                  PARAMETER
+                </th>
+                <th className="border border-gray-300 px-4 py-3 text-center font-bold">
+                  RIGHT EYE (OD)
+                </th>
+                <th className="border border-gray-300 px-4 py-3 text-center font-bold">
+                  LEFT EYE (OS)
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr className="bg-gray-50">
-                <td className="border border-gray-300 px-4 py-3 font-semibold">Fundus Image</td>
+                <td className="border border-gray-300 px-4 py-3 font-semibold">
+                  Fundus Image
+                </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
                   {rightEyeImage ? (
-                    <img src={rightEyeImage} alt="Right Eye Fundus" className="mx-auto w-44 h-44 object-cover rounded-lg shadow-md" />
-                  ) : "N/A"}
+                    <img
+                      src={rightEyeImage}
+                      alt="Right Eye Fundus"
+                      className="mx-auto w-44 h-44 object-cover rounded-lg shadow-md"
+                    />
+                  ) : (
+                    "N/A"
+                  )}
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
                   {leftEyeImage ? (
-                    <img src={leftEyeImage} alt="Left Eye Fundus" className="mx-auto w-44 h-44 object-cover rounded-lg shadow-md" />
-                  ) : "N/A"}
+                    <img
+                      src={leftEyeImage}
+                      alt="Left Eye Fundus"
+                      className="mx-auto w-44 h-44 object-cover rounded-lg shadow-md"
+                    />
+                  ) : (
+                    "N/A"
+                  )}
                 </td>
               </tr>
               <tr>
-                <td className="border border-gray-300 px-4 py-3 font-semibold">DR Severity Level</td>
-                <td className="border border-gray-300 px-4 py-3 text-center">
-                  {rightEyeData?.Stage ? <span className={`font-bold ${getSeverityColor(rightEyeData.Stage)}`}>{rightEyeData.Stage}</span> : "N/A"}
+                <td className="border border-gray-300 px-4 py-3 font-semibold">
+                  DR Severity Level
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
-                  {leftEyeData?.Stage ? <span className={`font-bold ${getSeverityColor(leftEyeData.Stage)}`}>{leftEyeData.Stage}</span> : "N/A"}
+                  {rightEyeData?.Stage ? (
+                    <span
+                      className={`font-bold ${getSeverityColor(
+                        rightEyeData.Stage
+                      )}`}
+                    >
+                      {rightEyeData.Stage}
+                    </span>
+                  ) : (
+                    "N/A"
+                  )}
+                </td>
+                <td className="border border-gray-300 px-4 py-3 text-center">
+                  {leftEyeData?.Stage ? (
+                    <span
+                      className={`font-bold ${getSeverityColor(
+                        leftEyeData.Stage
+                      )}`}
+                    >
+                      {leftEyeData.Stage}
+                    </span>
+                  ) : (
+                    "N/A"
+                  )}
                 </td>
               </tr>
               <tr className="bg-gray-50">
-                <td className="border border-gray-300 px-4 py-3 font-semibold">Confidence Level</td>
-                <td className="border border-gray-300 px-4 py-3 text-center">{rightEyeData?.confidence ? `${rightEyeData.confidence.toFixed(1)}%` : "N/A"}</td>
-                <td className="border border-gray-300 px-4 py-3 text-center">{leftEyeData?.confidence ? `${leftEyeData.confidence.toFixed(1)}%` : "N/A"}</td>
-              </tr>
-              <tr>
-                <td className="border border-gray-300 px-4 py-3 font-semibold">Risk Assessment</td>
-                <td className="border border-gray-300 px-4 py-3 text-center">
-                  {rightEyeData?.Risk_Factor != null ? getRiskLevel(rightEyeData.Risk_Factor).level : "N/A"}
+                <td className="border border-gray-300 px-4 py-3 font-semibold">
+                  Confidence Level
                 </td>
                 <td className="border border-gray-300 px-4 py-3 text-center">
-                  {leftEyeData?.Risk_Factor != null ? getRiskLevel(leftEyeData.Risk_Factor).level : "N/A"}
+                  {rightEyeData?.confidence
+                    ? `${rightEyeData.confidence.toFixed(1)}%`
+                    : "N/A"}
+                </td>
+                <td className="border border-gray-300 px-4 py-3 text-center">
+                  {leftEyeData?.confidence
+                    ? `${leftEyeData.confidence.toFixed(1)}%`
+                    : "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <td className="border border-gray-300 px-4 py-3 font-semibold">
+                  Risk Assessment
+                </td>
+                <td className="border border-gray-300 px-4 py-3 text-center">
+                  {rightEyeData?.Risk_Factor != null
+                    ? getRiskLevel(rightEyeData.Risk_Factor).level
+                    : "N/A"}
+                </td>
+                <td className="border border-gray-300 px-4 py-3 text-center">
+                  {leftEyeData?.Risk_Factor != null
+                    ? getRiskLevel(leftEyeData.Risk_Factor).level
+                    : "N/A"}
                 </td>
               </tr>
             </tbody>
@@ -232,23 +298,38 @@ const PDFReport = ({
         </div>
       </div>
 
+      <div style={{ pageBreakBefore: "always" }}></div>
       {/* Interpretation */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4 avoid-break">
         <div className="bg-blue-50 p-6 rounded-lg">
-          <h4 className="font-bold text-blue-800 mb-4 text-lg">RIGHT EYE (OD)</h4>
-          <p className="text-sm text-gray-800">{rightEyeData?.explanation || "N/A"}</p>
-          <p className="text-sm text-gray-800 mt-2"><strong>Notes:</strong> {rightEyeData?.Note || "N/A"}</p>
+          <h4 className="font-bold text-blue-800 mb-4 text-lg">
+            RIGHT EYE (OD)
+          </h4>
+          <p className="text-sm text-gray-800">
+            {rightEyeData?.explanation || "N/A"}
+          </p>
+          <p className="text-sm text-gray-800 mt-2">
+            <strong>Notes:</strong> {rightEyeData?.Note || "N/A"}
+          </p>
         </div>
         <div className="bg-green-50 p-6 rounded-lg">
-          <h4 className="font-bold text-green-800 mb-4 text-lg">LEFT EYE (OS)</h4>
-          <p className="text-sm text-gray-800">{leftEyeData?.explanation || "N/A"}</p>
-          <p className="text-sm text-gray-800 mt-2"><strong>Notes:</strong> {leftEyeData?.Note || "N/A"}</p>
+          <h4 className="font-bold text-green-800 mb-4 text-lg">
+            LEFT EYE (OS)
+          </h4>
+          <p className="text-sm text-gray-800">
+            {leftEyeData?.explanation || "N/A"}
+          </p>
+          <p className="text-sm text-gray-800 mt-2">
+            <strong>Notes:</strong> {leftEyeData?.Note || "N/A"}
+          </p>
         </div>
       </div>
 
       {/* Recommendations */}
       <div className="bg-yellow-50 border-l-4 border-yellow-400 p-2 mb-4 avoid-break">
-        <h4 className="font-bold text-yellow-800 mb-2 text-lg">CLINICAL RECOMMENDATIONS</h4>
+        <h4 className="font-bold text-yellow-800 mb-2 text-lg">
+          CLINICAL RECOMMENDATIONS
+        </h4>
         <ul className="list-disc list-inside text-sm text-gray-800">
           <li>Regular ophthalmological follow-up</li>
           <li>Diabetic control optimization</li>
@@ -260,14 +341,18 @@ const PDFReport = ({
 
       {/* Disclaimer */}
       <div className="bg-red-50 border-2 border-red-200 p-2 mb-4 avoid-break text-sm text-red-800">
-        <strong>⚠️ AI-ASSISTED ANALYSIS:</strong> This report is generated using AI as a diagnostic aid. Results must be verified by a qualified ophthalmologist.
+        <strong>⚠️ AI-ASSISTED ANALYSIS:</strong> This report is generated using
+        AI as a diagnostic aid. Results must be verified by a qualified
+        ophthalmologist.
       </div>
 
       {/* Footer */}
       <div className="border-t-2 border-gray-300 pt-3 mb-3 avoid-break text-sm">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <h5 className="font-bold text-gray-800 mb-2">REPORT GENERATED BY:</h5>
+            <h5 className="font-bold text-gray-800 mb-2">
+              REPORT GENERATED BY:
+            </h5>
             <p className="font-semibold text-blue-700">G-Nayana AI System</p>
           </div>
           <div className="text-center">
@@ -296,7 +381,8 @@ export function ReportModal(props: ReportModalProps) {
   const [rightEyeImage, setRightEyeImage] = useState<string | undefined>();
 
   // configure base (adjust if different)
-  const IMAGE_API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
+  const IMAGE_API_BASE =
+    import.meta.env.VITE_API_BASE || "http://localhost:8000";
   const IMAGE_ENDPOINT = `${IMAGE_API_BASE}/Get_patient_Clinical_and_PREDICTION_data/patient-image`;
 
   // Helper: fetch a URL and return object URL (or undefined)
@@ -305,10 +391,18 @@ export function ReportModal(props: ReportModalProps) {
       console.debug("[ReportModal] fetching URL -> blob:", url);
       const token = localStorage.getItem("token") || "";
       const res = await fetch(url, {
-        headers: token ? { Authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": "true" } : { "ngrok-skip-browser-warning": "true" },
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+              "ngrok-skip-browser-warning": "true",
+            }
+          : { "ngrok-skip-browser-warning": "true" },
       });
       if (!res.ok) {
-        console.warn("[ReportModal] Image fetch returned non-ok", { url, status: res.status });
+        console.warn("[ReportModal] Image fetch returned non-ok", {
+          url,
+          status: res.status,
+        });
         return undefined;
       }
       const blob = await res.blob();
@@ -328,7 +422,9 @@ export function ReportModal(props: ReportModalProps) {
    * - If candidate is full URL but not containing '/patient-image/', try fetch directly
    * - Returns objectURL or undefined
    */
-  const resolveImageCandidate = async (candidate?: string | null) : Promise<string | undefined> => {
+  const resolveImageCandidate = async (
+    candidate?: string | null
+  ): Promise<string | undefined> => {
     if (!candidate) return undefined;
 
     // candidate is something like: "P002-V001/left_image.jpg"
@@ -339,7 +435,9 @@ export function ReportModal(props: ReportModalProps) {
         const parts = candidate.split("/patient-image/");
         const filename = parts[parts.length - 1]; // e.g. P002-V001/left_image.jpg
         if (filename) {
-          const fileEndpoint = `${IMAGE_ENDPOINT}/${encodeURIComponent(filename)}`;
+          const fileEndpoint = `${IMAGE_ENDPOINT}/${encodeURIComponent(
+            filename
+          )}`;
           const obj = await fetchUrlToObjectUrl(fileEndpoint);
           if (obj) return obj;
           // fallback: try the full candidate URL directly
@@ -377,7 +475,11 @@ export function ReportModal(props: ReportModalProps) {
   useEffect(() => {
     // cleanup previous object URLs before new load
     createdObjectUrls.current.forEach((u) => {
-      try { URL.revokeObjectURL(u); } catch (e) { /* ignore */ }
+      try {
+        URL.revokeObjectURL(u);
+      } catch (e) {
+        /* ignore */
+      }
     });
     createdObjectUrls.current = [];
     setLeftEyeImage(undefined);
@@ -439,23 +541,36 @@ export function ReportModal(props: ReportModalProps) {
 
     return () => {
       // revoke object URLs when unmounting or closing
-      createdObjectUrls.current.forEach((u) => { try { URL.revokeObjectURL(u); } catch (e) { } });
+      createdObjectUrls.current.forEach((u) => {
+        try {
+          URL.revokeObjectURL(u);
+        } catch (e) {}
+      });
       createdObjectUrls.current = [];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, combinedReport]);
 
   // report metadata
-  const patientId = combinedReport?.composite_id ?? legacyProps.patientName ?? "";
+  const patientId =
+    combinedReport?.composite_id ?? legacyProps.patientName ?? "";
   const patientName = combinedReport?.name ?? legacyProps.patientName;
   const gender = combinedReport?.gender ?? legacyProps.gender;
-  const examDate = combinedReport?.left_eye?.timestamp ?? combinedReport?.right_eye?.timestamp ?? legacyProps.examDate;
-  const institutionName = combinedReport?.Hospital_name ?? legacyProps.institutionName;
-  const reportId = combinedReport?.patient_id ? String(combinedReport.patient_id) : legacyProps.reportId;
+  const examDate =
+    combinedReport?.left_eye?.timestamp ??
+    combinedReport?.right_eye?.timestamp ??
+    legacyProps.examDate;
+  const institutionName =
+    combinedReport?.Hospital_name ?? legacyProps.institutionName;
+  const reportId = combinedReport?.patient_id
+    ? String(combinedReport.patient_id)
+    : legacyProps.reportId;
   const leftEyeData = combinedReport?.left_eye ?? legacyProps.leftEyeData;
   const rightEyeData = combinedReport?.right_eye ?? legacyProps.rightEyeData;
 
-  const canRenderReport = Boolean(leftEyeData || rightEyeData || leftEyeImage || rightEyeImage);
+  const canRenderReport = Boolean(
+    leftEyeData || rightEyeData || leftEyeImage || rightEyeImage
+  );
 
   const targetRef = useRef<HTMLDivElement | null>(null);
 
@@ -480,7 +595,10 @@ export function ReportModal(props: ReportModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent aria-describedby="report-desc" className="bg-[#112240] text-white max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        aria-describedby="report-desc"
+        className="bg-[#112240] text-white max-w-6xl max-h-[90vh] overflow-y-auto"
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -488,8 +606,19 @@ export function ReportModal(props: ReportModalProps) {
           </DialogTitle>
         </DialogHeader>
 
-        <div id="report-desc" style={{ position: "absolute", left: -9999, top: "auto", width: 1, height: 1, overflow: "hidden" }}>
-          Medical report preview dialog. Shows patient data and left/right fundus images (if available).
+        <div
+          id="report-desc"
+          style={{
+            position: "absolute",
+            left: -9999,
+            top: "auto",
+            width: 1,
+            height: 1,
+            overflow: "hidden",
+          }}
+        >
+          Medical report preview dialog. Shows patient data and left/right
+          fundus images (if available).
         </div>
 
         {canRenderReport ? (
@@ -519,7 +648,10 @@ export function ReportModal(props: ReportModalProps) {
                 <Download className="h-4 w-4" />
                 Download PDF
               </Button>
-              <Button onClick={onClose} className="bg-gray-200 text-black hover:bg-gray-300 ml-2">
+              <Button
+                onClick={onClose}
+                className="bg-gray-200 text-black hover:bg-gray-300 ml-2"
+              >
                 Close
               </Button>
             </div>
