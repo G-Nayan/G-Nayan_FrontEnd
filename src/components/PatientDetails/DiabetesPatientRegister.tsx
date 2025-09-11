@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-// import { toast } from "@/hooks/use-toast";
 import { toast } from "react-hot-toast";
 import {
   DropdownMenu,
@@ -39,6 +37,8 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import SuccessAnimation from "./SuccessAnimation";
 
+const apiBase = import.meta.env.VITE_API_BASE;
+
 interface FormErrors {
   patient_id?: string;
   name?: string;
@@ -50,14 +50,18 @@ interface FormErrors {
   Duration_of_Diabetes?: string;
   HbA1c_Level?: string;
   Blood_Pressure?: string;
+  Blood_Pressure_Systolic?: string;
+  Blood_Pressure_Diastolic?: string;
   Fasting_Blood_Glucose?: string;
   BMI?: string;
   Cholesterol?: string;
   Albuminuria?: string;
   num_visits?: string;
+  visits_id?: number | string;
+  assigned_doctor?: string;
 }
 
-const DiabetesPatientRegister = () => {
+const DiabetesPatientRegister: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationComplete, setRegistrationComplete] = useState(false);
@@ -65,7 +69,9 @@ const DiabetesPatientRegister = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const totalSteps = 4;
 
-  const [formData, setFormData] = useState({
+  const [registerMode, setRegisterMode] = useState<"new" | "op">("new");
+
+  const [formData, setFormData] = useState<any>({
     patient_id: "",
     name: "",
     age: "",
@@ -73,37 +79,50 @@ const DiabetesPatientRegister = () => {
     mobile_number: "",
     HbA1c_Level: "",
     Fasting_Blood_Glucose: "",
-    Blood_Pressure: "",
+    Blood_Pressure_Systolic: "",
+    Blood_Pressure_Diastolic: "",
     Cholesterol: "",
     BMI: "",
     Albuminuria: "",
     Duration_of_Diabetes: "",
     Visual_Acuity: "Normal",
-    Hospital_name: "",
+    // Hospital_name: "",
+    assigned_doctor: "",
     Date_of_registration: new Date(),
-    num_visits: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
 
   const validateStep1 = (data: typeof formData): FormErrors => {
     const newErrors: FormErrors = {};
-    if (!data.patient_id || +data.patient_id <= 0)
-      newErrors.patient_id = "A valid patient ID is required.";
-    if (!data.name.trim()) newErrors.name = "Patient name is required.";
-    if (!data.age) {
+
+    // If OP mode, patient_id is required and must be positive integer
+    if (registerMode === "op") {
+      if (!data.patient_id && data.patient_id !== 0) {
+        newErrors.patient_id = "Patient ID is required for OP patients.";
+      } else {
+        const pid = parseInt(String(data.patient_id), 10);
+        if (isNaN(pid) || pid <= 0) {
+          newErrors.patient_id = "Patient ID must be a positive integer.";
+        }
+      }
+    }
+
+    if (!data.name || !data.name.trim())
+      newErrors.name = "Patient name is required.";
+    if (!data.age && data.age !== 0) {
       newErrors.age = "Age is required.";
     } else {
-      const ageNum = parseInt(data.age, 10);
+      const ageNum = parseInt(String(data.age), 10);
       if (isNaN(ageNum) || ageNum < 18 || ageNum > 90) {
         newErrors.age = "Age must be an integer between 18 and 90 years.";
       }
     }
     if (!data.gender) newErrors.gender = "Gender is required.";
-    if (!data.mobile_number.trim())
+    if (!data.mobile_number || !String(data.mobile_number).trim())
       newErrors.mobile_number = "Mobile number is required.";
-    else if (!/^\d{0,10}$/.test(data.mobile_number))
-      newErrors.mobile_number = "Enter a valid mobile number (0-10 digits).";
+    else if (!/^\d{10}$/.test(String(data.mobile_number)))
+      newErrors.mobile_number = "Enter a valid 10 digit mobile number.";
 
     return newErrors;
   };
@@ -113,75 +132,100 @@ const DiabetesPatientRegister = () => {
     const {
       Duration_of_Diabetes,
       HbA1c_Level,
-      Blood_Pressure,
+      Blood_Pressure_Diastolic,
+      Blood_Pressure_Systolic,
       Fasting_Blood_Glucose,
       BMI,
       Cholesterol,
       Albuminuria,
     } = data;
 
-    if (!Duration_of_Diabetes) {
+    if (
+      Duration_of_Diabetes === "" ||
+      Duration_of_Diabetes === null ||
+      Duration_of_Diabetes === undefined
+    ) {
       newErrors.Duration_of_Diabetes = "Duration of Diabetes is required.";
     } else {
-      const dod = parseInt(Duration_of_Diabetes, 10);
+      const dod = parseInt(String(Duration_of_Diabetes), 10);
       if (isNaN(dod) || dod < 0 || dod > 50) {
         newErrors.Duration_of_Diabetes =
           "Duration must be an integer between 0 and 50 years.";
       }
     }
 
-    if (!HbA1c_Level) {
+    if (!HbA1c_Level && HbA1c_Level !== 0) {
       newErrors.HbA1c_Level = "HbA1c Level is required.";
     } else {
-      const hba1c = parseFloat(HbA1c_Level);
+      const hba1c = parseFloat(String(HbA1c_Level));
       if (isNaN(hba1c) || hba1c < 4.0 || hba1c > 14.0) {
         newErrors.HbA1c_Level = "HbA1c Level must be between 4.0 and 14.0%.";
       }
     }
 
-    if (!Blood_Pressure) {
-      newErrors.Blood_Pressure = "Blood Pressure is required.";
+    // Systolic
+    if (
+      Blood_Pressure_Systolic === "" ||
+      Blood_Pressure_Systolic === null ||
+      Blood_Pressure_Systolic === undefined
+    ) {
+      newErrors.Blood_Pressure_Systolic = "Systolic BP is required.";
     } else {
-      const bp = parseInt(Blood_Pressure, 10);
-      if (isNaN(bp) || bp < 90 || bp > 200) {
-        newErrors.Blood_Pressure =
-          "Blood Pressure must be an integer between 90 and 200 mmHg.";
+      const s = parseInt(String(Blood_Pressure_Systolic), 10);
+      if (isNaN(s) || s < 70 || s > 250) {
+        newErrors.Blood_Pressure_Systolic =
+          "Enter a valid systolic BP (70-250).";
       }
     }
 
-    if (!Fasting_Blood_Glucose) {
+    // Diastolic
+    if (
+      Blood_Pressure_Diastolic === "" ||
+      Blood_Pressure_Diastolic === null ||
+      Blood_Pressure_Diastolic === undefined
+    ) {
+      newErrors.Blood_Pressure_Diastolic = "Diastolic BP is required.";
+    } else {
+      const d = parseInt(String(Blood_Pressure_Diastolic), 10);
+      if (isNaN(d) || d < 30 || d > 150) {
+        newErrors.Blood_Pressure_Diastolic =
+          "Enter a valid diastolic BP (30-150).";
+      }
+    }
+
+    if (!Fasting_Blood_Glucose && Fasting_Blood_Glucose !== 0) {
       newErrors.Fasting_Blood_Glucose = "Fasting Blood Glucose is required.";
     } else {
-      const fbg = parseFloat(Fasting_Blood_Glucose);
+      const fbg = parseFloat(String(Fasting_Blood_Glucose));
       if (isNaN(fbg) || fbg < 70 || fbg > 300) {
         newErrors.Fasting_Blood_Glucose =
           "Fasting Blood Glucose must be between 70 and 300 mg/dL.";
       }
     }
 
-    if (!BMI) {
+    if (!BMI && BMI !== 0) {
       newErrors.BMI = "BMI is required.";
     } else {
-      const bmiVal = parseFloat(BMI);
-      if (isNaN(bmiVal) || bmiVal < 15 || bmiVal > 50) {
-        newErrors.BMI = "BMI must be between 15 and 50 kg/m².";
+      const bmiVal = parseFloat(String(BMI));
+      if (isNaN(bmiVal) || bmiVal < 10 || bmiVal > 50) {
+        newErrors.BMI = "BMI must be between 10 and 50 kg/m².";
       }
     }
 
-    if (!Cholesterol) {
+    if (!Cholesterol && Cholesterol !== 0) {
       newErrors.Cholesterol = "Cholesterol is required.";
     } else {
-      const chol = parseInt(Cholesterol, 10);
-      if (isNaN(chol) || chol < 100 || chol > 300) {
+      const chol = parseInt(String(Cholesterol), 10);
+      if (isNaN(chol) || chol < 100 || chol > 400) {
         newErrors.Cholesterol =
-          "Cholesterol must be an integer between 100 and 300 mg/dL.";
+          "Cholesterol must be an integer between 100 and 400 mg/dL.";
       }
     }
 
-    if (!Albuminuria) {
+    if (!Albuminuria && Albuminuria !== 0) {
       newErrors.Albuminuria = "Albuminuria is required.";
     } else {
-      const alb = parseFloat(Albuminuria);
+      const alb = parseFloat(String(Albuminuria));
       if (isNaN(alb) || alb < 0 || alb > 1000) {
         newErrors.Albuminuria = "Albuminuria must be between 0 and 1000 mg/dL.";
       }
@@ -192,18 +236,12 @@ const DiabetesPatientRegister = () => {
 
   const validateStep3 = (data: typeof formData): FormErrors => {
     const newErrors: FormErrors = {};
-    if (!data.Hospital_name.trim())
-      newErrors.Hospital_name = "Hospital name is required.";
+    // if (!data.Hospital_name || !String(data.Hospital_name).trim())
+    //   newErrors.Hospital_name = "Hospital name is required.";
+    if (!data.assigned_doctor || !String(data.assigned_doctor).trim())
+      newErrors.assigned_doctor = "doctor name is required.";
     if (!data.Date_of_registration)
       newErrors.Date_of_registration = "Registration date is required.";
-    if (data.num_visits.trim() === "") {
-      newErrors.num_visits = "Number of visits is required.";
-    } else {
-      const visits = parseInt(data.num_visits, 10);
-      if (isNaN(visits) || visits < 1) {
-        newErrors.num_visits = "Enter a valid number of visits (1 or more).";
-      }
-    }
     return newErrors;
   };
 
@@ -216,7 +254,7 @@ const DiabetesPatientRegister = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
     if (errors[name as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
@@ -244,6 +282,12 @@ const DiabetesPatientRegister = () => {
     }
   };
 
+  const parseOrUndefined = (val: any) => {
+    if (val === null || val === undefined || String(val).trim() === "")
+      return undefined;
+    const n = Number(val);
+    return Number.isFinite(n) ? n : undefined;
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formErrors = validateForm(formData);
@@ -254,7 +298,6 @@ const DiabetesPatientRegister = () => {
         "Please fill in all required fields correctly across all steps."
       );
 
-      // Logic to switch to the step with the first error
       const step1Fields: (keyof FormErrors)[] = [
         "patient_id",
         "name",
@@ -265,16 +308,17 @@ const DiabetesPatientRegister = () => {
       const step2Fields: (keyof FormErrors)[] = [
         "Duration_of_Diabetes",
         "HbA1c_Level",
-        "Blood_Pressure",
+        "Blood_Pressure_Systolic",
+        "Blood_Pressure_Diastolic",
         "Fasting_Blood_Glucose",
         "BMI",
         "Cholesterol",
         "Albuminuria",
       ];
       const step3Fields: (keyof FormErrors)[] = [
-        "Hospital_name",
+        // "Hospital_name",
         "Date_of_registration",
-        "num_visits",
+        "assigned_doctor",
       ];
 
       if (step1Fields.some((key) => formErrors[key])) setCurrentStep(1);
@@ -286,29 +330,42 @@ const DiabetesPatientRegister = () => {
     setErrors({});
     setIsSubmitting(true);
 
-    const payload = {
-      ...formData,
-      patient_id: parseInt(formData.patient_id),
-      Age: parseInt(formData.age), // Assuming API expects 'Age'
-      HbA1c_Level: parseFloat(formData.HbA1c_Level),
-      Fasting_Blood_Glucose: parseFloat(formData.Fasting_Blood_Glucose),
-      Blood_Pressure: parseInt(formData.Blood_Pressure),
-      Cholesterol: parseInt(formData.Cholesterol),
-      BMI: parseFloat(formData.BMI),
-      Albuminuria: parseFloat(formData.Albuminuria),
-      Duration_of_Diabetes: parseInt(formData.Duration_of_Diabetes),
-      num_visits: formData.num_visits ? formData.num_visits : 0,
+    const payload: any = {
+      name: formData.name,
+      // ...(formData.patient_id && String(formData.patient_id).trim() !== ""
+      //   ? { patient_id: parseOrUndefined(formData.patient_id) }
+      //   : {}),
+      // include patient_id only when provided (for OP mode it is required)
+      ...(formData.patient_id && String(formData.patient_id).trim() !== ""
+        ? { patient_id: parseOrUndefined(formData.patient_id) }
+        : {}),
+      Age: parseOrUndefined(formData.age),
+      gender: formData.gender,
+      mobile_number: String(formData.mobile_number),
+      HbA1c_Level: parseOrUndefined(formData.HbA1c_Level),
+      Fasting_Blood_Glucose: parseOrUndefined(formData.Fasting_Blood_Glucose),
+      Blood_Pressure_Systolic: parseOrUndefined(
+        formData.Blood_Pressure_Systolic
+      ),
+      Blood_Pressure_Diastolic: parseOrUndefined(
+        formData.Blood_Pressure_Diastolic
+      ),
+      Cholesterol: parseOrUndefined(formData.Cholesterol),
+      BMI: parseOrUndefined(formData.BMI),
+      Albuminuria: parseOrUndefined(formData.Albuminuria),
+      Duration_of_Diabetes: parseOrUndefined(formData.Duration_of_Diabetes),
+      Visual_Acuity: formData.Visual_Acuity,
+      // Hospital_name: formData.Hospital_name,
+      assigned_doctor: formData.assigned_doctor,
       Date_of_registration:
-        formData.Date_of_registration.toISOString().split("T")[0],
+        formData.Date_of_registration instanceof Date
+          ? formData.Date_of_registration.toISOString().split("T")[0]
+          : formData.Date_of_registration,
     };
 
-    if (!formData.num_visits) {
-      delete (payload as any).num_visits;
-    }
+    const API_URL = `${apiBase}/patient_data_ingestion/create_patient`;
 
-    const API_URL = `https://d9bffae7d533.ngrok-free.app/?patient_id=${formData.patient_id}`;
-
-    let token =
+    const token =
       localStorage.getItem("token") ||
       localStorage.getItem("access_token") ||
       localStorage.getItem("authToken");
@@ -317,60 +374,78 @@ const DiabetesPatientRegister = () => {
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+           Authorization: token ? `Bearer ${token}` : "",
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        // Initialize a detailed error message
         let apiErrorMessage = `Error ${response.status}: ${
           response.statusText || "Unknown API Error"
         }`;
-
+        let errorJson: any = null;
         try {
-          const errorJson = await response.json();
-          // Attempt to extract a more specific message from the API's JSON response
-          if (errorJson.detail) {
-            if (Array.isArray(errorJson.detail) && errorJson.detail[0]?.msg) {
-              apiErrorMessage = errorJson.detail[0].msg; // Common for FastAPI validation errors
-            } else if (
-              typeof errorJson.detail === "string" &&
-              errorJson.detail.trim() !== ""
-            ) {
-              apiErrorMessage = errorJson.detail; // Common for FastAPI HTTPException
-            }
-          } else if (
-            errorJson.message &&
-            typeof errorJson.message === "string" &&
-            errorJson.message.trim() !== ""
-          ) {
-            apiErrorMessage = errorJson.message; // Generic message field
-          }
-        } catch (jsonParseError) {
-          // If parsing JSON fails, stick with the initial HTTP status error message.
-          // You could log jsonParseError for debugging if needed.
-          console.warn(
-            "Could not parse API error response as JSON:",
-            jsonParseError
-          );
+          errorJson = await response.json();
+        } catch (err) {
+          console.warn("Could not parse error JSON", err);
         }
-        // Throw an error with the derived API message. This will be caught by the catch block below.
+
+        if (errorJson?.detail && Array.isArray(errorJson.detail)) {
+          const newErrors: any = {};
+          errorJson.detail.forEach((errItem: any) => {
+            const loc = errItem.loc;
+            const field =
+              Array.isArray(loc) && loc.length >= 2
+                ? loc[loc.length - 1]
+                : null;
+            if (field) {
+              newErrors[field] = errItem.msg || "Invalid value";
+            }
+          });
+          if (Object.keys(newErrors).length > 0) {
+            setErrors((prev) => ({ ...prev, ...newErrors }));
+            throw new Error(Object.values(newErrors)[0] as string);
+          }
+        }
+
+        if (errorJson?.detail && typeof errorJson.detail === "string") {
+          apiErrorMessage = errorJson.detail;
+        } else if (errorJson?.message) {
+          apiErrorMessage = errorJson.message;
+        }
         throw new Error(apiErrorMessage);
       }
 
-      // If response.ok is true
-      // toast.success("Patient registered successfully!");
-      localStorage.setItem("patient_id", formData.patient_id);
+      const data = await response.json();
+
+      // Save composite_id or patient_id depending on response (backwards compatibility)
+      const compositeId =
+        data?.identifiers?.composite_id ?? data?.composite_id ?? null;
+      if (compositeId) {
+        localStorage.setItem("composite_id", String(compositeId));
+        // Do NOT overwrite patient_id with composite_id in all cases; set patient_id properly if returned
+        if (data?.identifiers?.patient_id) {
+          localStorage.setItem(
+            "patient_id",
+            String(data.identifiers.patient_id)
+          );
+        } else if (data?.patient_id) {
+          localStorage.setItem("patient_id", String(data.patient_id));
+        }
+      } else if (data?.patient_id) {
+        localStorage.setItem("patient_id", String(data.patient_id));
+      } else if (payload.patient_id) {
+        // If OP mode and backend didn't return anything but we sent patient_id, store it
+        localStorage.setItem("patient_id", String(payload.patient_id));
+      }
+
       setRegistrationComplete(true);
-    } catch (error) {
-      // This catch block handles:
-      // 1. Network errors from fetch() itself (e.g., server down).
-      // 2. Errors thrown manually from the `if (!response.ok)` block (i.e., API errors).
-      console.error("Registration failed:", error);
+      toast.success("Patient registered successfully!");
+    } catch (err) {
+      console.error("Registration failed:", err);
       const message =
-        error instanceof Error ? error.message : "An unknown error occurred";
+        err instanceof Error ? err.message : "An unknown error occurred";
       toast.error(`Registration failed: ${message}`);
     } finally {
       setIsSubmitting(false);
@@ -378,17 +453,15 @@ const DiabetesPatientRegister = () => {
   };
 
   const handleContinueToUpload = () => {
-    const patientId = localStorage.getItem("patient_id");
-    if (patientId) {
-      window.location.href = `/analysis/`;
+    const compositeId = localStorage.getItem("composite_id");
+
+    if (compositeId) {
+      localStorage.setItem("patient_id", compositeId);
+      navigate("/analysis");
     } else {
-      alert("Patient ID not found. Please register first.");
+      alert("Composite ID not found. Please register first.");
     }
   };
-
-  // const handleContinueToUpload = () => {
-  //   navigate(`/analysis/${formData.patient_id}`);
-  // };
 
   const progressPercentage = (currentStep / totalSteps) * 100;
 
@@ -433,7 +506,6 @@ const DiabetesPatientRegister = () => {
           Complete all steps to register
         </p>
       </div>
-
       <div className="p-2 md:p-2 border-b border-gray-100">
         <div className="flex justify-between items-center">
           <span className="text-sm font-medium text-gray-700">Progress</span>
@@ -441,15 +513,17 @@ const DiabetesPatientRegister = () => {
             {Math.round(progressPercentage)}%
           </span>
         </div>
-        <Progress value={progressPercentage} className="h-2" />
-      </div>
 
+        <Progress
+          value={progressPercentage}
+          className="h-2 [&>div]:bg-green-600 bg-gray-200"
+        />
+      </div>
       <div className="p-2 md:p-2 space-y-2">
         {steps.map((step) => {
           const Icon = step.icon;
           const isActive = currentStep === step.id;
           const isCompleted = currentStep > step.id;
-
           return (
             <div
               key={step.id}
@@ -502,45 +576,83 @@ const DiabetesPatientRegister = () => {
       case 1:
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 gap-3">
-              <div className="space-y-2">
-                <label
-                  htmlFor="patient_id"
-                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
-                >
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">
-                    *
-                  </Badge>
-                  Patient ID
-                </label>
-                <Input
-                  type="number"
-                  id="patient_id"
-                  name="patient_id"
-                  value={formData.patient_id}
-                  onChange={handleChange}
+            {/* NEW: Register Mode Toggle */}
+            <div className="flex items-center gap-3">
+              <div className="text-sm font-medium">Registration Type:</div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRegisterMode("new")}
                   className={cn(
-                    "transition-all duration-200",
-                    errors.patient_id && "border-red-500 focus:border-red-500"
+                    "px-3 py-1 rounded-md border",
+                    registerMode === "new"
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white text-gray-700"
                   )}
-                  placeholder="Enter unique patient ID"
-                />
-                {errors.patient_id && (
-                  <p className="text-red-500 text-sm flex items-center gap-1">
-                    <AlertCircle className="h-4 w-4" />
-                    {errors.patient_id}
-                  </p>
-                )}
+                >
+                  New Patient
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRegisterMode("op")}
+                  className={cn(
+                    "px-3 py-1 rounded-md border",
+                    registerMode === "op"
+                      ? "bg-indigo-600 text-white border-indigo-600"
+                      : "bg-white text-gray-700"
+                  )}
+                >
+                  OP / Existing Patient
+                </button>
               </div>
+            </div>
+            <p className="text-xs text-gray-500">
+              {registerMode === "new"
+                ? "Register a brand new patient. No patient_id required."
+                : "Link this visit to an existing patient by entering their patient_id (required)."}
+            </p>
+
+            <div className="grid grid-cols-1 gap-3">
+              {/* patient_id input shows only for OP mode */}
+              {registerMode === "op" && (
+                <div className="space-y-2">
+                  <label
+                    htmlFor="patient_id"
+                    className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                  >
+                    {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
+                      *
+                    </Badge> */}
+                    Patient ID (Existing)
+                  </label>
+                  <Input
+                    id="patient_id"
+                    name="patient_id"
+                    value={formData.patient_id}
+                    onChange={handleChange}
+                    placeholder="Enter existing patient ID (numeric)"
+                    className={cn(
+                      "transition-all duration-200",
+                      errors.patient_id && "border-red-500 focus:border-red-500"
+                    )}
+                  />
+                  {errors.patient_id && (
+                    <p className="text-red-500 text-sm flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {errors.patient_id}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <label
                   htmlFor="name"
                   className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                  {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                     *
-                  </Badge>
+                  </Badge> */}
                   Full Name
                 </label>
                 <Input
@@ -568,9 +680,9 @@ const DiabetesPatientRegister = () => {
                     htmlFor="age"
                     className="text-sm font-medium text-gray-700 flex items-center gap-2"
                   >
-                    <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                       *
-                    </Badge>
+                    </Badge> */}
                     Age
                   </label>
                   <Input
@@ -599,46 +711,50 @@ const DiabetesPatientRegister = () => {
                     htmlFor="gender"
                     className="text-sm font-medium text-gray-700 flex items-center gap-2"
                   >
-                    <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                       *
-                    </Badge>
+                    </Badge> */}
                     Gender
                   </label>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm shadow-sm",
-                          "flex items-center justify-between",
-                          !formData.gender && "text-muted-foreground",
-                          errors.gender && "border-red-500 focus:ring-red-500"
-                        )}
-                      >
-                        {formData.gender || "Select gender"}
-                        <ChevronDown className="h-4 w-4 opacity-50 ml-2" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-full bg-white shadow-md border mt-1 z-50">
-                      {["Male", "Female", "Other"].map((option) => (
-                        <DropdownMenuItem
-                          key={option}
-                          onSelect={() =>
-                            setFormData((prev) => ({ ...prev, gender: option }))
-                          }
-                          className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-100"
+                  <div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm shadow-sm",
+                            !formData.gender && "text-muted-foreground",
+                            errors.gender && "border-red-500 focus:ring-red-500"
+                          )}
                         >
-                          {option}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  {errors.gender && (
-                    <p className="text-red-500 text-sm flex items-center gap-1">
-                      <AlertCircle className="h-4 w-4" />
-                      {errors.gender}
-                    </p>
-                  )}
+                          {formData.gender || "Select gender"}
+                          <ChevronDown className="h-4 w-4 opacity-50 ml-2" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-white shadow-md border mt-1 z-50">
+                        {["Male", "Female", "Other"].map((option) => (
+                          <DropdownMenuItem
+                            key={option}
+                            onSelect={() =>
+                              setFormData((prev: any) => ({
+                                ...prev,
+                                gender: option,
+                              }))
+                            }
+                            className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-100"
+                          >
+                            {option}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    {errors.gender && (
+                      <p className="text-red-500 text-sm flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {errors.gender}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -647,9 +763,9 @@ const DiabetesPatientRegister = () => {
                   htmlFor="mobile_number"
                   className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                  {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                     *
-                  </Badge>
+                  </Badge> */}
                   <Phone className="h-4 w-4" />
                   Mobile Number
                 </label>
@@ -749,7 +865,7 @@ const DiabetesPatientRegister = () => {
                 </div>
               ))}
 
-              {/* Custom Blood Pressure Field */}
+              {/* Blood Pressure */}
               <div key="Blood_Pressure" className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <Heart className="h-4 w-4 text-green-600" />
@@ -759,36 +875,36 @@ const DiabetesPatientRegister = () => {
                   <Input
                     type="number"
                     step="1"
-                    name="Blood_Pressure"
-                    value={formData.Blood_Pressure}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        Blood_Pressure: e.target.value,
-                      }))
-                    }
+                    name="Blood_Pressure_Systolic"
+                    value={formData.Blood_Pressure_Systolic}
+                    onChange={handleChange}
                     placeholder="Systolic"
                     className={cn(
                       "w-1/2 transition-all duration-200 hover:border-green-300 focus:border-green-500",
-                      errors.Blood_Pressure &&
+                      errors.Blood_Pressure_Systolic &&
                         "border-red-500 focus:border-red-500"
                     )}
                   />
                   <Input
                     type="number"
                     step="1"
-                    name="Diastolic_Blood_Pressure"
+                    name="Blood_Pressure_Diastolic"
+                    value={formData.Blood_Pressure_Diastolic}
+                    onChange={handleChange}
                     placeholder="Diastolic"
-                    onChange={(e) => {
-                      console.log("Diastolic BP:", e.target.value);
-                    }}
-                    className="w-1/2 transition-all duration-200 hover:border-green-300 focus:border-green-500"
+                    className={cn(
+                      "w-1/2 transition-all duration-200 hover:border-green-300 focus:border-green-500",
+                      errors.Blood_Pressure_Diastolic &&
+                        "border-red-500 focus:border-red-500"
+                    )}
                   />
                 </div>
-                {errors.Blood_Pressure && (
+                {(errors.Blood_Pressure_Systolic ||
+                  errors.Blood_Pressure_Diastolic) && (
                   <p className="text-red-500 text-sm flex items-center gap-1">
                     <AlertCircle className="h-4 w-4" />
-                    {errors.Blood_Pressure}
+                    {errors.Blood_Pressure_Systolic ||
+                      errors.Blood_Pressure_Diastolic}
                   </p>
                 )}
               </div>
@@ -849,7 +965,7 @@ const DiabetesPatientRegister = () => {
                         <DropdownMenuItem
                           key={option}
                           onSelect={() =>
-                            setFormData((prev) => ({
+                            setFormData((prev: any) => ({
                               ...prev,
                               Visual_Acuity: option,
                             }))
@@ -871,14 +987,12 @@ const DiabetesPatientRegister = () => {
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-3 ">
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <label
                   htmlFor="Hospital_name"
                   className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">
-                    *
-                  </Badge>
+                
                   <Building2 className="h-4 w-4 text-purple-600" />
                   Hospital Name
                 </label>
@@ -901,16 +1015,16 @@ const DiabetesPatientRegister = () => {
                     {errors.Hospital_name}
                   </p>
                 )}
-              </div>
+              </div> */}
 
               <div className="space-y-2">
                 <label
                   htmlFor="Date_of_registration"
                   className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
-                  <Badge variant="destructive" className="px-1 py-0 text-xs">
+                  {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
                     *
-                  </Badge>
+                  </Badge> */}
                   <Calendar className="h-4 w-4 text-purple-600" />
                   Date of Registration
                 </label>
@@ -937,14 +1051,13 @@ const DiabetesPatientRegister = () => {
                     <CalendarComponent
                       mode="single"
                       selected={formData.Date_of_registration}
-                      onSelect={(date) =>
-                        setFormData((prev) => ({
+                      onSelect={(date: Date | undefined) =>
+                        setFormData((prev: any) => ({
                           ...prev,
                           Date_of_registration: date || new Date(),
                         }))
                       }
-                      // THIS IS THE CHANGE: Only today is selectable
-                      disabled={(date) =>
+                      disabled={(date: Date) =>
                         format(date, "yyyy-MM-dd") !==
                         format(new Date(), "yyyy-MM-dd")
                       }
@@ -963,28 +1076,34 @@ const DiabetesPatientRegister = () => {
 
               <div className="space-y-2">
                 <label
-                  htmlFor="num_visits"
+                  htmlFor="Hospital_name"
                   className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
-                  <User className="h-4 w-4 text-purple-600" />
-                  Number of Previous Visits
+                  {/* <Badge variant="destructive" className="px-1 py-0 text-xs">
+                    *
+                  </Badge> */}
+                  <Building2 className="h-4 w-4 text-purple-600" />
+                  assigned_doctor
                 </label>
                 <Input
-                  type="number"
-                  id="num_visits"
-                  name="num_visits"
-                  value={formData.num_visits}
+                  type="text"
+                  id="assigned_doctor"
+                  name="assigned_doctor"
+                  value={formData.assigned_doctor}
                   onChange={handleChange}
-                  step="1"
-                  className="transition-all duration-200 hover:border-purple-300 focus:border-purple-500"
-                  placeholder="Number of previous visits "
+                  className={cn(
+                    "transition-all duration-200"
+                    // errors.assigned_doctor &&
+                    //   "border-red-500 focus:border-red-500"
+                  )}
+                  placeholder="Enter hospital name"
                 />
-                {errors.num_visits && (
+                {/* {errors.Hospital_name && (
                   <p className="text-red-500 text-sm flex items-center gap-1">
                     <AlertCircle className="h-4 w-4" />
-                    {errors.num_visits}
+                    {errors.Hospital_name}
                   </p>
-                )}
+                )} */}
               </div>
             </div>
           </div>
@@ -998,9 +1117,6 @@ const DiabetesPatientRegister = () => {
                 Patient Summary
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                <div>
-                  <strong>ID:</strong> {formData.patient_id || "N/A"}
-                </div>
                 <div>
                   <strong>Name:</strong> {formData.name || "N/A"}
                 </div>
@@ -1032,9 +1148,15 @@ const DiabetesPatientRegister = () => {
                     : "N/A"}
                 </div>
                 <div>
-                  <strong>Blood Pressure:</strong>{" "}
-                  {formData.Blood_Pressure
-                    ? `${formData.Blood_Pressure} mmHg`
+                  <strong>Systolic BP:</strong>{" "}
+                  {formData.Blood_Pressure_Systolic
+                    ? `${formData.Blood_Pressure_Systolic} mmHg`
+                    : "N/A"}
+                </div>
+                <div>
+                  <strong>Diastolic BP:</strong>{" "}
+                  {formData.Blood_Pressure_Diastolic
+                    ? `${formData.Blood_Pressure_Diastolic} mmHg`
                     : "N/A"}
                 </div>
                 <div>
@@ -1080,12 +1202,6 @@ const DiabetesPatientRegister = () => {
                     ? format(formData.Date_of_registration, "PPP")
                     : "N/A"}
                 </div>
-                <div className="sm:col-span-2">
-                  <strong>Previous Visits:</strong>{" "}
-                  {formData.num_visits.trim() !== ""
-                    ? formData.num_visits
-                    : "0"}
-                </div>
               </div>
             </div>
 
@@ -1117,7 +1233,6 @@ const DiabetesPatientRegister = () => {
     }
   };
 
-  // Show success animation if registration is complete
   if (registrationComplete) {
     return (
       <SuccessAnimation onContinue={handleContinueToUpload} mode="register" />
@@ -1127,7 +1242,6 @@ const DiabetesPatientRegister = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="flex h-screen w-full">
-        {/* Mobile Header */}
         <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-200">
           <div className="flex items-center justify-between p-4">
             <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
@@ -1149,12 +1263,10 @@ const DiabetesPatientRegister = () => {
           </div>
         </div>
 
-        {/* Desktop Sidebar */}
-        <div className="hidden md:block w-[80\] h-screen bg-white w-1/5 min-w-[300px]  border-r border-gray-200 overflow-y-auto">
+        <div className="hidden md:block h-screen bg-white w-1/5 min-w-[300px] border-r border-gray-200 overflow-y-auto">
           <StepperContent />
         </div>
 
-        {/* Main Content */}
         <div className="flex-1 p-4 md:p-8 overflow-y-auto h-screen pt-20 md:pt-4">
           <div className="max-w-4xl mx-auto">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -1177,7 +1289,6 @@ const DiabetesPatientRegister = () => {
                 </CardContent>
               </Card>
 
-              {/* Navigation Buttons */}
               <div className="flex flex-col sm:flex-row justify-between gap-3 ">
                 <Button
                   type="button"

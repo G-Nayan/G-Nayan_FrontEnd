@@ -11,11 +11,15 @@ import Header from "./components/Header";
 import Hero from "./components/Hero";
 import Roadmap from "./components/Roadmap";
 import DiabetesPatientRegister from "./components/PatientDetails/DiabetesPatientRegister";
-import DiabetesPatientList from "./components/PatientDetails/DiabetesPatientList";
+// import DiabetesPatientList from "./components/PatientDetails/DiabetesPatientList";
 import AnalysisPage from "./components/Analysis/Analysis";
-import Login from "./components/(auth)/login/page";
-import AdminDashboard from "./components/Dashboard/admin/page";
+import Login from "./components/(auth)/login/Page";
+import Dashboard from "./components/Dashboard/admin/Page";
+import AdminDashboard from "./components/adminDashboard/Page";
 import PrivateRoute from "./components/(auth)/PrivateRoute";
+import Authmodel from "./components/(auth)/Model/page";
+import PatientLookup from "./components/adminDashboard/PatientLookup";
+import Profile from './components/Profile/Page';
 
 // ✅ Scroll to hash utility
 const ScrollToHashElement = () => {
@@ -56,8 +60,9 @@ const App = () => {
   const location = useLocation();
 
   // ❌ Hide header/footer on these routes
-  const hideHeaderFooterRoutes = ["/login"];
-  const hideFooterRoutes = ["/register-patient", "/patient-list", "/Analysis"];
+  const hideHeaderFooterRoutes = ["/login", "/Authmodel" ];
+  const hideFooterRoutes = ["/register-patient", "/patient-list", "/Analysis", "/profile"];
+
 
   const shouldShowHeader = !hideHeaderFooterRoutes.includes(location.pathname);
   const shouldShowFooter =
@@ -91,12 +96,16 @@ const App = () => {
             path="/register-patient"
             element={<DiabetesPatientRegister />}
           />
-          <Route path="/patient-list" element={<DiabetesPatientList />} />
+          {/* <Route path="/patient-list" element={<DiabetesPatientList />} /> */}
           <Route path="/Analysis" element={<AnalysisPage />} />
 
           <Route element={<PrivateRoute />}>
-            <Route path="/admindashboard" element={<AdminDashboard />} />
+            <Route path="/patient-records" element={<Dashboard />} />
           </Route>
+          <Route path="/dashboard" element={<AdminDashboard />} />
+          <Route path="/Authmodel" element={<Authmodel />} />
+          <Route path="/patient-search" element={<PatientLookup />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
 
         {shouldShowFooter && <Footer />}

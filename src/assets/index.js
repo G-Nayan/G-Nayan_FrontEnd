@@ -1,9 +1,9 @@
 import brainwave from "./brainwave.svg";
-// import AIRAlogo from "./AI-RAlogo.png";
+// import Gnayanlogo from "./AI-RAlogo.png";
 import check from "./check.svg";
 import brainwaveSymbol from "./brainwave-symbol.svg";
 import brainwaveWhiteSymbol from "./brainwave-symbol-white.svg";
-import AIRAlogo from './G-nayanalogo.png';
+import Gnayanlogo from './Gnayanalogo.png';
 import play from "./play.svg";
 import gradient from "./gradient.png";
 import smallSphere from "./4-small.png";
@@ -90,7 +90,7 @@ import bot from "./GNayana/bot.png";
 
 export {
   brainwave,
-  AIRAlogo,
+  Gnayanlogo,
   check,
   check2,
   loading1,

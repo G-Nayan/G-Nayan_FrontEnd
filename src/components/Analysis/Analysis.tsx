@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Eye, Info, MessageSquareWarning } from "lucide-react"; // Added MessageSquareWarning
+import { ArrowRight, Eye, Info } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
@@ -35,26 +35,35 @@ import ErrorModal from "@/components/Analysis/ErrorModal";
 import ModelRender from "@/components/Analysis/model-render";
 import Benefits from "@/components/Analysis/Benefits";
 import { FeedbackModal } from "@/components/Analysis/FeedbackModal";
-import  {ReportModal}  from "@/components/Analysis/ReportModal";
+import ReportModal from "@/components/Analysis/ReportModal";
 
-// ... (interfaces and helper components remain the same)
+const apiBase = import.meta.env.VITE_API_BASE || "";
+
 interface EyeResult {
-  patient_id: string;
-  email_id: string;
   predicted_class: number;
+  Stage: string;
   confidence: number;
   explanation: string;
-  Risk_Factor: number;
-  Stage: string;
   Note: string;
+  Risk_Factor: number;
+}
+
+interface PatientInfo {
+  composite_id: string;
+  name: string;
+  Hospital_name: string;
+  gender: string;
+  assigned_doctor?: string;
 }
 
 interface ApiResponse {
-  patient_id: string;
-  email_id: string;
-  left_eye?: EyeResult;
-  right_eye?: EyeResult;
   message?: string;
+  patient_id?: string;
+  results?: {
+    left_eye?: EyeResult;
+    right_eye?: EyeResult;
+  };
+  patient_info?: PatientInfo;
   error?: string;
 }
 
@@ -65,21 +74,6 @@ interface ChartDataItem {
   markers?: { position: number; label: string }[];
   isConfidence?: boolean;
   isPredictionClass?: boolean;
-}
-
-interface FeedbackData {
-  patient_id: string;
-  email_id: string;
-  left_eye: EyeResult & {
-    feedback: string;
-    doctors_diagnosis: string;
-    review: string;
-  };
-  right_eye: EyeResult & {
-    feedback: string;
-    doctors_diagnosis: string;
-    review: string;
-  };
 }
 
 const getTooltipContent = (itemName: string): string => {
@@ -129,13 +123,7 @@ const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
   return (
     <div className="space-y-6">
       {data.map((item) => (
-        <motion.div
-          key={item.name}
-          className="relative"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <motion.div key={item.name} className="relative" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="flex justify-between mb-2">
             <span className="text-sm font-medium text-gray-300 flex items-center">
               {item.name}
@@ -150,33 +138,17 @@ const CustomBarChart = ({ data }: { data: ChartDataItem[] }) => {
                 </Tooltip>
               </TooltipProvider>
             </span>
-            <span className="text-sm font-bold text-gray-100">
-              {item.displayValue}
-            </span>
+            <span className="text-sm font-bold text-gray-100">{item.displayValue}</span>
           </div>
           <div className="w-full bg-gray-700 rounded-full h-5">
             <motion.div
               className="h-5 rounded-full transition-all duration-500 ease-in-out"
               style={{
-                width: `${
-                  item.isPredictionClass
-                    ? ((item.value + 1) / 4) * 100
-                    : item.value
-                }%`,
-                backgroundColor: getColorForValue(
-                  item.value,
-                  item.isConfidence || false,
-                  item.isPredictionClass || false
-                ),
+                width: `${item.isPredictionClass ? ((item.value + 1) / 4) * 100 : item.value}%`,
+                backgroundColor: getColorForValue(item.value, item.isConfidence || false, item.isPredictionClass || false),
               }}
               initial={{ width: 0 }}
-              animate={{
-                width: `${
-                  item.isPredictionClass
-                    ? ((item.value + 1) / 4) * 100
-                    : item.value
-                }%`,
-              }}
+              animate={{ width: `${item.isPredictionClass ? ((item.value + 1) / 4) * 100 : item.value}%` }}
               transition={{ duration: 0.5, delay: 0.2 }}
             />
           </div>
@@ -268,38 +240,13 @@ const EyeAnalysisCard = ({ eye, data }: { eye: string; data: EyeResult }) => {
   );
 };
 
-const MovingImage = ({
-  src,
-  alt,
-  isMoving,
-  isAnalyzing,
-}: {
-  src: string;
-  alt: string;
-  isMoving: boolean;
-  isAnalyzing: boolean;
-}) => {
+const MovingImage = ({ src, alt, isMoving, isAnalyzing }: { src: string; alt: string; isMoving: boolean; isAnalyzing: boolean }) => {
   const handleAnimationComplete = () => {};
   return (
-    <motion.div
-      className="relative w-full max-w-[300px] h-[300px] mx-auto overflow-hidden"
-      animate={isMoving ? { x: [0, 10, -10, 0] } : { x: 0 }}
-      transition={{
-        repeat: isMoving ? Infinity : 0,
-        duration: 4,
-        ease: "easeInOut",
-      }}
-    >
-      <img
-        src={src}
-        alt={alt}
-        className="absolute inset-0 w-full h-full object-cover z-0 rounded-md"
-      />
+    <motion.div className="relative w-full max-w-[300px] h-[300px] mx-auto overflow-hidden" animate={isMoving ? { x: [0, 10, -10, 0] } : { x: 0 }} transition={{ repeat: isMoving ? Infinity : 0, duration: 4, ease: "easeInOut" }}>
+      <img src={src} alt={alt} className="absolute inset-0 w-full h-full object-cover z-0 rounded-md" />
       <div className="absolute inset-0 z-10">
-        <ModelRender
-          isAnalyzing={isAnalyzing}
-          onAnimationComplete={handleAnimationComplete}
-        />
+        <ModelRender isAnalyzing={isAnalyzing} onAnimationComplete={handleAnimationComplete} />
       </div>
     </motion.div>
   );
@@ -308,8 +255,8 @@ const MovingImage = ({
 export function Analysis() {
   const [leftEyeImage, setLeftEyeImage] = useState<File | null>(null);
   const [rightEyeImage, setRightEyeImage] = useState<File | null>(null);
-  const [leftEyePreview, setLeftEyePreview] = useState<string | null>(null);
-  const [rightEyePreview, setRightEyePreview] = useState<string | null>(null);
+  const [leftEyePreview, setLeftEyePreview] = useState<string | undefined>();
+  const [rightEyePreview, setRightEyePreview] = useState<string | undefined>();
   const [apiData, setApiData] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -325,13 +272,11 @@ export function Analysis() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showBenefitsInitially, setShowBenefitsInitially] = useState(true);
 
-  const [patientId, setPatientId] = useState("");
+  const [compositeId, setCompositeId] = useState("");
 
   useEffect(() => {
-    const storedId = localStorage.getItem("patient_id");
-    if (storedId) {
-      setPatientId(storedId);
-    }
+    const savedCompositeId = localStorage.getItem("composite_id");
+    if (savedCompositeId) setCompositeId(savedCompositeId);
   }, []);
 
   const handleImageUpload = (file: File | null, eye: "left" | "right") => {
@@ -358,8 +303,7 @@ export function Analysis() {
 
   const handlePatientIdSubmit = async () => {
     if (isSubmittingPatientId || isLoading) return;
-
-    if (!patientId.trim()) {
+    if (!compositeId.trim()) {
       setError("Please enter a Patient ID.");
       toast.error("Please enter a Patient ID.");
       return;
@@ -377,55 +321,84 @@ export function Analysis() {
     formData.append("left_image", leftEyeImage!);
     formData.append("right_image", rightEyeImage!);
 
-    let token =
-      localStorage.getItem("token") ||
-      localStorage.getItem("access_token") ||
-      localStorage.getItem("authToken");
+    const token = localStorage.getItem("token") || localStorage.getItem("access_token") || localStorage.getItem("authToken") || "";
 
     try {
-      const resp = await fetch(
-        `https://d9bffae7d533.ngrok-free.app
-/infer_for_diabetic_retinopathy/upload%20images?patient_id=${encodeURIComponent(
-          patientId
-        )}`,
-        {
-          method: "POST",
+      const resp = await fetch(`${apiBase}/prediction/infer_for_diabetic_retinopathy/upload_images?patient_id=${encodeURIComponent(compositeId)}`, {
+        method: "POST",
+        body: formData,
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
 
-          body: formData,
-
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
       if (!resp.ok) {
-        const errorData = await resp
-          .json()
-          .catch(() => ({ detail: `HTTP error! status: ${resp.status}` }));
-        throw new Error(
-          errorData.detail || `HTTP error! status: ${resp.status}`
-        );
+        const errorData = await resp.json().catch(() => ({ detail: `HTTP error! status: ${resp.status}` }));
+        throw new Error(errorData.detail || `HTTP error! status: ${resp.status}`);
       }
-      const data: ApiResponse = await resp.json();
-      if (data.message || data.error) {
-        const apiErrorMessage =
-          data.message || data.error || "An error occurred during analysis.";
+
+      const dataRaw = await resp.json().catch(() => ({}));
+      const data: ApiResponse = dataRaw;
+
+      console.log("API Response:", data);
+
+      if (data.message && data.message.toLowerCase().includes("error")) {
+        const apiErrorMessage = data.message || "An error occurred during analysis.";
         setError(apiErrorMessage);
         toast.error(apiErrorMessage);
         setShowInputCard(true);
         setShowBenefitsInitially(true);
         return;
       }
-      // setApiData(data);
-      setApiData({ ...data, patient_id: patientId });
 
+      if (data.error) {
+        const apiErrorMessage = data.error || "An error occurred during analysis.";
+        setError(apiErrorMessage);
+        toast.error(apiErrorMessage);
+        setShowInputCard(true);
+        setShowBenefitsInitially(true);
+        return;
+      }
+
+      // Normalize: extract results either from .results or top-level properties if present
+      const leftEyeData = (data.results && data.results.left_eye) ?? (data as any).left_eye ?? undefined;
+      const rightEyeData = (data.results && data.results.right_eye) ?? (data as any).right_eye ?? undefined;
+
+      if (!leftEyeData && !rightEyeData) {
+        setError("No analysis results received. Please try again.");
+        toast.error("No analysis results received. Please try again.");
+        setShowInputCard(true);
+        setShowBenefitsInitially(true);
+        return;
+      }
+
+      // Ensure patient_info exists
+      const patientInfo = data.patient_info ?? { composite_id: compositeId, name: "", Hospital_name: "", gender: "" };
+
+      // Build normalized response
+      const normalized: ApiResponse = {
+        message: data.message,
+        patient_id: data.patient_id ?? compositeId,
+        results: {
+          left_eye: leftEyeData,
+          right_eye: rightEyeData,
+        },
+        patient_info: patientInfo,
+        error: data.error,
+      };
+
+      setApiData(normalized);
+      setModalPatientId(patientInfo.composite_id ?? compositeId);
       setShowInputCard(false);
-      toast.success("Analysis complete! Please provide feedback.");
-      // DO NOT auto-open feedback modal here anymore
-      // setShowFeedbackModal(true);
+
+      if (leftEyeData && rightEyeData) {
+        toast.success("Analysis complete for both eyes!");
+      } else if (leftEyeData) {
+        toast.success("Analysis complete for left eye!");
+      } else if (rightEyeData) {
+        toast.success("Analysis complete for right eye!");
+      }
     } catch (e) {
-      const errorMessage =
-        (e as Error).message || "An unknown error occurred during analysis.";
+      console.error("API Error:", e);
+      const errorMessage = (e as Error).message || "An unknown error occurred during analysis.";
       setError(errorMessage);
       toast.error(errorMessage);
       setShowInputCard(true);
@@ -438,67 +411,12 @@ export function Analysis() {
     }
   };
 
-  const handleFeedbackSubmit = async (fb: FeedbackData) => {
-    const payload = {
-      patient_id: apiData?.patient_id,
-      email_id: "iscs-client_hospital@gmail.com",
-      left_eye: { ...apiData?.left_eye!, ...fb.left_eye },
-      right_eye: { ...apiData?.right_eye!, ...fb.right_eye },
-    };
-
-    let token =
-      localStorage.getItem("token") ||
-      localStorage.getItem("access_token") ||
-      localStorage.getItem("authToken");
-
-    try {
-      const resp = await fetch(
-        "https://d9bffae7d533.ngrok-free.app/submit_feedback_from_frontend/from_json_to_db",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!resp.ok) {
-        const errorData = await resp
-          .json()
-          .catch(() => ({ detail: `HTTP error! status: ${resp.status}` }));
-        throw new Error(
-          errorData.detail || `HTTP error! status: ${resp.status}`
-        );
-      }
-      await resp.json();
-      setFeedbackSubmitted(true);
-      setShowFeedbackModal(false);
-      toast.success("Feedback submitted! Opening report...");
-      setShowReportModal(true);
-    } catch (e) {
-      toast.error(`Failed to submit feedback: ${(e as Error).message}`);
-    }
-  };
-
-  const handleOpenFeedbackModal = () => {
-    if (apiData) {
-      // Only open if analysis data is present
-      setShowFeedbackModal(true);
-    } else {
-      toast.error("Please complete the analysis first.");
-    }
-  };
-
-  const handleCloseFeedbackModal = () => {
-    setShowFeedbackModal(false); // Always close it
-    if (apiData && !feedbackSubmitted) {
-      // If analysis was done but feedback not submitted yet
-      toast.error("Feedback is required to generate the report.", {
-        icon: <MessageSquareWarning className="text-yellow-400" />,
-      });
-    }
+  const handleOpenFeedbackModal = () => setShowFeedbackModal(true);
+  const handleCloseFeedbackModal = () => setShowFeedbackModal(false);
+  const handleFeedbackSubmit = (feedbackData: any) => {
+    setFeedbackSubmitted(true);
+    setShowFeedbackModal(false);
+    toast.success("Feedback submitted successfully!");
   };
 
   const handleGetReport = () => {
@@ -506,164 +424,67 @@ export function Analysis() {
       toast.error("Please complete the analysis first.");
       return;
     }
-    if (!feedbackSubmitted) {
-      toast.error(
-        "Feedback is required to view the report. Please provide feedback.",
-        { icon: <MessageSquareWarning className="text-yellow-400" /> }
-      );
-      setShowFeedbackModal(true); // Guide user back to feedback
+    if (!apiData.results?.left_eye && !apiData.results?.right_eye) {
+      toast.error("No retinopathy data found for this patient.");
       return;
     }
     setShowReportModal(true);
   };
 
   const handleGoBack = () => {
-    if (apiData && !feedbackSubmitted) {
-      toast.error(
-        "Please provide feedback for the current analysis before starting a new one.",
-        { icon: <MessageSquareWarning className="text-yellow-400" /> }
-      );
-      setShowFeedbackModal(true); // Re-open feedback modal
-      return; // Prevent reset
-    }
-
-    // Proceed with reset
     setShowInputCard(true);
     setShowBenefitsInitially(true);
     setApiData(null);
     setLeftEyeImage(null);
     setRightEyeImage(null);
-    setLeftEyePreview(null);
-    setRightEyePreview(null);
+    setLeftEyePreview(undefined);
+    setRightEyePreview(undefined);
     setFeedbackSubmitted(false);
     setShowReportModal(false);
     setShowFeedbackModal(false);
     setError(null);
+    setModalPatientId("");
   };
 
   return (
     <>
       <div className="relative min-h-screen w-full bg-[#0A192F]">
-        <div className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
-          {/* ... Hero section JSX ... */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[300px] h-[300px] opacity-20">
-            <div className="w-full h-full border-2 border-white/20 rounded-full" />
-            <div className="absolute inset-4 border-2 border-white/20 rounded-full" />
-            <div className="absolute inset-8 border-2 border-white/20 rounded-full" />
-          </div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[300px] h-[300px] opacity-20">
-            <div className="w-full h-full border-2 border-white/20 rounded-full" />
-            <div className="absolute inset-4 border-2 border-white/20 rounded-full" />
-            <div className="absolute inset-8 border-2 border-white/20 rounded-full" />
-          </div>
-          <div className="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-red-400/20 to-transparent" />
+        <div className="relative min-h-[40vh] flex items-center justify-center overflow-hidden">
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-tight max-w-5xl text-center">
-              <span className="inline-block relative">
-                {" "}
-                G-NAYANA
-                <svg
-                  viewBox="0 0 624 28"
-                  fill="none"
-                  className="absolute top-full left-0 w-full xl:-mt-2"
-                >
-                  <defs>
-                    <linearGradient
-                      id="threeColorGradient"
-                      x1="0%"
-                      y1="0%"
-                      x2="100%"
-                      y2="0%"
-                    >
-                      <stop offset="0%" stopColor="#3B82F6" />
-                      <stop offset="50%" stopColor="#F59E0B" />
-                      <stop offset="100%" stopColor="#EF4444" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M3 25C142.5 3.5 290.5 3.5 621 25"
-                    stroke="url(#threeColorGradient)"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
+              <span className="inline-block relative">G-NAYANA</span>
             </h1>
             <p className="text-lg md:text-xl lg:text-2xl font-light text-gray-300 tracking-wide leading-relaxed max-w-4xl text-center mt-6">
-              Empowering healthcare with cutting-edge AI to detect diabetic
-              retinopathy early and safeguard vision.
+              Empowering healthcare with cutting-edge AI to detect diabetic retinopathy early and safeguard vision.
             </p>
           </div>
         </div>
 
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-0">
           <div className="max-w-6xl mx-auto">
             {showInputCard && (
               <Card className="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-[#112240] text-white">
                 <CardHeader className="bg-gradient-to-r from-indigo-600/90 to-purple-600/90 rounded-t-lg">
-                  <CardTitle className="text-xl font-semibold text-center text-white">
-                    Diabetic Retinopathy Report Generation
-                  </CardTitle>
+                  <CardTitle className="text-xl font-semibold text-center text-white">Diabetic Retinopathy Report Generation</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 p-6">
-                  {" "}
-                  {/* ... Image Upload JSX ... */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <p className="text-sm font-bold text-gray-300">
-                        Right Eye Image
-                      </p>
-                      <FileUpload
-                        onChange={(file) => handleImageUpload(file, "right")}
-                      />
-                      {rightEyePreview && (
-                        <div className="mt-2 flex items-center justify-center relative overflow-hidden">
-                          <MovingImage
-                            src={rightEyePreview}
-                            alt="Right Eye Preview"
-                            isMoving={isMoving}
-                            isAnalyzing={isAnalyzing}
-                          />
-                        </div>
-                      )}
+                      <p className="text-sm font-bold text-gray-300">Right Eye Image</p>
+                      <FileUpload onChange={(file) => handleImageUpload(file, "right")} />
+                      {rightEyePreview && <div className="mt-2 flex items-center justify-center relative overflow-hidden"><MovingImage src={rightEyePreview} alt="Right Eye Preview" isMoving={isMoving} isAnalyzing={isAnalyzing} /></div>}
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm font-bold text-gray-300">
-                        Left Eye Image
-                      </p>
-                      <FileUpload
-                        onChange={(file) => handleImageUpload(file, "left")}
-                      />
-                      {leftEyePreview && (
-                        <div className="mt-2 flex items-center justify-center relative overflow-hidden">
-                          <MovingImage
-                            src={leftEyePreview}
-                            alt="Left Eye Preview"
-                            isMoving={isMoving}
-                            isAnalyzing={isAnalyzing}
-                          />
-                        </div>
-                      )}
+                      <p className="text-sm font-bold text-gray-300">Left Eye Image</p>
+                      <FileUpload onChange={(file) => handleImageUpload(file, "left")} />
+                      {leftEyePreview && <div className="mt-2 flex items-center justify-center relative overflow-hidden"><MovingImage src={leftEyePreview} alt="Left Eye Preview" isMoving={isMoving} isAnalyzing={isAnalyzing} /></div>}
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter className="bg-[#1A2C4E] p-4 flex flex-col items-center rounded-b-lg">
-                  <Button
-                    onClick={handleSubmitAnalysisImages}
-                    disabled={
-                      isLoading ||
-                      isSubmittingPatientId ||
-                      !leftEyeImage ||
-                      !rightEyeImage
-                    }
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out flex items-center text-base disabled:opacity-50"
-                  >
-                    {isLoading || isSubmittingPatientId
-                      ? "Processing..."
-                      : "Submit Analysis"}
-                    {!(isLoading || isSubmittingPatientId) && (
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    )}
+                  <Button onClick={handleSubmitAnalysisImages} disabled={isLoading || isSubmittingPatientId || !leftEyeImage || !rightEyeImage} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out flex items-center text-base disabled:opacity-50">
+                    {isLoading || isSubmittingPatientId ? "Processing..." : "Submit Analysis"}
+                    {!(isLoading || isSubmittingPatientId) && <ArrowRight className="ml-2 h-5 w-5" />}
                   </Button>
                 </CardFooter>
               </Card>
@@ -671,40 +492,32 @@ export function Analysis() {
 
             {apiData && !showInputCard && (
               <>
-                <motion.div
-                  className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <EyeAnalysisCard eye="Right" data={apiData.right_eye!} />
-                  <EyeAnalysisCard eye="Left" data={apiData.left_eye!} />
+                <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                  {apiData.results?.right_eye && <EyeAnalysisCard eye="Right" data={apiData.results.right_eye} />}
+                  {apiData.results?.left_eye && <EyeAnalysisCard eye="Left" data={apiData.results.left_eye} />}
+
+                  {!apiData.results?.right_eye && apiData.results?.left_eye && (
+                    <Card className="w-full shadow-lg bg-[#112240] text-white border-gray-600">
+                      <CardContent className="p-6 flex flex-col items-center justify-center h-64">
+                        <Eye className="h-16 w-16 text-gray-400 mb-4" />
+                        <p className="text-gray-400 text-center">Right eye analysis not available</p>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {!apiData.results?.left_eye && apiData.results?.right_eye && (
+                    <Card className="w-full shadow-lg bg-[#112240] text-white border-gray-600">
+                      <CardContent className="p-6 flex flex-col items-center justify-center h-64">
+                        <Eye className="h-16 w-16 text-gray-400 mb-4" />
+                        <p className="text-gray-400 text-center">Left eye analysis not available</p>
+                      </CardContent>
+                    </Card>
+                  )}
                 </motion.div>
 
-                {/* Buttons after analysis results are shown */}
                 <div className="flex flex-col items-center justify-center mt-8 space-y-4 md:space-y-0 md:flex-row md:space-x-4">
-                  {!feedbackSubmitted ? (
-                    <Button
-                      onClick={handleOpenFeedbackModal}
-                      className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg text-base shadow-lg animate-pulse" // Added animate-pulse for attraction
-                    >
-                      <MessageSquareWarning className="mr-2 h-5 w-5" /> Provide
-                      Feedback (Required)
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleGetReport} // This will now open the report directly
-                      className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg text-base shadow-lg"
-                    >
-                      View Report
-                    </Button>
-                  )}
-                  <Button
-                    onClick={handleGoBack}
-                    className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg text-base"
-                  >
-                    Analyze New Images
-                  </Button>
+                  <Button onClick={handleGetReport} className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg text-base shadow-lg">View Report</Button>
+                  <Button onClick={handleGoBack} className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg text-base">Analyze New Images</Button>
                 </div>
               </>
             )}
@@ -714,45 +527,15 @@ export function Analysis() {
         </div>
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          {/* ... Patient ID Modal JSX ... */}
           <DialogContent className="bg-[#112240] text-white border-indigo-500">
             <DialogHeader>
               <DialogTitle className="text-white">Enter Patient ID</DialogTitle>
-              <DialogDescription className="text-gray-400">
-                {" "}
-                Please enter the Patient ID to proceed with the analysis.{" "}
-              </DialogDescription>
+              <DialogDescription className="text-gray-400">Please enter the Patient ID to proceed with the analysis.</DialogDescription>
             </DialogHeader>
-            <Input
-              type="text"
-              placeholder="Patient ID"
-              // value={modalPatientId}
-              // onChange={(e) => setModalPatientId(e.target.value)}
-
-              value={patientId}
-              onChange={(e) => setPatientId(e.target.value)}
-              className="w-full border-indigo-400 focus:border-indigo-300 focus:ring-indigo-300 bg-[#1A2C4E] text-white placeholder-gray-500"
-            />
+            <Input type="text" value={compositeId} onChange={(e) => setCompositeId(e.target.value)} placeholder="Enter Composite ID" className="w-full border-indigo-400 focus:border-indigo-300 focus:ring-indigo-300 bg-[#1A2C4E] text-white placeholder-gray-500" />
             <DialogFooter>
-              <Button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                variant="outline"
-                className="text-gray-300 border-gray-500 hover:bg-gray-700 hover:text-white"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handlePatientIdSubmit}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                // disabled={
-                //   !modalPatientId.trim() || isSubmittingPatientId || isLoading
-                // }
-                disabled={
-                  !patientId.trim() || isSubmittingPatientId || isLoading
-                }
-              >
+              <Button type="button" onClick={() => setIsModalOpen(false)} variant="outline" className="text-gray-300 border-gray-500 hover:bg-gray-700 hover:text-white">Cancel</Button>
+              <Button type="button" onClick={handlePatientIdSubmit} className="bg-indigo-600 hover:bg-indigo-700 text-white" disabled={!compositeId.trim() || isSubmittingPatientId || isLoading}>
                 {isSubmittingPatientId ? "Submitting..." : "Submit"}
               </Button>
             </DialogFooter>
@@ -762,33 +545,33 @@ export function Analysis() {
         {apiData && (
           <FeedbackModal
             isOpen={showFeedbackModal}
-            onClose={handleCloseFeedbackModal} // Use new handler
+            onClose={handleCloseFeedbackModal}
             leftEyePreview={leftEyePreview || ""}
             rightEyePreview={rightEyePreview || ""}
             onSubmitFeedback={handleFeedbackSubmit}
             patientId={modalPatientId}
-            leftEyeData={apiData.left_eye!}
-            rightEyeData={apiData.right_eye!}
+            leftEyeData={apiData.results?.left_eye as any}
+            rightEyeData={apiData.results?.right_eye as any}
           />
         )}
 
-        {apiData && feedbackSubmitted && (
+        {apiData && (
           <ReportModal
             isOpen={showReportModal}
             onClose={() => setShowReportModal(false)}
-            patientId={modalPatientId}
+            patientId={apiData.patient_info?.composite_id ?? modalPatientId}
+            patientName={apiData.patient_info?.name}
+            gender={apiData.patient_info?.gender}
+            institutionName={apiData.patient_info?.Hospital_name}
+            physicianName={apiData.patient_info?.assigned_doctor || "Not Mentiond"}
             leftEyeImage={leftEyePreview}
             rightEyeImage={rightEyePreview}
-            leftEyeData={apiData.left_eye}
-            rightEyeData={apiData.right_eye}
+            leftEyeData={apiData.results?.left_eye}
+            rightEyeData={apiData.results?.right_eye}
           />
         )}
 
-        <ErrorModal
-          isOpen={!!error}
-          onClose={() => setError(null)}
-          errorMessage={error || ""}
-        />
+        <ErrorModal isOpen={!!error} onClose={() => setError(null)} errorMessage={error || ""} />
       </div>
     </>
   );
