@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Download, FileText } from "lucide-react";
 import html2pdf from "html2pdf.js";
-import AIRAlogo from "../../assets/G-nayanalogo.png";
+import Gnayanlogo from "../../assets/Gnayanalogo.png";
 
 // ---------------- Types ----------------
 interface EyeData {
@@ -122,7 +122,7 @@ const PDFReport = ({
           </div>
           <div className="text-right text-sm">
             <img
-              src={AIRAlogo}
+              src={Gnayanlogo}
               alt="Logo"
               width={80}
               height={80}

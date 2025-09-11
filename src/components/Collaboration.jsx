@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { brainwaveSymbol, check, AIRAlogo } from "../assets";
+import { brainwaveSymbol, check, Gnayanlogo } from "../assets";
 import { collabApps, collabContent } from "../constants";
 import Button from "./Button";
 import Section from "./Section";
@@ -50,7 +50,7 @@ const Collaboration = () => {
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <img
-                    src={AIRAlogo}
+                    src={Gnayanlogo}
                     width={48}
                     height={48}
                     alt="brainwave"

@@ -1,6 +1,6 @@
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { disablePageScroll, enablePageScroll } from "scroll-lock";
-import { AIRAlogo } from "../assets";
+import { Gnayanlogo } from "../assets";
 import { navigation } from "../constants";
 import Button from "./Button";
 import MenuSvg from "../assets/svg/MenuSvg";
@@ -95,7 +95,7 @@ const Header = () => {
     >
       <div className="flex items-center px-5 lg:px-7.5 xl:px-10 max-lg:py-4">
         <a className="block w-[12rem] xl:mr-0" href="/">
-          <img src={AIRAlogo} width={60} height={60} alt="AIRA" />
+          <img src={Gnayanlogo} width={60} height={60} alt="G-nayan" />
         </a>
 
         {/* Navigation */}
