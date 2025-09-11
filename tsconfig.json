@@ -1,12 +1,17 @@
 {
-    "compilerOptions": {
-      // other options
-      "jsx": "react",
-      "baseUrl": "./",
-      "esModuleInterop": true,
-      "paths": {
-        "@/*": ["src/*"]
-      }
+  "compilerOptions": {
+    "target": "esnext",            // allows modern JS features
+    "module": "esnext",            // required for import.meta
+    "moduleResolution": "node",
+    "strict": true,
+    "jsx": "react",
+    "baseUrl": "./",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@/*": ["src/*"]
     }
-    
-  }
+  },
+  "include": ["src", "env.d.ts"],   // include env typings
+  "exclude": ["node_modules"]
+}
