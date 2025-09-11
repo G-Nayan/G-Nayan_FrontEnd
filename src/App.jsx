@@ -13,13 +13,13 @@ import Roadmap from "./components/Roadmap";
 import DiabetesPatientRegister from "./components/PatientDetails/DiabetesPatientRegister";
 // import DiabetesPatientList from "./components/PatientDetails/DiabetesPatientList";
 import AnalysisPage from "./components/Analysis/Analysis";
-import Login from "./components/(auth)/login/page";
-import Dashboard from "./components/Dashboard/admin/page";
-import AdminDashboard from "./components/adminDashboard/page";
+import Login from "./components/(auth)/login/Page";
+import Dashboard from "./components/Dashboard/admin/Page";
+import AdminDashboard from "./components/adminDashboard/Page";
 import PrivateRoute from "./components/(auth)/PrivateRoute";
 import Authmodel from "./components/(auth)/Model/page";
 import PatientLookup from "./components/adminDashboard/PatientLookup";
-import Profile from './components/Profile/page';
+import Profile from './components/Profile/Page';
 
 // ✅ Scroll to hash utility
 const ScrollToHashElement = () => {
